@@ -1,0 +1,19 @@
+---
+description: Lexicon—temporal scripts, logs, and scratch go only under .tmp/. Never in knowledge base or scripts/.
+globs: "**/*"
+alwaysApply: true
+---
+
+# Temporal files: use .tmp/ only (Lexicon)
+
+In this **Lexicon** project, all temporal/one-off content must go **only** under the top-level folder **`.tmp/`**.
+
+- **One-off or experimental scripts** → `.tmp/scripts/`
+- **Script output logs** → `.tmp/logs/`
+- **Scratch / temporary files** → `.tmp/` (or a subfolder, e.g. `.tmp/scratch/`)
+
+**Do not:**
+- Put temporal scripts or logs in **Transcripts**, **Meetings**, **People**, **Memory**, or **Metadata** (these are the user’s knowledge base).
+- Put temporal scripts in **`scripts/`** — that directory is for stable, committed commands only.
+
+When you create a one-off script, write a log file, or need a scratch file, use **`.tmp/`** so the vault and script area stay clean. The repo’s `.gitignore` already excludes `.tmp/`.

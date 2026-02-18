@@ -1,0 +1,170 @@
+---
+description: Summarize raw transcripts (Fireflies, HiNotes, other) into structured meeting notes. Paths: Meetings/<Area>/.
+globs: Transcripts/**/*.md
+alwaysApply: false
+---
+
+# Meeting Note Creation (Lexicon)
+
+Trigger: When processing a raw transcript file (Fireflies, HiNotes, other) into a meeting note.
+Goal: Produce a clean, structured, traceable meeting note that is safe to distill later.
+Transcript -(Summarize)-> Structured Evidence -(Distill)-> Knowledge
+
+## Principles
+Summary must be
+- factual
+- traceable
+- neutral
+- complete enough for later distillation
+
+Philosophy: Prefer recall over compression.
+
+Do not aggressively summarize.
+Preserve subtle, weak, or ambiguous statements if they may matter later.
+Future distillation and AI reasoning may extract patterns from them.
+Especially if speaker is respected professional / external customers, let's try to keep a lot of learning signals.
+
+## Output file template
+**File path:** `Meetings/<Area>/YYYY-MM-DD [Title].md`  
+Use the transcript's `area` (or frontmatter) to choose `<Area>` (e.g. work, personal, career).
+**Template:** Use `.cursor/templates/meeting_note_template.md`
+
+
+## Step 1 — Identify metadata (light)
+
+Fill only what is clear.
+Use only these tags/fields unless the user explicitly asks for more. Prefer fewer tags.
+
+- meeting_type: one of [1:1, small_group, leadership, team, interview, customer, other]
+- context: one of [internal, external]
+- participants
+- topics (3–5 max, snake_case nouns)
+
+## Step 2 — Write Context
+
+Purpose of meeting in 1–3 bullets:
+
+- Why meeting happened
+- Important background
+- Any constraint or urgency
+
+No interpretation.
+
+## Step 3 — Record Atmosphere
+
+Brief notes on tone and mood:
+- relaxed | tense | rushed | enthusiastic | neutral
+- Any notable energy shifts or emotional undercurrents
+
+Keep factual and brief (1–2 lines max).
+
+## Step 4 — Write Summary (factual)
+
+Rules:
+
+- Preserve disagreements
+- Preserve uncertainty
+- Use concrete language
+- Avoid vague sentences (“good discussion”)
+
+Example:
+
+Bad:
+- They talked about pricing.
+
+Good:
+- Alice said pricing tiers confuse customers.
+- Bob said flexibility is more important.
+
+## Step 5 — Extract Decisions
+
+Only if explicitly stated.
+
+Format:
+- Decision
+  - Owner
+  - Why
+  - Confidence: low | med | high
+
+If none → "(None)"
+
+## Step 6 — Extract Action Items
+
+Record action items unless clearly trivial.
+Even small tasks can reveal priorities, constraints, or relationships later.
+
+Format:
+- Owner
+  - Task
+  - Due
+
+If none → "(None)"
+
+## Step 7 — Record Unresolved Points
+
+Record confusing or unresolved points that came up but weren't resolved.
+Future meetings may clarify them.
+
+Format:
+- Unresolved point (brief)
+  - Why it matters (if clear)
+  - Who raised it (if known)
+
+If none → "(None)"
+
+## Step 8 — Extract Signals (CRITICAL)
+
+### Objective of Signal Extraction
+
+Signals capture durable information that should influence future decisions, relationships, or product direction.
+
+Capture signals:
+1. It will likely matter in 3+ months
+2. It affects people, product, org, learnings
+  - people: sentiment, feedback given/received, motivations, blockers, working styles
+  - product: feedbacks on vision / product, relevant products / partners / competitors, use cases
+  - org: focused goals, constraints, risks
+  - learnings: new technical/business knowledge, tips not specific to the project
+
+Priority:
+Tier 1 – always capture: decisions, customer feedback, blockers, explicit feedback, major risks
+Tier 2 – capture if clear: communication style, motivation, partnership intent, strategy disagreement
+Tier 3 – usually skip: status updates, casual comments, small clarifications
+
+Use this minimal format:
+
+- type: <taxonomy_id> (one of: people, product, org, decision, risk, learning)
+- target: <person/team/product> (optional)
+- topic: <snake_case_topic>
+- evidence: "<quote or precise paraphrase>" — <speaker or 'one participant'>
+
+Rules:
+- Do NOT infer personality or intent
+- If attribution unclear → say "one participant"
+
+## Step 9 — Verification Pass
+
+Before saving:
+
+- Each signal has evidence
+- Each signal has topic + context
+- No interpretation words ("seems", "likely")
+- Decisions are explicit
+- Summary understandable without transcript
+
+## Step 10 — Self-evaluation
+
+Always include self-evaluation section.
+Subjective reflection is allowed here.
+Example questions:
+- What I did well
+- What I could improve
+- One experiment for next time
+
+## Philosophy
+
+Meeting notes = structured evidence.
+Signals = classification-ready observations.
+Distill = durable knowledge.
+
+Never mix them.

@@ -1,0 +1,8 @@
+# Local config (never commit secrets)
+.env
+
+# Temporal files: one-off scripts, logs, scratch. Do not commit.
+.tmp/
+
+# Internal development docs (not for distribution)
+dev/

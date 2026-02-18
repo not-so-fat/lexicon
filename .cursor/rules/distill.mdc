@@ -1,0 +1,200 @@
+---
+description: Distill meeting notes into People, Memory, and Metadata. Paths: People/<Area>/, Memory/<Area>/.
+globs: Meetings/**/*.md, People/**/*.md, Memory/**/*.md, Metadata/**/*.md
+alwaysApply: false
+---
+
+# Deep Distillation Protocol (Lexicon)
+
+**Trigger:** When the user asks to distill a meeting note (e.g. "Distill this meeting note").
+
+Goal:
+Convert structured evidence into long-term knowledge about people, product, org, and decisions.
+
+Meeting notes = evidence  
+Distillation = durable knowledge
+
+Never reinterpret transcript directly unless the user asks.
+Distilled knowledge is not dashboard, it is big memory for AI to extract information.
+Memory should be append-only.
+Do not rewrite past insights unless clearly wrong.
+Patterns emerge from history.
+
+## Step 0 — Read Meeting Note
+
+Read sections in order:
+
+1. Signals
+2. Decisions
+3. Action Items
+4. Summary
+5. Context
+
+Signals are primary input.
+
+## Step 1 — Determine routing category (deterministic)
+
+Use meeting_type + context (not signal taxonomy) to route most outputs:
+
+A) People-focused routing
+- If meeting_type in [1:1, small_group] AND context in [internal]
+  → update People pages for relevant participants (excluding obvious “group” entities)
+
+B) Product routing
+- If context in [external] OR meeting_type in [customer, interview]
+  → update Memory/Product pages for relevant topics
+
+C) Org routing
+- If meeting_type in [leadership, team] AND context in [internal]
+  → update Memory/Org pages for relevant topics
+
+D) Decisions routing (always)
+- If Decisions section contains entries (not “(None)”)
+  → update Memory/Decisions
+
+E) Personal routing
+- Always update Memory/Personal from Self-evaluation (if meaningful)
+
+If uncertain between Product vs Org:
+- Prefer Product when external voices appear (customer/partner)
+- Prefer Org when only internal discussion
+
+## Step 2 — Output destinations (default)
+
+Create/update only these files:
+
+People pages:
+- People/<Area>/<PersonName>.md (use the meeting note's `area` frontmatter)
+
+Topic memory pages (topic-driven, not taxonomy-driven):
+- Memory/<Area>/Product/<topic>.md
+- Memory/<Area>/Org/<topic>.md
+
+Decisions:
+- Memory/<Area>/Decisions/decisions.md  (single log per area)
+
+Personal:
+- Memory/<Area>/Personal/self_evaluation.md  (single log per area)
+
+Topic naming:
+- Use the meeting note frontmatter `topics` as canonical.
+- If topics missing, infer 1–2 topics from Summary headings/phrases, snake_case, and keep minimal.
+
+Create a topic page whenever a meaningful signal appears.
+Early-stage startups often have weak signals that become important later.
+Low-confidence signals are allowed but must include evidence.
+
+
+## Step 3 — Distill from each section (what to extract)
+
+### 3.1 Signals (neutral) → primary source
+Signals are primary input for distillation.
+
+Extract signals generously.
+Include subtle, weak, or ambiguous signals if they may matter later.
+
+Do NOT filter based on current importance.
+Future patterns may emerge.
+
+Always keep evidence and attribution.
+
+### 3.2 Decisions → Decisions memory
+Copy decisions with owner + reason if present.
+If unclear, record as “Decision (pending)” and keep evidence.
+
+### 3.3 Action Items → (optional)
+Only record durable action items (multi-week or strategic).
+Daily tactical to-dos should remain only in the meeting note.
+
+### 3.4 Self-evaluation → Personal memory
+Always extract self-evaluation bullets.
+This is allowed to be subjective.
+
+## Evidence-first principle
+
+When unsure whether something is important, store it in Evidence Log.
+
+Do not discard ambiguous observations.
+
+Memory pages should keep both:
+- interpreted insights
+- raw evidence bullets
+
+Future AI may reinterpret them.
+
+
+## Step 4 — People pages (vague working style, evidence-backed)
+
+Update People/<Area>/<Name>.md only when routing category includes People-focused routing. Use the meeting note's `area` frontmatter to determine `<Area>`.
+
+Recommended People page structure (create if missing):
+- # Working Style (observations)
+- # Preferences / Constraints (explicit)
+- # Current Interests / Concerns
+- # Feedback (attributed)
+- # Evidence Log (append-only)
+
+Working Style observations may be added from a single signal if clearly evidenced.  Mark confidence explicitly.
+Prefer cautious language.
+
+Example:
+- May prefer async updates. (confidence: low, source: 2026-02-01)
+
+Evidence Log entry format (append-only):
+- YYYY-MM-DD — <short paraphrase> (confidence: low|med|high) — Source: [[<Meeting Note>]]
+
+## Step 5 — Topic memory pages (Product/Org)
+
+### Memory/<Area>/Product/<topic>.md
+Structure:
+- # What we learned (durable)
+- # Evidence (links)
+
+Add any bullets for product use cases, feedback, requests, confusion, adoption blockers, positioning, pricing, even subtle or speculative.
+For external feedback, subtle comments could be important, let's keep track on them. Early-stage signals are often weak but critical.
+
+Each bullet:
+- short statement
+- date
+- link to meeting note
+
+### Memory/<Area>/Org/<topic>.md
+Structure:
+- # Signals (durable)
+- # Evidence (links)
+
+Add bullets for durable internal patterns: blockers, alignment issues, hiring/process concerns.
+Use neutral language; no blame.
+
+## Step 6 — Decisions log
+
+Memory/<Area>/Decisions/decisions.md append format (use the meeting note's `area`):
+- YYYY-MM-DD — Decision: <...> (Owner: <...>) — Source: [[<Meeting Note>]]
+If pending:
+- YYYY-MM-DD — Pending decision: <...> — Source: [[<Meeting Note>]]
+
+## Step 7 — Personal self-evaluation log
+
+Memory/<Area>/Personal/self_evaluation.md append format (use the meeting note's `area`):
+- YYYY-MM-DD — Meeting: <title>
+  - What I did well: ...
+  - What I could improve: ...
+  - Experiment: ...
+  - Source: [[<Meeting Note>]]
+
+## Step 8 — Traceability back to the meeting note
+
+Always update the meeting note section:
+# Distilled
+
+List every file you touched, e.g.
+- [[People/work/Alice]]
+- [[Memory/work/Product/pricing]]
+- [[Memory/work/Org/hiring]]
+- [[Memory/work/Decisions/decisions]]
+- [[Memory/work/Personal/self_evaluation]]
+
+If nothing was updated, write:
+- (No durable updates.)
+
+Do not list Product Direction / roadmap unless the user explicitly asked you to update it. Write in **durable, concise** form.
