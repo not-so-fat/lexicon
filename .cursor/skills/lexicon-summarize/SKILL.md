@@ -17,15 +17,15 @@ User says things like:
 
 If the transcript file is unclear, ask which file to use.
 
-**If the user pastes transcript text** and says "add this transcript and summarize" (or similar) and there is no transcript file yet: create a transcript file first. Ask for **date** (YYYY-MM-DD), **title** (or "Catch up [name]"), **with_whom**, and **area** (work, personal, career, general). Create `Transcripts/Manual/<Area>/YYYY-MM-DD_<slug>_manual.md` with frontmatter and the pasted content under "# Raw Transcript", then continue with the steps below to create the meeting note.
+**Manual transcripts:** Summarize only works on an existing transcript file. If the user has pasted text or has no file yet, do not create the file in this skill. Use the **lexicon-manual-template** skill instead: it creates a template file under `Transcripts/Manual/`. Tell the user to ask for that ("Create a manual transcript template" or "I want to add a manual transcript"), then edit the file (paste under "# Raw Transcript"), save, then ask to summarize.
 
 ## Steps
 
 1. **Identify the transcript**  
-   Path under `Transcripts/Fireflies/<account>/` or `Transcripts/Manual/<Area>/`. Read its frontmatter (title, date, participants or with_whom, source, area if present).
+   Path under `Transcripts/Fireflies/<account>/` or `Transcripts/Manual/`. Read its frontmatter (title, date, participants or with_whom, source, area).
 
 2. **Choose area**  
-   Use `area` from frontmatter, or infer from path (e.g. `Transcripts/Manual/work/` → area work). Defaults: work, personal, career, general.
+   Use only `area` from the transcript frontmatter. Do not infer area from the path. If frontmatter has no area, ask the user which area (work, personal, career, general) to use.
 
 3. **Create meeting note**  
    Path: `Meetings/<Area>/YYYY-MM-DD [Title].md`.  

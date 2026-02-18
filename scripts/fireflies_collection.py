@@ -6,7 +6,7 @@ Usage:
   python scripts/fireflies_collection.py process-date YYYY-MM-DD <account>
   python scripts/fireflies_collection.py fetch <transcript_id> <account>
 
-Requires .env: FIREFLIES_API_KEY_<account>, EMAIL_<account>. See .env.example.
+Required .env per account: FIREFLIES_API_KEY_<account>, EMAIL_<account>. See .env.example.
 
 Dedup: One transcript per logical meeting (same title + 15-min time bucket). When multiple
 recordings exist, we keep the one where organizer_email == EMAIL_<account>; otherwise the
@@ -39,16 +39,18 @@ if os.path.isfile(env_path):
 
 
 def get_config(account):
-    """account: e.g. 'personal', 'work'. Env: FIREFLIES_API_KEY_<account>, EMAIL_<account>, optional OUTPUT_DIR_<account>."""
+    """Env: FIREFLIES_API_KEY_<account>, EMAIL_<account>; optional OUTPUT_DIR_<account>."""
     key = account.lower()
     output_dir = os.getenv(f"OUTPUT_DIR_{key}")
     if not output_dir:
         output_dir = os.path.join(REPO_ROOT, "Transcripts", "Fireflies", key)
+    area = (os.getenv(f"AREA_{key}") or "").strip()
     return {
         "api_key": (os.getenv(f"FIREFLIES_API_KEY_{key}") or "").strip(),
         "email": (os.getenv(f"EMAIL_{key}") or "").strip(),
         "output_dir": output_dir,
         "name": key,
+        "area": area,
     }
 
 
@@ -141,10 +143,11 @@ def fetch_and_save(meeting_id, config):
     transcript_str = "\n".join([f"{s.get('speaker_name', '')}: {s.get('text', '')}" for s in sentences])
     meta_date = datetime.fromtimestamp(m["date"] / 1000).strftime("%Y/%m/%d")
 
+    area_line = f"area: {config['area']}\n" if config.get("area") else ""
     content = f"""---
 title: {m['title']}
 date: {meta_date}
-participants:
+{area_line}participants:
 {participants_str}
 meeting_link: {m['transcript_url']}
 fireflies_id: {m['id']}

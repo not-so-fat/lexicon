@@ -2,7 +2,7 @@
 """
 Ingest manual/HiNotes meeting transcript into Lexicon.
 
-Output: Transcripts/Manual/<Area>/YYYY-MM-DD_<slug>_hinotes.md
+Output: Transcripts/Manual/YYYY-MM-DD_<slug>_hinotes.md (area is in frontmatter only; folder is not area-based).
 
 Modes:
   1. Stub: Create file with metadata only; you fill transcript later.
@@ -89,7 +89,7 @@ tags: [transcript, hinotes, raw, meeting]
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Ingest manual/HiNotes transcript into Transcripts/Manual/<Area>/."
+        description="Ingest manual/HiNotes transcript into Transcripts/Manual/. Area is stored in frontmatter only."
     )
     parser.add_argument("--date", default=None, help="Meeting date YYYY-MM-DD (optional with --stub: default today)")
     parser.add_argument("--title", default=None, help="Meeting title (required for --stub)")
@@ -113,17 +113,15 @@ def main():
     if not title:
         title = f"Catch up {with_whom}" if args.stub else f"{date_str} {with_whom}"
 
-    safe_area = clean_filename(area) or "general"
-    out_dir = os.path.join(MANUAL_BASE, safe_area)
     slug = clean_filename(title) if args.title else clean_filename(with_whom)
     out_filename = f"{date_str}_{slug}_hinotes.md"
-    out_path = os.path.join(out_dir, out_filename)
+    out_path = os.path.join(MANUAL_BASE, out_filename)
 
     if args.stub:
         if args.dry_run:
             print(f"Would write stub: {out_path}")
             return
-        os.makedirs(out_dir, exist_ok=True)
+        os.makedirs(MANUAL_BASE, exist_ok=True)
         create_stub(date_str, title, with_whom, area, out_path)
         print(f"SAVED (stub): {out_path}")
         print("Fill the transcript under # Raw Transcript, then ask the agent to summarize.")
@@ -144,7 +142,7 @@ def main():
         print(f"Parsed blocks: {len(blocks)}")
         return
 
-    os.makedirs(out_dir, exist_ok=True)
+    os.makedirs(MANUAL_BASE, exist_ok=True)
     body = format_transcript_body(blocks)
     content = f"""---
 title: "{title}"

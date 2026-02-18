@@ -33,9 +33,9 @@ That prepared memory is **why** you do this: so you (and Cursor) can query natur
 No extra step is needed to "install" Lexicon: your agent uses this repo's **scripts** and **skills** from the cloned folder. There is no global `lexicon` binary to install.
 
 1. **Clone** this repo.
-2. **Configure** – Copy `.env.example` to `.env`. Set **LEXICON_USER_NAME** (your name) first—needed for Self-evaluation and retrospectives in meeting notes. Then set Fireflies API key(s) and priority email(s) per account, and choose your **areas** (e.g. work, personal, career). Install Python deps: `pip install -r requirements.txt` (for fetch scripts).
+2. **Configure** – Copy `.env.example` to `.env`. Set **LEXICON_USER_NAME** (your name) first—needed for Self-evaluation and retrospectives in meeting notes. Then set Fireflies API key(s) and priority email(s) per account. If your account name is not the same as your Lexicon area (e.g. account "kite" but you want notes in work), set **AREA_kite=work** so context is not mixed. Install Python deps: `pip install -r requirements.txt` (for fetch scripts).
 3. **Fireflies (automated)** – You ask (e.g. “Process my Fireflies meetings for 2026-02-17 on my work account”). The agent runs init (if needed), then **fetch → summarize → distill** using the repo skills. Transcripts land under `Transcripts/Fireflies/<account>/`; meeting notes under `Meetings/<Area>/`; People/Memory/Metadata are updated by the distill skill. (We call this full pipeline **process**.)
-4. **HiNotes / manual transcripts** – You paste or ingest a transcript into `Transcripts/Manual/<Area>/` (no speaker labels). You ask (e.g. “Summarize this transcript into a meeting note”). The agent creates the note using the meeting-ingest skill. You **review** it (especially speaker attribution), then ask (e.g. “Distill this meeting note”). The agent updates People/Memory/Metadata using the distill skill.
+4. **HiNotes / manual transcripts** – You paste or ingest a transcript into `Transcripts/Manual/` and set **area** in frontmatter (no speaker labels). You ask (e.g. “Summarize this transcript into a meeting note”). The agent creates the note using the summarize skill. You **review** it (especially speaker attribution), then ask (e.g. “Distill this meeting note”). The agent updates People/Memory/Metadata using the distill skill.
 
 See **Installation & configuration** below for setup details.
 
@@ -57,18 +57,15 @@ If you have no meetings that day, the agent will say so and nothing is written.
 
 ## How to: Manual / HiNotes transcripts
 
-**Goal:** Get a manual or HiNotes transcript (no Fireflies) into Lexicon and into memory: ingest → summarize → review → distill.
+**Goal:** Get a manual or HiNotes transcript (no Fireflies) into Lexicon and into memory: create transcript file → edit it → summarize → review → distill.
 
 **What you do:**
 
-1. **Get the transcript into the repo.** Pick one:
-   - **Option A:** Create a file under `Transcripts/Manual/<Area>/` (e.g. `Transcripts/Manual/work/2026-02-17_Catch_up_Satish_hinotes.md`). Paste the transcript. Add minimal frontmatter at the top: `title`, `date`, `with_whom`, `area`, `source: HiNotes`. Then in Cursor, open that file and say: **"Summarize this transcript."**
-   - **Option B:** Run the ingest script (stub, then paste):  
-     `python scripts/manual_ingest.py --stub --date 2026-02-17 --title "Catch up Satish" --with-whom "Satish" --area work`  
-     Then open the created file, paste the transcript under "# Raw Transcript", save. Then say: **"Summarize this transcript."**
-   - **Option C:** If you paste the transcript text in chat and say **"Add this transcript and summarize it"**, the agent can create the file in `Transcripts/Manual/<Area>/` (it will ask for date, title, with whom, area) and then create the meeting note.
-2. **Review** the meeting note (especially speaker attribution—HiNotes has no labels).
-3. Say: **"Distill this meeting note."** The agent updates People/Memory/Metadata and fills the note's # Distilled section.
+1. **Create a transcript file (manual "fetch").** Ask your agent: **"Create a manual transcript template"** or **"I want to add a manual transcript"**. Say the date, title, with whom, and area (e.g. work). The agent creates a file under `Transcripts/Manual/` with frontmatter and a "# Raw Transcript" section.
+2. **Edit the file.** Open the file the agent created, paste or type the transcript under "# Raw Transcript", save.
+3. **Summarize.** In Cursor, with that file open or in context, say: **"Summarize this transcript."** The agent creates the meeting note at `Meetings/<Area>/...` using the summarize skill.
+4. **Review** the meeting note (especially speaker attribution—HiNotes has no labels).
+5. Say: **"Distill this meeting note."** The agent updates People/Memory/Metadata and fills the note's # Distilled section.
 
 Manual transcripts always need **review before distill**; Fireflies can be processed straight through.
 
@@ -76,7 +73,7 @@ Manual transcripts always need **review before distill**; Fireflies can be proce
 
 ## Where things live
 
-- **Transcripts** – Raw input: `Transcripts/Fireflies/<account>/`, `Transcripts/Manual/<Area>/`.
+- **Transcripts** – Raw input: `Transcripts/Fireflies/<account>/`, `Transcripts/Manual/`. Area is in transcript frontmatter only (not in folder path).
 - **Meetings** – Summarized notes: `Meetings/<Area>/` (includes Context, Atmosphere, Summary, Decisions, Action Items, Unresolved Points, Signals, Self-evaluation).
 - **People** – Per-person memory: `People/<Area>/<PersonName>.md`.
 - **Memory** – Product, Org, Decisions, Personal: `Memory/<Area>/Product/<topic>.md`, `Memory/<Area>/Org/<topic>.md`, `Memory/<Area>/Decisions/decisions.md`, `Memory/<Area>/Personal/self_evaluation.md`.
@@ -97,6 +94,7 @@ Your **agent** runs deterministic steps via the repo's scripts (e.g. `python scr
 Lexicon ships **skills** in `.cursor/skills/` so your agent can run init, fetch, summarize, and distill:
 
 - **lexicon-process** – "Process my Fireflies meetings for [date] on my [account] account" → fetch, then summarize each transcript into a meeting note, then distill each note into People/Memory/Metadata.
+- **lexicon-manual-template** – "Create a manual transcript template" or "I want to add a manual transcript" → create a stub file under `Transcripts/Manual/` (user edits it, then asks to summarize).
 - **lexicon-summarize** – "Summarize this transcript" → create a meeting note at `Meetings/<Area>/` from the current or selected transcript (includes Context, Atmosphere, Summary, Decisions, Action Items, Unresolved Points, Signals, Self-evaluation; uses summarize rule).
 - **lexicon-distill** – "Distill this meeting note" → update People/Memory/Metadata from the current or selected note and fill its **# Distilled** section (uses distill rule).
 
