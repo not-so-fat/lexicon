@@ -44,13 +44,13 @@ def get_config(account):
     output_dir = os.getenv(f"OUTPUT_DIR_{key}")
     if not output_dir:
         output_dir = os.path.join(REPO_ROOT, "Transcripts", "Fireflies", key)
-    area = (os.getenv(f"AREA_{key}") or "").strip()
+    project = (os.getenv(f"PROJECT_{key}") or "").strip()
     return {
         "api_key": (os.getenv(f"FIREFLIES_API_KEY_{key}") or "").strip(),
         "email": (os.getenv(f"EMAIL_{key}") or "").strip(),
         "output_dir": output_dir,
         "name": key,
-        "area": area,
+        "project": project,
     }
 
 
@@ -143,11 +143,11 @@ def fetch_and_save(meeting_id, config):
     transcript_str = "\n".join([f"{s.get('speaker_name', '')}: {s.get('text', '')}" for s in sentences])
     meta_date = datetime.fromtimestamp(m["date"] / 1000).strftime("%Y/%m/%d")
 
-    area_line = f"area: {config['area']}\n" if config.get("area") else ""
+    project_line = f"project: {config['project']}\n" if config.get("project") else ""
     content = f"""---
 title: {m['title']}
 date: {meta_date}
-{area_line}participants:
+{project_line}participants:
 {participants_str}
 meeting_link: {m['transcript_url']}
 fireflies_id: {m['id']}

@@ -20,7 +20,7 @@ No new UI. No extra LLM API. Your agent runs the repo's scripts and skills when 
 
 1. **Fetch** – Pull transcripts from Fireflies (by account and date) or add manual/HiNotes transcripts into a single structure.
 2. **Summarize** – Turn a raw transcript into a structured meeting note: Context, Atmosphere, Summary, Decisions, Action Items, Unresolved Points, Signals (people/product/org/decision/risk/learning), Self-evaluation (Cursor + rules).
-3. **Distill** – Turn a meeting note into durable memory: per-person pages (`People/<Area>/`), product/org learnings (`Memory/<Area>/`), and decisions (Cursor + rules).
+3. **Distill** – Turn a meeting note into durable memory: per-person pages (`People/<Project>/`), product/org learnings (`Memory/<Project>/`), and decisions (Cursor + rules).
 
 That prepared memory is **why** you do this: so you (and Cursor) can query naturally over Transcripts, Meetings, People, and Memory—e.g. "What did we agree with Sarah?" All output is **local Markdown** with YAML frontmatter. The main consumer is **AI** (Cursor), not a dashboard.
 
@@ -33,9 +33,9 @@ That prepared memory is **why** you do this: so you (and Cursor) can query natur
 No extra step is needed to "install" Lexicon: your agent uses this repo's **scripts** and **skills** from the cloned folder. There is no global `lexicon` binary to install.
 
 1. **Clone** this repo.
-2. **Configure** – Copy `.env.example` to `.env`. Set **LEXICON_USER_NAME** (your name) first—needed for Self-evaluation and retrospectives in meeting notes. Then set Fireflies API key(s) and priority email(s) per account. If your account name is not the same as your Lexicon area (e.g. account "kite" but you want notes in work), set **AREA_kite=work** so context is not mixed. Install Python deps: `pip install -r requirements.txt` (for fetch scripts).
-3. **Fireflies (automated)** – You ask (e.g. “Process my Fireflies meetings for 2026-02-17 on my work account”). The agent runs init (if needed), then **fetch → summarize → distill** using the repo skills. Transcripts land under `Transcripts/Fireflies/<account>/`; meeting notes under `Meetings/<Area>/`; People/Memory/Metadata are updated by the distill skill. (We call this full pipeline **process**.)
-4. **HiNotes / manual transcripts** – You paste or ingest a transcript into `Transcripts/Manual/` and set **area** in frontmatter (no speaker labels). You ask (e.g. “Summarize this transcript into a meeting note”). The agent creates the note using the summarize skill. You **review** it (especially speaker attribution), then ask (e.g. “Distill this meeting note”). The agent updates People/Memory/Metadata using the distill skill.
+2. **Configure** – Copy `.env.example` to `.env`. Set **LEXICON_USER_NAME** (your name) first—needed for Self-evaluation and retrospectives in meeting notes. Then set Fireflies API key(s) and priority email(s) per account. Default account is **personal**; use company name for another (e.g. "acme"). If account name is not the project (e.g. "acme" but you want notes in company), set **PROJECT_acme=company**. Install Python deps: `pip install -r requirements.txt` (for fetch scripts).
+3. **Fireflies (automated)** – You ask (e.g. "Process my Fireflies meetings for 2026-02-17 on my personal account"). The agent runs init (if needed), then **fetch → summarize → distill** using the repo skills. Transcripts land under `Transcripts/Fireflies/<account>/`; meeting notes under `Meetings/<Project>/`; People/Memory/Metadata are updated by the distill skill. (We call this full pipeline **process**.)
+4. **HiNotes / manual transcripts** – You paste or ingest a transcript into `Transcripts/Manual/` and set **project** in frontmatter (no speaker labels). You ask (e.g. “Summarize this transcript into a meeting note”). The agent creates the note using the summarize skill. You **review** it (especially speaker attribution), then ask (e.g. “Distill this meeting note”). The agent updates People/Memory/Metadata using the distill skill.
 
 See **Installation & configuration** below for setup details.
 
@@ -47,9 +47,9 @@ See **Installation & configuration** below for setup details.
 
 **What you do:**
 
-1. Say exactly: **"Process my Fireflies meetings for today on my work account"** (or use a date: "for 2026-02-17", or "yesterday"; use your account name: work, personal, etc.).
+1. Say exactly: **"Process my Fireflies meetings for today on my personal account"** (or use a date: "for 2026-02-17", or "yesterday"; use your account name: personal, acme, etc.).
 2. The agent runs init (if needed), fetches transcripts for that date, creates a meeting note for each, and distills each note into People/Memory/Metadata.
-3. Done. Transcripts are in `Transcripts/Fireflies/<account>/`, meeting notes in `Meetings/<Area>/`, memory updated.
+3. Done. Transcripts are in `Transcripts/Fireflies/<account>/`, meeting notes in `Meetings/<Project>/`, memory updated.
 
 If you have no meetings that day, the agent will say so and nothing is written.
 
@@ -61,9 +61,9 @@ If you have no meetings that day, the agent will say so and nothing is written.
 
 **What you do:**
 
-1. **Create a transcript file (manual "fetch").** Ask your agent: **"Create a manual transcript template"** or **"I want to add a manual transcript"**. Say the date, title, with whom, and area (e.g. work). The agent creates a file under `Transcripts/Manual/` with frontmatter and a "# Raw Transcript" section.
+1. **Create a transcript file (manual "fetch").** Ask your agent: **"Create a manual transcript template"** or **"I want to add a manual transcript"**. Say the date, title, with whom, and project (e.g. personal, company). The agent creates a file under `Transcripts/Manual/` with frontmatter and a "# Raw Transcript" section.
 2. **Edit the file.** Open the file the agent created, paste or type the transcript under "# Raw Transcript", save.
-3. **Summarize.** In Cursor, with that file open or in context, say: **"Summarize this transcript."** The agent creates the meeting note at `Meetings/<Area>/...` using the summarize skill.
+3. **Summarize.** In Cursor, with that file open or in context, say: **"Summarize this transcript."** The agent creates the meeting note at `Meetings/<Project>/...` using the summarize skill.
 4. **Review** the meeting note (especially speaker attribution—HiNotes has no labels).
 5. Say: **"Distill this meeting note."** The agent updates People/Memory/Metadata and fills the note's # Distilled section.
 
@@ -73,10 +73,10 @@ Manual transcripts always need **review before distill**; Fireflies can be proce
 
 ## Where things live
 
-- **Transcripts** – Raw input: `Transcripts/Fireflies/<account>/`, `Transcripts/Manual/`. Area is in transcript frontmatter only (not in folder path).
-- **Meetings** – Summarized notes: `Meetings/<Area>/` (includes Context, Atmosphere, Summary, Decisions, Action Items, Unresolved Points, Signals, Self-evaluation).
-- **People** – Per-person memory: `People/<Area>/<PersonName>.md`.
-- **Memory** – Product, Org, Decisions, Personal: `Memory/<Area>/Product/<topic>.md`, `Memory/<Area>/Org/<topic>.md`, `Memory/<Area>/Decisions/decisions.md`, `Memory/<Area>/Personal/self_evaluation.md`.
+- **Transcripts** – Raw input: `Transcripts/Fireflies/<account>/`, `Transcripts/Manual/`. Project is in transcript frontmatter only (not in folder path).
+- **Meetings** – Summarized notes: `Meetings/<Project>/` (includes Context, Atmosphere, Summary, Decisions, Action Items, Unresolved Points, Signals, Self-evaluation).
+- **People** – Per-person memory: `People/<Project>/<PersonName>.md`.
+- **Memory** – Product, Org, Decisions, Personal: `Memory/<Project>/Product/<topic>.md`, `Memory/<Project>/Org/<topic>.md`, `Memory/<Project>/Decisions/decisions.md`, `Memory/<Project>/Personal/self_evaluation.md`.
 - **Metadata** – e.g. user name: `Metadata/User.md`.
 - **Scripts** – Stable CLI/ingestion only: `scripts/`.
 - **Temporal** – One-off scripts, logs, scratch: **`.tmp/`** only. Do not put temporal files in your knowledge base or in `scripts/`.
@@ -95,7 +95,7 @@ Lexicon ships **skills** in `.cursor/skills/` so your agent can run init, fetch,
 
 - **lexicon-process** – "Process my Fireflies meetings for [date] on my [account] account" → fetch, then summarize each transcript into a meeting note, then distill each note into People/Memory/Metadata.
 - **lexicon-manual-template** – "Create a manual transcript template" or "I want to add a manual transcript" → create a stub file under `Transcripts/Manual/` (user edits it, then asks to summarize).
-- **lexicon-summarize** – "Summarize this transcript" → create a meeting note at `Meetings/<Area>/` from the current or selected transcript (includes Context, Atmosphere, Summary, Decisions, Action Items, Unresolved Points, Signals, Self-evaluation; uses summarize rule).
+- **lexicon-summarize** – "Summarize this transcript" → create a meeting note at `Meetings/<Project>/` from the current or selected transcript (includes Context, Atmosphere, Summary, Decisions, Action Items, Unresolved Points, Signals, Self-evaluation; uses summarize rule).
 - **lexicon-distill** – "Distill this meeting note" → update People/Memory/Metadata from the current or selected note and fill its **# Distilled** section (uses distill rule).
 
 You can **edit** these skills in `.cursor/skills/<name>/SKILL.md` to match how you want summaries and distillation to work.

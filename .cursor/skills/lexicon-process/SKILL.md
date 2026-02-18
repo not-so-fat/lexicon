@@ -10,16 +10,16 @@ Runs **fetch → summarize → distill** for a given date and account. One pipel
 ## When to use
 
 User says things like:
-- "Process my Fireflies meetings for **today** on my work account"
-- "Process my Fireflies meetings for 2026-02-17 on my personal account"
-- "Process my meetings for yesterday, work account"
+- "Process my Fireflies meetings for **today** on my personal account"
+- "Process my Fireflies meetings for 2026-02-17 on my acme account"
+- "Process my meetings for yesterday, personal"
 - "Fetch and summarize and distill my meetings for today, personal"
 
 **Date:** If the user says **today**, use the current date in YYYY-MM-DD. If they say **yesterday**, use yesterday's date. Otherwise use the given date (YYYY-MM-DD).
 
-**Account:** work, personal, or whatever name they use (must match an account in their .env).
+**Account:** personal (default), or company name / other label (e.g. acme) that matches their .env.
 
-If date or account is missing, ask: "Which date (e.g. today, 2026-02-17) and which account (e.g. work, personal)?"
+If date or account is missing, ask: "Which date (e.g. today, 2026-02-17) and which account (e.g. personal, acme)?"
 
 ## Steps
 
@@ -33,10 +33,10 @@ If date or account is missing, ask: "Which date (e.g. today, 2026-02-17) and whi
    Transcripts land in `Transcripts/Fireflies/<account>/`.
 
 3. **Summarize**  
-   For each **new** transcript file in that folder for that date: create a meeting note at `Meetings/<Area>/YYYY-MM-DD [Title].md` following the structure in `.cursor/rules/summarize.mdc`. **Area:** Use only the transcript's frontmatter `area` (set by fetch when AREA_<account> is in .env). Do not infer area from the transcript path or account name. If the transcript has no `area` in frontmatter, ask the user which area (work, personal, career, general) to use for this run. Do not duplicate the rule content; apply it.
+   For each **new** transcript file in that folder for that date: create a meeting note at `Meetings/<Project>/YYYY-MM-DD [Title].md` following the structure in `.cursor/rules/summarize.mdc`. **Project:** Use only the transcript's frontmatter `project` (set by fetch when PROJECT_<account> is in .env). Do not infer project from the transcript path or account name. If the transcript has no `project` in frontmatter, ask the user which project (personal, company, career, general) to use for this run. Do not duplicate the rule content; apply it.
 
 4. **Distill**  
-   For each meeting note you just created (or that was updated): update `People/<Area>/`, `Memory/<Area>/`, and `Metadata/` following `.cursor/rules/distill.mdc`, and fill the note's **# Distilled** section with links to every destination updated. Apply the rule; do not duplicate it.
+   For each meeting note you just created (or that was updated): update `People/<Project>/`, `Memory/<Project>/`, and `Metadata/` following `.cursor/rules/distill.mdc`, and fill the note's **# Distilled** section with links to every destination updated. Apply the rule; do not duplicate it.
 
 5. **Report**  
    Tell the user how many transcripts were fetched, how many meeting notes created/updated, and that People/Memory/Metadata were updated.
@@ -44,5 +44,5 @@ If date or account is missing, ask: "Which date (e.g. today, 2026-02-17) and whi
 ## Notes
 
 - If fetch returns no new transcripts, say so and skip summarize/distill for that run.
-- Area must come from transcript frontmatter (set by fetch when .env has AREA_<account>=work etc.). Do not infer area from path or account name. If frontmatter has no area, ask the user which area to use.
+- Project must come from transcript frontmatter (set by fetch when .env has PROJECT_<account>=personal etc.). Do not infer project from path or account name. If frontmatter has no project, ask the user which project to use.
 - All one-off or scratch output goes in `.tmp/`, not in Transcripts/Meetings/People/Memory/Metadata or `scripts/`.

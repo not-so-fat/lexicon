@@ -1,5 +1,5 @@
 ---
-description: Distill meeting notes into People, Memory, and Metadata. Paths: People/<Area>/, Memory/<Area>/.
+description: Distill meeting notes into People, Memory, and Metadata. Paths: People/<Project>/, Memory/<Project>/.
 globs: Meetings/**/*.md, People/**/*.md, Memory/**/*.md, Metadata/**/*.md
 alwaysApply: false
 ---
@@ -64,17 +64,17 @@ If uncertain between Product vs Org:
 Create/update only these files:
 
 People pages:
-- People/<Area>/<PersonName>.md (use the meeting note's `area` frontmatter)
+- People/<Project>/<PersonName>.md (use the meeting note's `project` frontmatter)
 
 Topic memory pages (topic-driven, not taxonomy-driven):
-- Memory/<Area>/Product/<topic>.md
-- Memory/<Area>/Org/<topic>.md
+- Memory/<Project>/Product/<topic>.md
+- Memory/<Project>/Org/<topic>.md
 
 Decisions:
-- Memory/<Area>/Decisions/decisions.md  (single log per area)
+- Memory/<Project>/Decisions/decisions.md  (single log per project)
 
 Personal:
-- Memory/<Area>/Personal/self_evaluation.md  (single log per area)
+- Memory/<Project>/Personal/self_evaluation.md  (single log per project)
 
 Topic naming:
 - Use the meeting note frontmatter `topics` as canonical.
@@ -125,7 +125,7 @@ Future AI may reinterpret them.
 
 ## Step 4 — People pages (vague working style, evidence-backed)
 
-Update People/<Area>/<Name>.md only when routing category includes People-focused routing. Use the meeting note's `area` frontmatter to determine `<Area>`.
+Update People/<Project>/<Name>.md only when routing category includes People-focused routing. Use the meeting note's `project` frontmatter to determine `<Project>`.
 
 Recommended People page structure (create if missing):
 - # Working Style (observations)
@@ -145,7 +145,7 @@ Evidence Log entry format (append-only):
 
 ## Step 5 — Topic memory pages (Product/Org)
 
-### Memory/<Area>/Product/<topic>.md
+### Memory/<Project>/Product/<topic>.md
 Structure:
 - # What we learned (durable)
 - # Evidence (links)
@@ -158,7 +158,7 @@ Each bullet:
 - date
 - link to meeting note
 
-### Memory/<Area>/Org/<topic>.md
+### Memory/<Project>/Org/<topic>.md
 Structure:
 - # Signals (durable)
 - # Evidence (links)
@@ -168,14 +168,14 @@ Use neutral language; no blame.
 
 ## Step 6 — Decisions log
 
-Memory/<Area>/Decisions/decisions.md append format (use the meeting note's `area`):
+Memory/<Project>/Decisions/decisions.md append format (use the meeting note's `project`):
 - YYYY-MM-DD — Decision: <...> (Owner: <...>) — Source: [[<Meeting Note>]]
 If pending:
 - YYYY-MM-DD — Pending decision: <...> — Source: [[<Meeting Note>]]
 
 ## Step 7 — Personal self-evaluation log
 
-Memory/<Area>/Personal/self_evaluation.md append format (use the meeting note's `area`):
+Memory/<Project>/Personal/self_evaluation.md append format (use the meeting note's `project`):
 - YYYY-MM-DD — Meeting: <title>
   - What I did well: ...
   - What I could improve: ...
@@ -188,11 +188,11 @@ Always update the meeting note section:
 # Distilled
 
 List every file you touched, e.g.
-- [[People/work/Alice]]
-- [[Memory/work/Product/pricing]]
-- [[Memory/work/Org/hiring]]
-- [[Memory/work/Decisions/decisions]]
-- [[Memory/work/Personal/self_evaluation]]
+- [[People/personal/Alice]]
+- [[Memory/personal/Product/pricing]]
+- [[Memory/personal/Org/hiring]]
+- [[Memory/personal/Decisions/decisions]]
+- [[Memory/personal/Personal/self_evaluation]]
 
 If nothing was updated, write:
 - (No durable updates.)

@@ -5,7 +5,7 @@ description: Creates an empty manual transcript file (template) under Transcript
 
 # Lexicon: Create manual transcript template
 
-Creates a stub file at `Transcripts/Manual/YYYY-MM-DD_<slug>_hinotes.md` with frontmatter and a "# Raw Transcript" section. The user edits the file (paste transcript), then asks to summarize.
+Creates a stub file at `Transcripts/Manual/YYYY-MM-DD_<slug>_manual.md` with frontmatter and a "# Raw Transcript" section. The user edits the file (paste transcript), then asks to summarize.
 
 ## When to use
 
@@ -17,15 +17,15 @@ User says things like:
 
 ## Steps
 
-1. **Gather inputs.** You need: **date** (YYYY-MM-DD), **title** (e.g. "Catch up Satish" or meeting title), **with_whom**, **area** (work, personal, career, general).  
-   If the user gave them, use those. If not, ask: "What date (YYYY-MM-DD), title (or 'Catch up [name]'), with whom, and area (work, personal, career, general)?"  
+1. **Gather inputs.** You need: **date** (YYYY-MM-DD), **title** (e.g. "Catch up Satish" or meeting title), **with_whom**, **project** (personal, company, career, general).  
+   If the user gave them, use those. If not, ask: "What date (YYYY-MM-DD), title (or 'Catch up [name]'), with whom, and project (personal, company, career, general)?"  
    For date, if they say "today" use current date in YYYY-MM-DD.
 
 2. **Create the file.** From the repo root, run:
-   `python scripts/manual_ingest.py --stub --date YYYY-MM-DD --title "Title" --with-whom "Name" --area <area>`
-   Use the exact date, title, with_whom, and area. If title has spaces or special characters, quote it.
+   `python scripts/manual_ingest.py --stub --date YYYY-MM-DD --title "Title" --with-whom "Name" --project <project>`
+   Use the exact date, title, with_whom, and project. If title has spaces or special characters, quote it.
 
-3. **Reply.** Tell the user the path of the created file (e.g. `Transcripts/Manual/2026-02-17_Catch_up_Satish_hinotes.md`). Say: "Open that file, paste your transcript under **# Raw Transcript**, save. Then ask me to **summarize this transcript** and I'll create the meeting note."
+3. **Reply.** Tell the user the path of the created file (e.g. `Transcripts/Manual/2026-02-17_Catch_up_Satish_manual.md`). Say: "Open that file, paste your transcript under **# Raw Transcript**, save. Then ask me to **summarize this transcript** and I'll create the meeting note."
 
 ## Notes
 

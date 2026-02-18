@@ -1,6 +1,7 @@
 ---
 title:
 date:
+project:
 participants:
 meeting_link:
 meeting_type:

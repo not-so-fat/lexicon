@@ -1,5 +1,5 @@
 ---
-description: Summarize raw transcripts (Fireflies, HiNotes, other) into structured meeting notes. Paths: Meetings/<Area>/.
+description: Summarize raw transcripts (Fireflies, HiNotes, other) into structured meeting notes. Paths: Meetings/<Project>/.
 globs: Transcripts/**/*.md
 alwaysApply: false
 ---
@@ -25,8 +25,8 @@ Future distillation and AI reasoning may extract patterns from them.
 Especially if speaker is respected professional / external customers, let's try to keep a lot of learning signals.
 
 ## Output file template
-**File path:** `Meetings/<Area>/YYYY-MM-DD [Title].md`  
-Use the transcript's `area` (or frontmatter) to choose `<Area>` (e.g. work, personal, career).
+**File path:** `Meetings/<Project>/YYYY-MM-DD [Title].md`  
+Use the transcript's `project` (or frontmatter) to choose `<Project>` (e.g. personal, company, career).
 **Template:** Use `.cursor/templates/meeting_note_template.md`
 
 

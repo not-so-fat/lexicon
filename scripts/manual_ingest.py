@@ -1,18 +1,19 @@
 #!/usr/bin/env python3
 """
-Ingest manual/HiNotes meeting transcript into Lexicon.
+Ingest manual meeting transcript into Lexicon.
 
-Output: Transcripts/Manual/YYYY-MM-DD_<slug>_hinotes.md (area is in frontmatter only; folder is not area-based).
+Output: Transcripts/Manual/YYYY-MM-DD_<slug>_manual.md (project is in frontmatter only; folder is not project-based).
+
+No external HiNotes (or other) dependency: stub mode is source-agnostic. Full mode optionally parses
+HiNotes-style input (Unknown Speaker → HH:MM:SS → paragraph); if you use another format, use --stub and paste into the file.
 
 Modes:
   1. Stub: Create file with metadata only; you fill transcript later.
-     python scripts/manual_ingest.py --stub --date YYYY-MM-DD --title "Title" --with-whom "Name" --area work
+     python scripts/manual_ingest.py --stub --date YYYY-MM-DD --title "Title" --with-whom "Name" --project personal
 
-  2. Full: Parse HiNotes-format transcript and write formatted file.
-     python scripts/manual_ingest.py --date YYYY-MM-DD --with-whom "Name" --area work [--transcript-file PATH]
-     If --transcript-file is omitted, transcript is read from stdin.
-
-HiNotes format: "Unknown Speaker" → HH:MM:SS → paragraph, repeated.
+  2. Full: Parse HiNotes-format transcript from file or stdin and write formatted file.
+     python scripts/manual_ingest.py --date YYYY-MM-DD --with-whom "Name" --project personal [--transcript-file PATH]
+     HiNotes format: "Unknown Speaker" → HH:MM:SS → paragraph, repeated.
 """
 import argparse
 import os
@@ -67,20 +68,20 @@ def format_transcript_body(blocks):
     return "\n".join(out)
 
 
-def create_stub(date_str, title, with_whom, area, out_path):
+def create_stub(date_str, title, with_whom, project, out_path):
     safe_title = title.replace('"', '\\"')
     content = f"""---
 title: "{safe_title}"
 date: {date_str}
 with_whom: {with_whom}
-area: {area}
-source: HiNotes
-tags: [transcript, hinotes, raw, meeting]
+project: {project}
+source: manual
+tags: [transcript, manual, raw, meeting]
 ---
 
 # Raw Transcript
 
-(Paste HiNotes transcript here: Unknown Speaker → HH:MM:SS → paragraph, repeated.)
+(Paste or type your transcript here.)
 """
     with open(out_path, "w", encoding="utf-8") as f:
         f.write(content)
@@ -89,12 +90,12 @@ tags: [transcript, hinotes, raw, meeting]
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Ingest manual/HiNotes transcript into Transcripts/Manual/. Area is stored in frontmatter only."
+        description="Ingest manual transcript into Transcripts/Manual/. Project is stored in frontmatter only."
     )
     parser.add_argument("--date", default=None, help="Meeting date YYYY-MM-DD (optional with --stub: default today)")
     parser.add_argument("--title", default=None, help="Meeting title (required for --stub)")
     parser.add_argument("--with-whom", required=True, dest="with_whom", help="With whom (e.g. Satish)")
-    parser.add_argument("--area", required=True, help="Area: work, personal, career, general, etc.")
+    parser.add_argument("--project", required=True, help="Project: personal, company, career, general, etc.")
     parser.add_argument("--stub", action="store_true", help="Create stub only; you fill transcript later.")
     parser.add_argument("--transcript-file", dest="transcript_file", default=None, help="Transcript file; default: stdin")
     parser.add_argument("--dry-run", action="store_true", help="Print target path only; do not write")
@@ -108,13 +109,13 @@ def main():
         print("ERROR: --date required when not using --stub", file=sys.stderr)
         sys.exit(1)
     with_whom = args.with_whom.strip()
-    area = args.area.strip()
+    project = args.project.strip()
     title = (args.title or "").strip()
     if not title:
         title = f"Catch up {with_whom}" if args.stub else f"{date_str} {with_whom}"
 
     slug = clean_filename(title) if args.title else clean_filename(with_whom)
-    out_filename = f"{date_str}_{slug}_hinotes.md"
+    out_filename = f"{date_str}_{slug}_manual.md"
     out_path = os.path.join(MANUAL_BASE, out_filename)
 
     if args.stub:
@@ -122,7 +123,7 @@ def main():
             print(f"Would write stub: {out_path}")
             return
         os.makedirs(MANUAL_BASE, exist_ok=True)
-        create_stub(date_str, title, with_whom, area, out_path)
+        create_stub(date_str, title, with_whom, project, out_path)
         print(f"SAVED (stub): {out_path}")
         print("Fill the transcript under # Raw Transcript, then ask the agent to summarize.")
         return
@@ -148,9 +149,9 @@ def main():
 title: "{title}"
 date: {date_str}
 with_whom: {with_whom}
-area: {area}
-source: HiNotes
-tags: [transcript, hinotes, raw, meeting]
+project: {project}
+source: manual
+tags: [transcript, manual, raw, meeting]
 ---
 
 # Raw Transcript

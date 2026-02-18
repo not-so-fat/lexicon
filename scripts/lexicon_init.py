@@ -59,9 +59,9 @@ def main():
 
     env = os.path.join(root, ".env")
     if not os.path.isfile(env):
-        print("Copy .env.example to .env and set FIREFLIES_API_KEY_<account>, EMAIL_<account>, and optionally LEXICON_USER_NAME.")
+        print("Copy .env.example to .env and set FIREFLIES_API_KEY_<account>, EMAIL_<account> (default account: personal), and optionally LEXICON_USER_NAME.")
     else:
-        print(".env present. Run process-date via the agent or: python scripts/fireflies_collection.py process-date YYYY-MM-DD <account>")
+        print(".env present. Run process-date via the agent or: python scripts/fireflies_collection.py process-date YYYY-MM-DD <account> (e.g. personal)")
 
 
 if __name__ == "__main__":
