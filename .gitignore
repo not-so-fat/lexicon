@@ -1,6 +1,9 @@
 # Local config (never commit secrets)
 .env
 
+# macOS
+.DS_Store
+
 # Temporal files: one-off scripts, logs, scratch. Do not commit.
 .tmp/
 

@@ -1,43 +1,25 @@
 ---
 name: lexicon-distill
-description: Distills a Lexicon meeting note into People, Memory, and Metadata. Use when the user asks to "distill this meeting note", "distill this note", or wants to extract durable knowledge from a meeting note at Meetings/<Project>/ into People/<Project>/, Memory/<Project>/, and Metadata/.
+description: Extract durable knowledge from a meeting note into People, Memory, and Metadata. Use when user says "distill this meeting note", "distill this note", or "extract knowledge from this meeting".
 ---
 
-# Lexicon: Distill meeting note → People / Memory / Metadata
+# Distill meeting note into memory
 
-Updates `People/<Project>/`, `Memory/<Project>/`, and `Metadata/` from one meeting note, and fills the note's **# Distilled** section.
+Updates `People/<Project>/`, `Memory/<Project>/`, and `Metadata/` from one meeting note. Fills the note's **# Distilled** section.
 
-## When to use
+## Prerequisites
 
-User says things like:
-- "Distill this meeting note"
-- "Distill this note"
-- "Extract knowledge from this meeting"
-- Points at or @-mentions a file under `Meetings/<Project>/`
-
-If the meeting note is unclear, ask which file to use.
+A meeting note under `Meetings/<Project>/`. The note is the source of truth (user may have edited it after summarize).
 
 ## Steps
 
-1. **Identify the meeting note**  
-   Path under `Meetings/<Project>/`. Read it; the note is the source of truth (user may have edited it).
+1. **Read the meeting note** — Identify the file under `Meetings/<Project>/`.
+2. **Apply distill rule** — Follow `.cursor/rules/distill.mdc` in full (routing, People pages, Memory pages, Decisions, Personal, traceability).
+3. **Fill # Distilled** — In the meeting note, list every file you updated (e.g. `[[People/personal/Alice]]`, `[[Memory/personal/Product/pricing]]`).
+4. **Reply** — Confirm done and list updated files.
 
-2. **Apply distill rule**  
-   Follow `.cursor/rules/distill.mdc` in full:
-   - Decide deep vs light distillation.
-   - Update **People/<Project>/[Name].md** (Catch-up Log, Communication Style, etc.).
-   - Update **Memory/<Project>/** (Product, Org, Partnerships, Career, Technical as needed).
-   - Update **Metadata/CommunicationStyle.md** and **Metadata/CurrentPriorities.md** when relevant.
-   - For external/experienced-person meetings, add learnings and feedback as in the rule.
+## Error handling
 
-3. **Traceability**  
-   In the meeting note's **# Distilled** section, list every destination you actually updated (links to People, Memory, Metadata files/sections). Overwrite that section with the new list.
-
-4. **Reply**  
-   Confirm distillation done and list the updated files/sections.
-
-## Notes
-
-- Do not re-parse the raw transcript unless needed to clarify something in the note.
-- Never overwrite past bullets in People pages; append or refine.
-- Scratch/temporal output goes in `.tmp/` only.
+- **No meeting note** — Ask user which note to distill.
+- **Note has no project** — Ask user which project to use.
+- **Append-only** — Never overwrite past entries in People or Memory; always append.
