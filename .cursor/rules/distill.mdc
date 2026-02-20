@@ -76,9 +76,13 @@ Decisions:
 Personal:
 - Memory/<Project>/Personal/self_evaluation.md  (single log per project)
 
-Topic naming:
-- Use the meeting note frontmatter `topics` as canonical.
-- If topics missing, infer 1–2 topics from Summary headings/phrases, snake_case, and keep minimal.
+Topic naming — match-before-create:
+1. **List existing files** under `Memory/<Project>/Product/` and `Memory/<Project>/Org/`.
+2. **Check registry:** Look up the proposed topic slug in `Metadata/topic_registry.md`.
+   If it matches an alias, use the canonical slug instead.
+3. **Fuzzy match:** If the proposed slug is semantically close to an existing slug
+   (e.g. `pricing_model` when `pricing` exists), use the existing one.
+4. **New topic:** If genuinely new, add it to the topic registry first, then create the file.
 
 Create a topic page whenever a meaningful signal appears.
 Early-stage startups often have weak signals that become important later.
@@ -131,6 +135,7 @@ Recommended People page structure (create if missing):
 - # Working Style (observations)
 - # Preferences / Constraints (explicit)
 - # Current Interests / Concerns
+- # Relationships
 - # Feedback (attributed)
 - # Evidence Log (append-only)
 
@@ -142,6 +147,26 @@ Example:
 
 Evidence Log entry format (append-only):
 - YYYY-MM-DD — <short paraphrase> (confidence: low|med|high) — Source: [[<Meeting Note>]]
+
+### Relationships
+
+When a signal reveals interpersonal dynamics, update the Relationships section.
+
+Entry format:
+- **[[OtherPerson]]** — <relationship description>. (confidence: low|med|high, source: YYYY-MM-DD)
+
+Relationship types (suggested, not exhaustive): collaborates-with, reports-to / manages,
+mentors / mentored-by, tension-with, influenced-by / influences, sponsors / sponsored-by,
+partners-with.
+
+Rules:
+1. Write an entry on **both** people's pages (with evidence and date).
+2. If a relationship already has an entry, append a new dated observation (don't overwrite).
+3. Use inline `#topic` when the relationship centers on a specific subject.
+
+When to extract: explicit feedback between people, visible alignment or misalignment,
+delegation patterns, mentoring/coaching moments, tension or conflict (neutral language).
+When NOT to: casual conversation with no signal, standard status updates.
 
 ## Step 5 — Topic memory pages (Product/Org)
 
@@ -157,6 +182,7 @@ Each bullet:
 - short statement
 - date
 - link to meeting note
+- if the fact also relates to another registered topic, append `#topic_slug` inline
 
 ### Memory/<Project>/Org/<topic>.md
 Structure:
@@ -165,6 +191,15 @@ Structure:
 
 Add bullets for durable internal patterns: blockers, alignment issues, hiring/process concerns.
 Use neutral language; no blame.
+
+### Inline `#topic` cross-references
+
+When writing any bullet to a Memory or People page, check whether the fact also relates
+to another topic in `Metadata/topic_registry.md`. If yes, append `#topic_slug` inline.
+Only use canonical slugs (never aliases). This enables Cursor to grep across topics.
+
+Example: a bullet in `partnership.md` about a pricing constraint →
+- Partner X won't accept usage-based pricing; needs flat fee. #pricing (2026-02-15, [[Meeting Note]])
 
 ## Step 6 — Decisions log
 

@@ -1,0 +1,82 @@
+---
+description: How to search and retrieve knowledge from the Lexicon vault. Apply when the user asks a question that requires finding information across meetings, people, topics, or decisions.
+globs: Meetings/**/*.md, People/**/*.md, Memory/**/*.md, Metadata/**/*.md
+alwaysApply: false
+---
+
+# Lexicon Search & Retrieval
+
+When the user asks a question about what they know, what happened, who said what,
+or needs context for preparation — use this strategy to find the answer.
+
+## Data layers (search priority)
+
+| Layer | What it contains | When to search |
+|-------|-----------------|----------------|
+| **Memory/** | Durable knowledge by topic | First — most distilled, highest signal |
+| **People/** | Per-person observations, relationships | First — when question is about a person |
+| **Meetings/** | Structured evidence (meeting notes) | Second — when Memory/People don't have enough, or user asks about a specific meeting |
+| **Metadata/** | Registries (tags, topics, projects), user config | Reference — to understand structure |
+| **Transcripts/** | Raw transcripts | Last resort — only when user explicitly wants raw source |
+
+Always start from the most distilled layer and drill down only if needed.
+
+## Search strategies by question type
+
+### "What do we know about [subject]?"
+1. Check `Metadata/topic_registry.md` for the canonical slug (and aliases).
+2. Read `Memory/<Project>/Product/<topic>.md` or `Memory/<Project>/Org/<topic>.md` directly.
+3. Sweep for cross-references: `rg "#<topic_slug>" Memory/ People/`
+4. If still thin, grep `Meetings/` frontmatter: `rg "topics:.*<slug>" Meetings/` then read matching notes.
+
+### "Tell me about [person]"
+1. Read `People/<Project>/<Name>.md` — all sections including Relationships.
+2. If the person may appear under multiple projects, check other project folders too.
+3. For recent interactions, grep: `rg "<Name>" Meetings/ --include "*.md"` and read recent matches.
+
+### "What happened on [date]?" / "What happened in [meeting]?"
+1. List files: `ls Meetings/<Project>/YYYY-MM-DD*` (or glob across projects).
+2. Read the matching meeting note(s).
+3. For deeper context, follow links to People/Memory pages referenced in the # Distilled section.
+
+### "What decisions have we made about [subject]?"
+1. Read `Memory/<Project>/Decisions/decisions.md` and grep for the subject.
+2. Also check: `rg "key-decision" Meetings/ --include "*.md"` for notes tagged with key-decision.
+3. Read the Decisions section of matching meeting notes.
+
+### "What's the relationship between [person A] and [person B]?"
+1. Read both People pages — check their `# Relationships` sections.
+2. Cross-reference with: `rg "<PersonA>.*<PersonB>\|<PersonB>.*<PersonA>" Memory/ People/`
+
+### "Prepare me for a meeting with [person] about [subject]"
+Combine strategies:
+1. Read `People/<Project>/<Name>.md` — working style, interests, recent concerns.
+2. Read `Memory/<Project>/Product/<topic>.md` for the subject.
+3. Sweep: `rg "#<topic_slug>" People/` for topic-related observations about attendees.
+4. Read recent meeting notes with this person: `rg "<Name>" Meetings/ --include "*.md"` — pick the 2-3 most recent.
+
+### "What should I be careful about?" / "What are open risks?"
+1. Grep for follow-up-needed: `rg "follow-up-needed" Meetings/ --include "*.md"` — read recent matches.
+2. Read `Memory/<Project>/Decisions/decisions.md` for pending decisions.
+3. Check recent meeting notes for Unresolved Points sections.
+
+## Grep patterns for the classification system
+
+| What to find | Grep command |
+|-------------|-------------|
+| All notes about a topic | `rg "topics:.*<slug>" Meetings/` |
+| Cross-topic references | `rg "#<topic_slug>" Memory/ People/` |
+| Notes with a property tag | `rg "tags:.*<tag>" Meetings/` |
+| Notes for a project | `ls Meetings/<project>/` |
+| A person across all projects | `rg "<Name>" People/ --include "*.md" -l` |
+| Recent decisions | `rg "Decision:" Memory/*/Decisions/` |
+
+## Tips
+
+- **Registries first**: when unsure about a topic slug or project name, read the
+  registries (`Metadata/topic_registry.md`, `Metadata/project_registry.md`) to get
+  canonical names before grepping.
+- **Cross-project**: if the user doesn't specify a project, search across all projects.
+- **Combine layers**: for thorough answers, read the Memory/People page first (distilled),
+  then trace back to meeting notes (evidence) for quotes or dates.
+- **Don't read transcripts** unless the user explicitly asks for raw source material.

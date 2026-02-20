@@ -152,7 +152,7 @@ date: {meta_date}
 meeting_link: {m['transcript_url']}
 fireflies_id: {m['id']}
 source: Fireflies
-tags: [transcript, fireflies, raw, meeting]
+tags: [transcript, fireflies, meeting]
 ---
 
 # Raw Transcript

@@ -1,12 +1,12 @@
 ---
 title:
 date:
-project:
+project:           # from Metadata/project_registry.md — may override transcript default
 participants:
 meeting_link:
 meeting_type:
-topics:
-tags:
+topics:            # canonical slugs from Metadata/topic_registry.md (3–5 max)
+tags:              # property tags only from Metadata/tag_registry.md (max 3)
 ---
 
 # Context

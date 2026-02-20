@@ -33,12 +33,30 @@ Use the transcript's `project` (or frontmatter) to choose `<Project>` (e.g. pers
 ## Step 1 — Identify metadata (light)
 
 Fill only what is clear.
-Use only these tags/fields unless the user explicitly asks for more. Prefer fewer tags.
 
 - meeting_type: one of [1:1, small_group, leadership, team, interview, customer, other]
 - context: one of [internal, external]
 - participants
-- topics (3–5 max, snake_case nouns)
+
+**Project assignment:**
+The transcript's `project` frontmatter is the default. Before accepting it, check
+if the meeting content clearly belongs to a different project listed in
+`Metadata/project_registry.md`. Reassign if clearly mismatched; when uncertain,
+keep the default. Common overrides:
+- Personal account meeting about career → `career`
+- Personal account meeting with non-work friends → `friendship`
+- Company account meeting about personal mentoring → `career`
+
+**Topics** (3–5 max, snake_case nouns):
+Check `Metadata/topic_registry.md` for existing canonical slugs before inventing
+new ones. If the subject matches an alias, use the canonical slug. If genuinely
+new, add it to the registry under the appropriate project section.
+
+**Tags** (property tags only, max 3):
+Tags describe *qualities of the interaction*, not subjects. Subjects go in `topics`.
+Use only tags listed in `Metadata/tag_registry.md`. Apply a property tag only when
+the meeting substantively has that quality — not for passing mentions.
+Never invent new tags — only the user may add tags to the registry.
 
 ## Step 2 — Write Context
 

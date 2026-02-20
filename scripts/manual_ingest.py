@@ -76,7 +76,7 @@ date: {date_str}
 with_whom: {with_whom}
 project: {project}
 source: manual
-tags: [transcript, manual, raw, meeting]
+tags: [transcript, manual, meeting]
 ---
 
 # Raw Transcript
@@ -151,7 +151,7 @@ date: {date_str}
 with_whom: {with_whom}
 project: {project}
 source: manual
-tags: [transcript, manual, raw, meeting]
+tags: [transcript, manual, meeting]
 ---
 
 # Raw Transcript
