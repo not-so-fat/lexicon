@@ -53,7 +53,7 @@ D) Decisions routing (always)
   → update Memory/Decisions
 
 E) Personal routing
-- Always update Memory/Personal from Self-evaluation (if meaningful)
+- Always update Memory/Personal from AI Evaluation (if meaningful)
 
 If uncertain between Product vs Org:
 - Prefer Product when external voices appear (customer/partner)
@@ -74,7 +74,7 @@ Decisions:
 - Memory/<Project>/Decisions/decisions.md  (single log per project)
 
 Personal:
-- Memory/<Project>/Personal/self_evaluation.md  (single log per project)
+- Memory/<Project>/Personal/ai_evaluation.md  (single log per project)
 
 Topic naming — match-before-create:
 1. **List existing files** under `Memory/<Project>/Product/` and `Memory/<Project>/Org/`.
@@ -110,8 +110,8 @@ If unclear, record as “Decision (pending)” and keep evidence.
 Only record durable action items (multi-week or strategic).
 Daily tactical to-dos should remain only in the meeting note.
 
-### 3.4 Self-evaluation → Personal memory
-Always extract self-evaluation bullets.
+### 3.4 AI Evaluation → Personal memory
+Always extract AI evaluation bullets.
 This is allowed to be subjective.
 
 ## Evidence-first principle
@@ -208,12 +208,12 @@ Memory/<Project>/Decisions/decisions.md append format (use the meeting note's `p
 If pending:
 - YYYY-MM-DD — Pending decision: <...> — Source: [[<Meeting Note>]]
 
-## Step 7 — Personal self-evaluation log
+## Step 7 — Personal AI evaluation log
 
-Memory/<Project>/Personal/self_evaluation.md append format (use the meeting note's `project`):
+Memory/<Project>/Personal/ai_evaluation.md append format (use the meeting note's `project`):
 - YYYY-MM-DD — Meeting: <title>
-  - What I did well: ...
-  - What I could improve: ...
+  - Did well: ...
+  - Could improve: ...
   - Experiment: ...
   - Source: [[<Meeting Note>]]
 
@@ -227,7 +227,7 @@ List every file you touched, e.g.
 - [[Memory/personal/Product/pricing]]
 - [[Memory/personal/Org/hiring]]
 - [[Memory/personal/Decisions/decisions]]
-- [[Memory/personal/Personal/self_evaluation]]
+- [[Memory/personal/Personal/ai_evaluation]]
 
 If nothing was updated, write:
 - (No durable updates.)

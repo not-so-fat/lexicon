@@ -10,7 +10,7 @@ Your Cursor agent turns transcripts (Fireflies, manual, or pasted) into structur
 
 1. **Clone** this repo.
 2. **Configure** – Copy `.env.example` to `.env`. Minimum setup is a few variables:
-   - **LEXICON_USER_NAME** – Your name (for Self-evaluation in meeting notes).
+   - **LEXICON_USER_NAME** – Your name (for AI Evaluation in meeting notes).
    - For Fireflies, one account is enough to start. Use the suffix **personal** (default), e.g.:
      ```bash
      LEXICON_USER_NAME=Thomas A. Anderson
@@ -28,7 +28,7 @@ Your Cursor agent turns transcripts (Fireflies, manual, or pasted) into structur
 ## What it does
 
 - **Fetch** – Fireflies by date/account, or manual template (you edit, then summarize).
-- **Summarize** – Raw transcript → structured meeting note (Context, Summary, Decisions, Action Items, Unresolved Points, Signals, Self-evaluation).
+- **Summarize** – Raw transcript → structured meeting note (Context, Summary, Decisions, Action Items, Unresolved Points, Signals, AI Evaluation).
 - **Distill** – Meeting note → durable memory in `People/<Project>/`, `Memory/<Project>/` (product, org, decisions, personal).
 
 Philosophy: prefer recall over compression; notes are evidence. Early-stage signals matter—preserve them.

@@ -170,14 +170,15 @@ Before saving:
 - Decisions are explicit
 - Summary understandable without transcript
 
-## Step 10 — Self-evaluation
+## Step 10 — AI Evaluation
 
-Always include self-evaluation section.
-Subjective reflection is allowed here.
-Example questions:
-- What I did well
-- What I could improve
-- One experiment for next time
+Always include an AI Evaluation section analyzing the note-taker's performance.
+The AI writes this based on transcript evidence — the user doesn't write it themselves.
+
+Analyze:
+- What the note-taker did well in the conversation
+- What they could improve (communication, pacing, framing)
+- One concrete experiment to try in similar meetings
 
 ## Philosophy
 
