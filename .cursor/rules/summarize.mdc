@@ -172,11 +172,11 @@ Before saving:
 
 ## Step 10 — AI Evaluation
 
-Always include an AI Evaluation section analyzing the note-taker's performance.
-The AI writes this based on transcript evidence — the user doesn't write it themselves.
+Always include an AI Evaluation section analyzing the user's performance in the conversation.
+The AI writes this based on transcript evidence.
 
 Analyze:
-- What the note-taker did well in the conversation
+- What the user did well in the conversation
 - What they could improve (communication, pacing, framing)
 - One concrete experiment to try in similar meetings
 

@@ -63,9 +63,9 @@ Who, context, main points, decisions. For 1:1s, include a short **Sentiment chec
 ### Technical
 - Only when relevant: protocols, integration details, architecture decisions.
 
-# AI Evaluation (for the note-taker)
-**Instruction:** Include this section in every meeting note. The AI analyzes the transcript to give the note-taker feedback on their performance. Use the heading "AI Evaluation (for [Name])" if Metadata/User.md exists and specifies "Primary user: [Name]"; otherwise "AI Evaluation (for the note-taker)".
-- What the note-taker did well in this conversation.
+# AI Evaluation (for the user)
+**Instruction:** Include this section in every meeting note. The AI analyzes the transcript to give the user feedback on their performance. Use the heading "AI Evaluation (for [Name])" if Metadata/User.md exists and specifies "Primary user: [Name]"; otherwise "AI Evaluation (for the user)".
+- What the user did well in this conversation.
 - What they could improve (communication, pacing, framing).
 - One concrete experiment to try in similar meetings.
 

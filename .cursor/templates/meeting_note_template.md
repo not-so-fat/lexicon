@@ -35,8 +35,8 @@ Brief notes on tone (relaxed - tense - rushed - enthusiastic)
 # Transcript Link
 - 
 
-# AI Evaluation (for the note-taker)
-- What the note-taker did well in this conversation.
+# AI Evaluation (for the user)
+- What the user did well in this conversation.
 - What they could improve (communication, pacing, framing).
 - One concrete experiment to try in similar meetings.
 
