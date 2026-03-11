@@ -14,7 +14,7 @@ A meeting note under `Meetings/<Project>/`. The note is the source of truth (use
 ## Steps
 
 1. **Read the meeting note** — Identify the file under `Meetings/<Project>/`.
-2. **Read registries** — Read `Metadata/topic_registry.md` (for topic matching) and list existing files under `Memory/<Project>/Product/` and `Memory/<Project>/Org/` (for match-before-create).
+2. **Read registries** — Read `Metadata/topic_registry.md` (for topic matching) and list existing files under `Memory/<Project>/Product/` and `Memory/<Project>/Org/` (for match-before-create). If registries or folders are missing, proceed with best-effort matching and create minimal structure as needed.
 3. **Apply distill rule** — Follow `.cursor/rules/distill.mdc` in full. Key additions:
    - **Topic matching**: before creating a new Memory topic file, check the topic registry for canonical slugs and aliases. Use existing topics when possible. Add genuinely new topics to the registry.
    - **Inline `#topic`**: when writing a bullet to a Memory or People page, append `#topic_slug` if the fact also relates to another registered topic.
@@ -25,5 +25,5 @@ A meeting note under `Meetings/<Project>/`. The note is the source of truth (use
 ## Error handling
 
 - **No meeting note** — Ask user which note to distill.
-- **Note has no project** — Ask user which project (check `Metadata/project_registry.md`).
+- **Note has no project** — Ask user which project (check `Metadata/project_registry.md` when available).
 - **Append-only** — Never overwrite past entries in People or Memory; always append.
