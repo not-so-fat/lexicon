@@ -9,16 +9,27 @@ alwaysApply: false
 **Trigger:** When the user asks to distill a meeting note (e.g. "Distill this meeting note").
 
 Goal:
-Convert structured evidence into long-term knowledge about people, product, org, and decisions.
+Extract **important statements** from the meeting note into durable **evidence** in People and Memory. **Do not synthesize** — triage updates `# Current model` later.
 
 Meeting notes = evidence  
-Distillation = durable knowledge
+Distillation = dated facts appended to evidence sections
 
 Never reinterpret transcript directly unless the user asks.
-Distilled knowledge is not dashboard, it is big memory for AI to extract information.
-Memory should be append-only.
-Do not rewrite past insights unless clearly wrong.
-Patterns emerge from history.
+Memory evidence sections are **append-only**.
+Do not rewrite past evidence unless clearly wrong.
+
+## Hard boundaries (never in distill)
+
+**Do not edit during distill:**
+
+- `# Current model` on any Memory area file
+- `# Current read` on People pages
+- `Direction.md`
+- Meeting note body (except `# Distilled` traceability section)
+
+**Triage** owns synthesis, `# Current model`, `# Current read`, and Direction. See `.cursor/rules/triage.mdc` and `Memory/Lexicon/processing-strategy.md`.
+
+Do not set `triaged` on meeting notes.
 
 ## Step 0 — Read Meeting Note
 

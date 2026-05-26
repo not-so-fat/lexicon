@@ -173,7 +173,29 @@ Each step must return validated output, using **frontmatter** and, when availabl
 | summarize | List of meeting note paths | Valid YAML frontmatter, required sections, `project` matches `project_registry` when present |
 | distill | List of updated file paths | Files modified, structure matches distill rule, topics match `topic_registry` when present |
 
-### 4. Retry Logic
+### 4. Triage (outside the automated runner)
+
+**Triage is not a pipeline step.** It is a separate, **user-kicked** interactive session:
+
+```
+Ingest → Summarize → Distill → Triage → Query
+         (automated)   (automated) (interactive)
+```
+
+- **Meetings:** handled by summarize + distill (evidence append-only). Triage reads meetings for recap only — never edits them.
+- **Ideas/Clippings:** handled only in triage — Promote / Keep / Skip / Retire / Move.
+- **Synthesis:** `# Current model`, `# Current read`, Direction — triage only, with user approval.
+
+Tooling (already in repo):
+
+- Skill: `.cursor/skills/lexicon-triage/SKILL.md`
+- Rule: `.cursor/rules/triage.mdc`
+- Queue: `python3 scripts/triage_queue.py --project <project>`
+- Charter: `Memory/Lexicon/processing-strategy.md`
+
+The file-based runner (if implemented) covers **fetch → summarize → distill** only. Do not automate triage.
+
+### 5. Retry Logic
 
 - **Max retries:** 2 per step (configurable)
 - **Backoff:** Exponential — 2s → 4s → 8s

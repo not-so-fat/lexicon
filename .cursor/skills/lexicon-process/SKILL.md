@@ -50,7 +50,7 @@ If either is missing, ask: "Which date and which account?"
    - Apply `.cursor/rules/distill.mdc`.
    - Fill the note's **# Distilled** section with links to updated files.
 
-6. **Report** — Tell user: transcripts fetched, notes created, memory updated.
+6. **Report** — Tell user: transcripts fetched, notes created, memory updated. Remind that **triage** (interactive recap + Ideas queue) is a separate user-kicked step — not part of this batch run.
 
 ## Error handling
 

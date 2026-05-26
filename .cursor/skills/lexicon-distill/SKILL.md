@@ -7,6 +7,8 @@ description: Extract durable knowledge from a meeting note into People, Memory, 
 
 Updates `People/<Project>/`, `Memory/<Project>/`, and `Metadata/` from one meeting note. Fills the note's **# Distilled** section.
 
+**Not triage.** Distill appends **evidence** only. Synthesis (`# Current model`, `# Current read`, Direction) happens in **lexicon-triage** after user approval. See `Memory/Lexicon/processing-strategy.md`.
+
 ## Prerequisites
 
 A meeting note under `Meetings/<Project>/`. The note is the source of truth (user may have edited it after summarize).
@@ -27,3 +29,4 @@ A meeting note under `Meetings/<Project>/`. The note is the source of truth (use
 - **No meeting note** — Ask user which note to distill.
 - **Note has no project** — Ask user which project (check `Metadata/project_registry.md` when available).
 - **Append-only** — Never overwrite past entries in People or Memory; always append.
+- **No synthesis** — Do not edit `# Current model`, `# Current read`, or `Direction.md`. Do not set `triaged` on meeting notes.

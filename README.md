@@ -2,7 +2,7 @@
 
 **AI-ready organizational memory from meeting transcripts.**
 
-Your Cursor agent turns transcripts (Fireflies, manual, or pasted) into structured Markdown: meeting notes → People, Product, and Org memory. So you can query naturally: "What did we agree with Sarah?" No new app, no extra LLM API—your agent runs this repo's scripts and skills when you ask.
+Your Cursor agent turns transcripts (Fireflies, manual, or pasted) into structured Markdown: meeting notes → People, Product, and Org memory — then **triage** keeps current truth fresh and cleans your Ideas queue. So you can query naturally: "What did we agree with Sarah?" No new app, no extra LLM API—your agent runs this repo's scripts and skills when you ask.
 
 ---
 
@@ -29,9 +29,10 @@ Your Cursor agent turns transcripts (Fireflies, manual, or pasted) into structur
 
 - **Fetch** – Fireflies by date/account, or manual template (you edit, then summarize).
 - **Summarize** – Raw transcript → structured meeting note (Context, Summary, Decisions, Action Items, Unresolved Points, Signals, AI Evaluation).
-- **Distill** – Meeting note → durable memory in `People/<Project>/`, `Memory/<Project>/` (product, org, decisions, personal).
+- **Distill** – Meeting note → durable **evidence** in `People/<Project>/`, `Memory/<Project>/` (product, org, decisions, personal). Evidence only — no synthesis.
+- **Triage** – Interactive session you kick when ready: recap recent work, update **current truth** in Memory, clean **Ideas/Clippings** queue, write recap log.
 
-Philosophy: prefer recall over compression; notes are evidence. Early-stage signals matter—preserve them.
+Philosophy: prefer recall over compression; notes are evidence. Early-stage signals matter—preserve them. Synthesis happens in **triage**, not distill.
 
 ---
 
@@ -42,6 +43,9 @@ Philosophy: prefer recall over compression; notes are evidence. Early-stage sign
 | Transcripts | `Transcripts/Fireflies/<account>/`, `Transcripts/Manual/` (project in frontmatter) |
 | Meeting notes | `Meetings/<Project>/` |
 | People / Memory | `People/<Project>/`, `Memory/<Project>/` (Product, Org, Decisions, Personal) |
+| Ideas / Clippings | `Ideas/<Project>/`, `Clippings/` (empty `triaged:` = in queue) |
+| Triage recap logs | `Metadata/recap/<Project>/YYYY-MM.md` |
+| Process charter | `Memory/Lexicon/processing-strategy.md` |
 | Scratch / logs | **`.tmp/`** only |
 
 ---
@@ -54,8 +58,11 @@ Philosophy: prefer recall over compression; notes are evidence. Early-stage sign
 | "Create a manual transcript template" | Stub file in `Transcripts/Manual/`; you paste, then summarize |
 | "Summarize this transcript" | Meeting note at `Meetings/<Project>/` |
 | "Distill this meeting note" | Update People/Memory/Metadata, fill # Distilled |
+| "Triage \<project\>" or "Recap \<project\>" | Interactive recap, update Memory current truth, clean Ideas queue |
 
-Edit skills in `.cursor/skills/<name>/SKILL.md`. Rules in `.cursor/rules/` (summarize, distill).
+Before triage, the agent can run `python3 scripts/triage_queue.py --project <project>` to list the Ideas queue, pending decisions, and recent meetings (read-only context).
+
+Edit skills in `.cursor/skills/<name>/SKILL.md`. Rules in `.cursor/rules/` (summarize, distill, triage, search).
 
 ---
 
