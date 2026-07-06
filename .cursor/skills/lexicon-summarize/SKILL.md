@@ -14,7 +14,7 @@ An existing transcript file under `Transcripts/Fireflies/<account>/`, `Transcrip
 ## Steps
 
 1. **Read transcript** — Identify the file. Read frontmatter (`title`, `date`, `signature` for HiDock; `project`, `participants` or `with_whom` when present).
-2. **Read registries** — Read `Metadata/project_registry.md`, `Metadata/topic_registry.md`, and `Metadata/tag_registry.md`. These are needed for Step 3.
+2. **Read registries** — Read `Metadata/project_registry.md`, `Metadata/topic_registry.md`, and `Metadata/tag_registry.md`. These are needed for Step 3. If a registry file is missing, fall back to best-effort choices and note that the registry is absent.
 3. **Create meeting note** — Path: `Meetings/<Project>/YYYY-MM-DD [Title].md`. Apply `.cursor/rules/summarize.mdc` (all steps). Key points from registries:
    - **Project**: Fireflies/Manual — transcript's `project` is the default. HiDock — no `project` in transcript; infer from content + registry. Override if clearly mismatched.
    - **HiDock**: set `source: HiDock`, `hidock_signature: <signature>` on the meeting note; link `Transcripts/HiDock/...`.

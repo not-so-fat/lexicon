@@ -2,7 +2,7 @@
 
 **AI-ready organizational memory from meeting transcripts.**
 
-Your Cursor agent turns transcripts (Fireflies, HiDock, manual, or pasted) into structured Markdown: meeting notes → People, Product, and Org memory. Query naturally in Cursor — no extra LLM API for summarize/distill.
+Your Cursor agent turns transcripts (Fireflies, HiDock, manual, or pasted) into structured Markdown: meeting notes → People, Product, and Org memory — then **triage** keeps current truth fresh and cleans your Ideas queue. So you can query naturally: "What did we agree with Sarah?" No new app, no extra LLM API — your agent runs this repo's scripts and skills when you ask.
 
 ---
 
@@ -56,9 +56,11 @@ Capture your own thoughts as files under `Ideas/<Project>/` — they enter the t
 ## What it does
 
 - **Fetch** – Fireflies by date/account; HiDock via hinotes_organizer (pending list); or manual template.
-- **Summarize** – Raw transcript → structured meeting note (Context, Summary, Decisions, Signals, AI Evaluation).
-- **Distill** – Meeting note → **`# Evidence`** in People/Memory only.
-- **Triage** – Interactive recap; updates **`# Current model`**. See [docs/MEMORY_MODEL.md](docs/MEMORY_MODEL.md).
+- **Summarize** – Raw transcript → structured meeting note (Context, Summary, Decisions, Action Items, Unresolved Points, Signals, AI Evaluation).
+- **Distill** – Meeting note → durable **evidence** in `People/<Project>/`, `Memory/<Project>/`. Evidence only — no synthesis.
+- **Triage** – Interactive session you kick when ready: recap recent work, update **current truth** in Memory, clean **Ideas/Clippings** queue, write recap log. See [docs/MEMORY_MODEL.md](docs/MEMORY_MODEL.md).
+
+Philosophy: prefer recall over compression; notes are evidence. Early-stage signals matter — preserve them. Synthesis happens in **triage**, not distill.
 
 ---
 
@@ -69,7 +71,9 @@ Capture your own thoughts as files under `Ideas/<Project>/` — they enter the t
 | Transcripts | `Transcripts/Fireflies/<account>/`, `Transcripts/HiDock/`, `Transcripts/Manual/` |
 | Meeting notes | `Meetings/<Project>/` |
 | People / Memory | `People/<Project>/`, `Memory/<Project>/` |
-| Ideas queue | `Ideas/<Project>/` |
+| Ideas / Clippings | `Ideas/<Project>/`, `Clippings/` (empty `triaged:` = in queue) |
+| Triage recap logs | `Metadata/recap/<Project>/YYYY-MM.md` |
+| Process charter | `Memory/Lexicon/processing-strategy.md` |
 | Scratch / logs | **`.tmp/`** only |
 
 ---
@@ -83,7 +87,7 @@ Capture your own thoughts as files under `Ideas/<Project>/` — they enter the t
 | "Create a manual transcript template" | Stub in `Transcripts/Manual/` |
 | "Summarize this transcript" | Meeting note at `Meetings/<Project>/` |
 | "Distill this meeting note" | Append `# Evidence`; fill `# Distilled` |
-| "Triage [project]" | Recap + `# Current model` + Ideas queue |
+| "Triage \<project\>" or "Recap \<project\>" | Interactive recap, update Memory current truth, clean Ideas queue |
 
 Skills: `.cursor/skills/`. Rules: `.cursor/rules/`.
 
@@ -102,6 +106,7 @@ python3 scripts/verify_setup.py
 | [docs/SETUP.md](docs/SETUP.md) | Full install: Fireflies, HiDock (hinotes_organizer), manual |
 | [docs/MEMORY_MODEL.md](docs/MEMORY_MODEL.md) | How knowledge is organized: evidence vs current model, layouts, triage |
 | [docs/UPDATING.md](docs/UPDATING.md) | Pulling engine updates without touching your content; `local-*.mdc` customization |
+| `Memory/Lexicon/processing-strategy.md` | Process charter: the five-stage pipeline and triage discipline |
 
 ---
 

@@ -24,6 +24,8 @@ Appends **evidence only** from a meeting note. **Triage** later updates `# Curre
 - Classic topic slugs: `Product/<topic>.md`, `Decisions/decisions.md` — only when the project has no area files
 - AI Evaluation → `Me.md` `# Evidence` when it exists; `Personal/ai_evaluation.md` only in classic layout
 
+**Not triage.** Distill appends **evidence** only. Synthesis (`# Current model`, `# Current read`, Direction) happens in **lexicon-triage** after user approval. See `Memory/Lexicon/processing-strategy.md`.
+
 ## Prerequisites
 
 Meeting note under `Meetings/<Project>/`.
@@ -32,12 +34,17 @@ Meeting note under `Meetings/<Project>/`.
 
 1. **Read the meeting note** — Signals, Decisions, Action Items, Summary, Context.
 2. **Detect memory layout** — Area files if `Memory/<Project>/Product.md` (or `Me.md`) exists at root; else topic slugs. See distill rule.
-3. **Apply distill rule** — Append evidence only.
-4. **Fill `# Distilled`** on the meeting note — list files touched.
-5. **Reply** — Confirm files updated.
+3. **Read registries** — Read `Metadata/topic_registry.md` (for topic matching); classic layout: list existing files under `Memory/<Project>/Product/` and `Org/` (match-before-create). If registries or folders are missing, proceed with best-effort matching.
+4. **Apply distill rule** — Follow `.cursor/rules/distill.mdc` in full. Key additions:
+   - **Topic matching**: before creating a new Memory topic file, check the topic registry for canonical slugs and aliases. Use existing topics when possible. Add genuinely new topics to the registry.
+   - **Inline `#topic`**: when writing a bullet to a Memory or People page, append `#topic_slug` if the fact also relates to another registered topic.
+   - **Relationships**: when signals reveal interpersonal dynamics, update the `# Relationships` section on **both** people's pages.
+5. **Fill `# Distilled`** — In the meeting note, list every file you updated.
+6. **Reply** — Confirm done and list updated files.
 
 ## Error handling
 
-- **No meeting note** — Ask which note.
-- **No project** — Ask which project.
-- **Append-only** — Never overwrite past evidence entries.
+- **No meeting note** — Ask user which note to distill.
+- **Note has no project** — Ask user which project (check `Metadata/project_registry.md` when available).
+- **Append-only** — Never overwrite past entries in People or Memory; always append.
+- **No synthesis** — Do not edit `# Current model`, `# Current read`, or `Direction.md`. Do not set `triaged` on meeting notes.

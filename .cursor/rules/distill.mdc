@@ -10,8 +10,8 @@ alwaysApply: false
 
 Goal: Extract **important statements** from the meeting note into durable **evidence** in People and Memory. **Do not synthesize** — triage updates `# Current model` later.
 
-Meeting notes = evidence  
-Distillation = dated facts appended to Evidence sections
+Meeting notes = evidence
+Distillation = dated facts appended to evidence sections
 
 Never reinterpret transcript directly unless the user asks.
 Memory evidence sections are **append-only**.
@@ -26,7 +26,9 @@ Do not rewrite past evidence unless clearly wrong.
 - `Direction.md`
 - Meeting note body (except `# Distilled` traceability section)
 
-**Triage** owns synthesis, `# Current model`, `# Current read`, and Direction.
+**Triage** owns synthesis, `# Current model`, `# Current read`, and Direction. See `.cursor/rules/triage.mdc` and `Memory/Lexicon/processing-strategy.md`.
+
+Do not set `triaged` on meeting notes.
 
 ## Step 0 — Read Meeting Note
 

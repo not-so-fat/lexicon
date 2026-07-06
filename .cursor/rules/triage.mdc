@@ -8,7 +8,7 @@ alwaysApply: false
 
 **Trigger:** User says "Triage \<project\>", "Recap \<project\>", or similar.
 
-**Charter:** [[Ideas/personal/Lexicon Processing Strategy]]
+**Charter:** `Memory/Lexicon/processing-strategy.md`
 
 ## What triage is
 
@@ -18,13 +18,19 @@ An **interactive thinking session** with the user — not a meeting inbox proces
 |---|---|
 | Recap: what happened, how the user is doing | Editing meeting notes |
 | Discuss open problems and direction shifts | Distilling meetings (use **distill** separately) |
-| Update Memory **`# Current model`**, resolve **`## Open decisions`** | Setting `triaged` on `Meetings/` |
-| Refresh People **`# Current read`** | Bulk-processing meeting files |
-| Clean **Ideas/** and **Clippings/** queue | Appending meeting `# Evidence` (distill's job) |
+| Update Memory **`# Current model`** (area layout) or durable sections (topic layout) | Setting `triaged` on `Meetings/` |
+| Resolve **`## Open decisions`** / **`## Open hypotheses`** | Bulk-processing meeting files |
+| Refresh People **`# Current read`** | Appending meeting `# Evidence` (distill's job) |
+| Clean **Ideas/** and **Clippings/** queue | |
 
 **Meetings are read-only evidence** during triage. Read recent notes to inform the recap; do not mutate them.
 
-**Distill** captures important statements into `# Evidence` (and related append sections). **Triage** synthesizes those facts into `# Current model` when the user agrees.
+**Distill** captures important statements into `# Evidence` (and related append sections). **Triage** synthesizes those facts into `# Current model` (or `# What we learned` on topic-slug projects) when the user agrees.
+
+## Layout detection
+
+- **Area files:** `Memory/<project>/Product.md` exists → update `# Current model`, `## Open decisions`, `Direction.md`, `Validation.md`, `Partners/*.md`, `Me.md`.
+- **Topic slugs (default):** update `# What we learned` / `# Signals` on topic pages; refresh `Decisions/decisions.md` narrative; People `# Current read` if present.
 
 ## Principles
 
@@ -39,7 +45,7 @@ An **interactive thinking session** with the user — not a meeting inbox proces
 ## Step 0 — Confirm project and period
 
 1. **Project** — from user (`Meetings/<project>/`, `Ideas/<project>/`).
-2. **Period** — ask if not specified: *"Since when?"* (e.g. last two weeks, since April). Default suggestion: **since last triage date** or **last 14 days** — never all-time unless user asks.
+2. **Period** — ask if not specified: *"Since when?"* Default suggestion: **since last triage date** or **last 14 days** — never all-time unless user asks.
 3. **Run queue script:**
 
 ```bash
@@ -63,14 +69,14 @@ Pause for user corrections before proposing memory writes.
 
 After recap discussion, propose **Memory** changes:
 
-| Action | Target |
-|---|---|
-| **Update Current model** | `Validation.md`, `Product.md`, `Org.md`, `Partners/<Co>.md`, `Me.md` — refresh `# Current model` from evidence + conversation |
-| **Resolve decision** | Move resolved items from `## Open decisions` / `## Open hypotheses` into `# Current model`; remove or mark resolved |
-| **Canon** | Rare edit to `Direction.md` (principles only; user must explicitly approve) |
-| **People read** | Refresh `# Current read` (~5 bullets) on People touched this session |
+| Action | Target (area layout) | Target (topic-slug layout) |
+|---|---|---|
+| **Update current truth** | `# Current model` on Validation, Product, Org, Partners, Me | `# What we learned` / `# Signals` on topic pages |
+| **Resolve decision** | Move from `## Open decisions` / `## Open hypotheses` into `# Current model` | Update decisions log + durable sections |
+| **Canon** | Rare edit to `Direction.md` (principles only; explicit approval) | — |
+| **People read** | Refresh `# Current read` (~5 bullets) | Same if section exists |
 
-Do **not** append new `# Evidence` from meetings here — that is **distill**. Triage may reference existing evidence when rewriting `# Current model`.
+Do **not** append new `# Evidence` from meetings here — that is **distill**.
 
 Wait for approval before mutating Memory.
 
@@ -80,13 +86,13 @@ For each item in **Ideas / Clippings queue** only:
 
 | Disposition | Action |
 |---|---|
-| **Promote** | Durable knowledge → Memory (`# Current model`, area files, Partners); idea: `triaged`, `status: promoted`, `promotes-to`. **Retire (delete)** idea file once Memory has it unless you still want a scratch copy. |
-| **Keep** | **You expect to edit this file again** in `Ideas/` — not ready to promote. Set `triaged` when queue-reviewed. If you won't edit again → **Promote** or **Retire**, not Keep. |
+| **Promote** | Durable knowledge → Memory; idea: `triaged`, `status: promoted`, `promotes-to`. **Retire (delete)** idea file once Memory has it unless you still want a scratch copy. |
+| **Keep** | **You expect to edit this file again** in `Ideas/`. Set `triaged` when queue-reviewed. If you won't edit again → **Promote** or **Retire**, not Keep. |
 | **Skip** | Not now — **no `triaged`** |
 | **Retire** | Delete idea file |
 | **Move** | Relocate; set `triaged` when done |
 
-Cluster proposals when possible (e.g. "all Competitive Research → Validation").
+Cluster proposals when possible (e.g. "all competitive research → Validation").
 
 ## Step 4 — Recap log
 

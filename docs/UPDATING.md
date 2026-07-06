@@ -6,8 +6,8 @@ Your vault starts as a clone of this repo. After that, **your content is yours**
 
 | Engine (synced from template) | Content (never synced — yours) |
 |---|---|
-| `.cursor/rules/`, `.cursor/skills/`, `.cursor/templates/` | `Meetings/`, `Memory/`, `People/`, `Ideas/`, `Transcripts/` |
-| `scripts/` | `Metadata/` (registries, recap logs, `User.md`) |
+| `.cursor/rules/`, `.cursor/skills/`, `.cursor/templates/` | `Meetings/`, `Memory/` (except `Memory/Lexicon/`), `People/`, `Ideas/`, `Transcripts/` |
+| `scripts/`, `Memory/Lexicon/` (process charter) | `Metadata/` (registries, recap logs, `User.md`) |
 | `docs/`, `README.md`, `requirements.txt`, `.env.example` | `.env`, `.cursor/rules/local-*.mdc` |
 
 ## Recommended setup (private vault + template upstream)
@@ -22,7 +22,7 @@ git push -u origin main
 
 # whenever you want updates
 git fetch template
-git checkout template/main -- .cursor/rules .cursor/skills .cursor/templates scripts docs README.md requirements.txt .env.example
+git checkout template/main -- .cursor/rules .cursor/skills .cursor/templates scripts docs Memory/Lexicon README.md requirements.txt .env.example
 git diff --stat                          # review what changed
 # commit to your private repo as usual
 ```

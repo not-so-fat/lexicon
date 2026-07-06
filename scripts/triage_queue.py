@@ -6,9 +6,9 @@ Triage is interactive — Ideas queue only. Meetings are recap context, not queu
 Use --since / --until when the user specifies a period during triage.
 
 Usage:
-  python3 scripts/triage_queue.py --project company
-  python3 scripts/triage_queue.py --project company --since 2026-04-01 --until 2026-05-24
-  python3 scripts/triage_queue.py --project company --json
+  python3 scripts/triage_queue.py --project personal
+  python3 scripts/triage_queue.py --project acme --since 2026-04-01 --until 2026-05-24
+  python3 scripts/triage_queue.py --project acme --json
 
 Exit 0. Writes human-readable report to stdout.
 """
@@ -132,12 +132,13 @@ def iter_capture_files(project: str):
         for fpath in base.rglob("*.md"):
             if fpath.name.startswith("."):
                 continue
+            if fpath.name.lower() == "readme.md":
+                continue
             rel = fpath.relative_to(REPO_ROOT)
             parts = rel.parts
             folder_project = parts[1] if len(parts) > 2 else None
 
             if root_name == "Ideas" and folder_project != project:
-                # Ideas/<subdir>/ — match frontmatter project only
                 if folder_project == project:
                     pass
                 else:
@@ -149,8 +150,7 @@ def iter_capture_files(project: str):
                     if not project_matches(fm, folder_project, project):
                         continue
                     capture_date = file_capture_date(fpath, fm)
-                    kind = root_name
-                    yield str(rel), fm, capture_date, kind
+                    yield str(rel), fm, capture_date, root_name
                     continue
 
             if not path_filter(project, rel):
@@ -166,10 +166,11 @@ def iter_capture_files(project: str):
             capture_date = file_capture_date(fpath, fm)
             yield str(rel), fm, capture_date, root_name
 
-    # Clippings tagged to project
     clippings = REPO_ROOT / "Clippings"
     if clippings.is_dir():
         for fpath in clippings.rglob("*.md"):
+            if fpath.name.lower() == "readme.md":
+                continue
             try:
                 content = fpath.read_text(encoding="utf-8", errors="replace")[:8192]
             except OSError:
@@ -185,7 +186,7 @@ def in_date_range(capture_date: str, since: str | None, until: str | None) -> bo
     if not since and not until:
         return True
     if not capture_date:
-        return not since  # undated files: include when no since filter
+        return not since
     if since and capture_date < since:
         return False
     if until and capture_date > until:
@@ -257,6 +258,25 @@ def _open_decisions_from_file(
     return found
 
 
+def _pending_from_decisions_log(path: Path) -> list[str]:
+    """Classic layout: Memory/<project>/Decisions/decisions.md."""
+    if not path.is_file():
+        return []
+    try:
+        lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
+    except OSError:
+        return []
+    found: list[str] = []
+    for ln in lines:
+        stripped = ln.strip()
+        if not stripped.startswith("-"):
+            continue
+        lower = stripped.lower()
+        if "pending decision" in lower or "decision (pending)" in lower:
+            found.append(f"[Decisions] {stripped.lstrip('-').strip()}")
+    return found
+
+
 def pending_decisions_snippet(project: str, limit: int = 20) -> list[str]:
     memory = REPO_ROOT / "Memory" / project
     pending: list[str] = []
@@ -277,7 +297,6 @@ def pending_decisions_snippet(project: str, limit: int = 20) -> list[str]:
             label = f"Partners/{partner_file.stem}"
             pending.extend(_open_decisions_from_file(partner_file, label))
 
-    # Legacy decisions log (until fully migrated)
     legacy = memory / "_legacy" / "decisions.md"
     if legacy.is_file():
         try:
@@ -287,6 +306,8 @@ def pending_decisions_snippet(project: str, limit: int = 20) -> list[str]:
         for ln in lines:
             if "pending decision" in ln.lower():
                 pending.append(f"[legacy decisions] {ln.strip().lstrip('-').strip()}")
+
+    pending.extend(_pending_from_decisions_log(memory / "Decisions" / "decisions.md"))
 
     return pending[-limit:]
 
@@ -342,7 +363,7 @@ def build_queue(project: str, since: str | None, until: str | None) -> list[dict
 
 def main():
     parser = argparse.ArgumentParser(description="Lexicon triage queue for a project")
-    parser.add_argument("--project", required=True, help="Project slug (e.g. company, career)")
+    parser.add_argument("--project", required=True, help="Project slug (e.g. personal, acme)")
     parser.add_argument("--since", help="Include capture on/after YYYY-MM-DD")
     parser.add_argument("--until", help="Include capture on/before YYYY-MM-DD")
     parser.add_argument("--json", action="store_true", help="JSON output")
@@ -393,7 +414,9 @@ def main():
         lines.append("Period filter: none (all untriaged ideas/clippings for project)")
     lines.append(f"Untriaged ideas queue: **{len(queue)}**")
     lines.append("")
-    lines.append("*Meetings are not triaged — use distill after summarize. Listed below for recap context only.*")
+    lines.append(
+        "*Meetings are not triaged — use distill after summarize. Listed below for recap context only.*"
+    )
 
     if recap_path and last_section:
         lines.extend(

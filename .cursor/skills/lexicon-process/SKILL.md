@@ -52,9 +52,8 @@ If either is missing, ask: "Which date and which account?"
 5. **Distill** — For each new meeting note:
    - Apply `.cursor/rules/distill.mdc` — **evidence only** (`# Evidence`, People `# Evidence Log`); **never** `# Current model`.
    - Fill the note's **# Distilled** section with links to updated files.
-   - Triage (separate habit) synthesizes into `# Current model` later.
 
-6. **Report** — Tell user: transcripts fetched, notes created, memory updated.
+6. **Report** — Tell user: transcripts fetched, notes created, memory updated. Remind that **triage** (interactive recap + Ideas queue) is a separate user-kicked step — not part of this batch run.
 
 ## Error handling
 
