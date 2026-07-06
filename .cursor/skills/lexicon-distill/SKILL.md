@@ -1,29 +1,43 @@
 ---
 name: lexicon-distill
-description: Extract durable knowledge from a meeting note into People, Memory, and Metadata. Use when user says "distill this meeting note", "distill this note", or "extract knowledge from this meeting".
+description: Extract important statements from a meeting note into Memory and People evidence only — never # Current model. Use when user says "distill this meeting note". Not used in triage.
 ---
 
 # Distill meeting note into memory
 
-Updates `People/<Project>/`, `Memory/<Project>/`, and `Metadata/` from one meeting note. Fills the note's **# Distilled** section.
+Appends **evidence only** from a meeting note. **Triage** later updates `# Current model` from that evidence.
+
+**Rule:** `.cursor/rules/distill.mdc`
+
+## Hard boundaries
+
+**Never during distill:**
+- `# Current model` on Memory area files
+- `# Current read` on People pages
+- `Direction.md`
+- `triaged` on meeting notes
+
+**Do append:**
+- Memory `# Evidence` (Product, Org, Validation, Partners, **Me**)
+- People `# Evidence Log`
+- `## Open decisions` / `## Open hypotheses` when meeting records pending items
+- Classic topic slugs: `Product/<topic>.md`, `Decisions/decisions.md` — only when the project has no area files
+- AI Evaluation → `Me.md` `# Evidence` when it exists; `Personal/ai_evaluation.md` only in classic layout
 
 ## Prerequisites
 
-A meeting note under `Meetings/<Project>/`. The note is the source of truth (user may have edited it after summarize).
+Meeting note under `Meetings/<Project>/`.
 
 ## Steps
 
-1. **Read the meeting note** — Identify the file under `Meetings/<Project>/`.
-2. **Read registries** — Read `Metadata/topic_registry.md` (for topic matching) and list existing files under `Memory/<Project>/Product/` and `Memory/<Project>/Org/` (for match-before-create).
-3. **Apply distill rule** — Follow `.cursor/rules/distill.mdc` in full. Key additions:
-   - **Topic matching**: before creating a new Memory topic file, check the topic registry for canonical slugs and aliases. Use existing topics when possible. Add genuinely new topics to the registry.
-   - **Inline `#topic`**: when writing a bullet to a Memory or People page, append `#topic_slug` if the fact also relates to another registered topic.
-   - **Relationships**: when signals reveal interpersonal dynamics, update the `# Relationships` section on **both** people's pages.
-4. **Fill # Distilled** — In the meeting note, list every file you updated.
-5. **Reply** — Confirm done and list updated files.
+1. **Read the meeting note** — Signals, Decisions, Action Items, Summary, Context.
+2. **Detect memory layout** — Area files if `Memory/<Project>/Product.md` (or `Me.md`) exists at root; else topic slugs. See distill rule.
+3. **Apply distill rule** — Append evidence only.
+4. **Fill `# Distilled`** on the meeting note — list files touched.
+5. **Reply** — Confirm files updated.
 
 ## Error handling
 
-- **No meeting note** — Ask user which note to distill.
-- **Note has no project** — Ask user which project (check `Metadata/project_registry.md`).
-- **Append-only** — Never overwrite past entries in People or Memory; always append.
+- **No meeting note** — Ask which note.
+- **No project** — Ask which project.
+- **Append-only** — Never overwrite past evidence entries.

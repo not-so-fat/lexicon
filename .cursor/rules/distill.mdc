@@ -1,5 +1,5 @@
 ---
-description: Distill meeting notes into People, Memory, and Metadata. Paths: People/<Project>/, Memory/<Project>/.
+description: Distill meeting notes into People and Memory evidence only — never # Current model. Synthesis happens in triage.
 globs: Meetings/**/*.md, People/**/*.md, Memory/**/*.md, Metadata/**/*.md
 alwaysApply: false
 ---
@@ -8,17 +8,25 @@ alwaysApply: false
 
 **Trigger:** When the user asks to distill a meeting note (e.g. "Distill this meeting note").
 
-Goal:
-Convert structured evidence into long-term knowledge about people, product, org, and decisions.
+Goal: Extract **important statements** from the meeting note into durable **evidence** in People and Memory. **Do not synthesize** — triage updates `# Current model` later.
 
 Meeting notes = evidence  
-Distillation = durable knowledge
+Distillation = dated facts appended to Evidence sections
 
 Never reinterpret transcript directly unless the user asks.
-Distilled knowledge is not dashboard, it is big memory for AI to extract information.
-Memory should be append-only.
-Do not rewrite past insights unless clearly wrong.
-Patterns emerge from history.
+Memory evidence sections are **append-only**.
+Do not rewrite past evidence unless clearly wrong.
+
+## Hard boundaries (never in distill)
+
+**Do not edit during distill:**
+
+- `# Current model` on any Memory area file
+- `# Current read` on People pages
+- `Direction.md`
+- Meeting note body (except `# Distilled` traceability section)
+
+**Triage** owns synthesis, `# Current model`, `# Current read`, and Direction.
 
 ## Step 0 — Read Meeting Note
 
@@ -38,22 +46,27 @@ Use meeting_type + context (not signal taxonomy) to route most outputs:
 
 A) People-focused routing
 - If meeting_type in [1:1, small_group] AND context in [internal]
-  → update People pages for relevant participants (excluding obvious “group” entities)
+  → append People `# Evidence Log` only (not `# Current read`)
 
 B) Product routing
 - If context in [external] OR meeting_type in [customer, interview]
-  → update Memory/Product pages for relevant topics
+  → append Memory `# Evidence` (Product or Partners)
+  → **area layout:** `Memory/<Project>/Product.md` `# Evidence` or `Partners/<Co>.md`
 
 C) Org routing
 - If meeting_type in [leadership, team] AND context in [internal]
-  → update Memory/Org pages for relevant topics
+  → append Memory `# Evidence` on Org
+  → **area layout:** `Memory/<Project>/Org.md` `# Evidence`
 
 D) Decisions routing (always)
 - If Decisions section contains entries (not “(None)”)
-  → update Memory/Decisions
+  → topic-slug: `Decisions/decisions.md`
+  → area layout: append to area `## Open decisions` or `## Open hypotheses` when meeting records **pending** (factual capture)
 
 E) Personal routing
-- Always update Memory/Personal from AI Evaluation (if meaningful)
+- Meaningful **# AI Evaluation** → append `Memory/<Project>/Me.md` `# Evidence` when that file exists; else `Personal/ai_evaluation.md` (classic layout)
+- One compact evidence line per meeting (growth signal); full Did well / Could improve / Experiment stays in the meeting note
+- Promote recurring patterns to `Me.md` `# Current model` in **triage**, not distill
 
 If uncertain between Product vs Org:
 - Prefer Product when external voices appear (customer/partner)
@@ -61,175 +74,90 @@ If uncertain between Product vs Org:
 
 ## Step 2 — Output destinations (default)
 
-Create/update only these files:
-
 People pages:
-- People/<Project>/<PersonName>.md (use the meeting note's `project` frontmatter)
+- People/<Project>/<PersonName>.md — **`# Evidence Log` only**
 
-Topic memory pages (topic-driven, not taxonomy-driven):
-- Memory/<Project>/Product/<topic>.md
-- Memory/<Project>/Org/<topic>.md
+Topic memory pages (classic layout):
+- Memory/<Project>/Product/<topic>.md — **`# Evidence`**
+- Memory/<Project>/Org/<topic>.md — **`# Evidence`** or `# Signals` append section
 
 Decisions:
-- Memory/<Project>/Decisions/decisions.md  (single log per project)
+- Memory/<Project>/Decisions/decisions.md
 
-Personal:
-- Memory/<Project>/Personal/ai_evaluation.md  (single log per project)
+Personal (self-improvement):
+- Memory/<Project>/Me.md `# Evidence` (preferred — create in triage when patterns recur)
+- Memory/<Project>/Personal/ai_evaluation.md (classic layout only, when no `Me.md`)
 
 Topic naming — match-before-create:
 1. **List existing files** under `Memory/<Project>/Product/` and `Memory/<Project>/Org/`.
 2. **Check registry:** Look up the proposed topic slug in `Metadata/topic_registry.md`.
-   If it matches an alias, use the canonical slug instead.
-3. **Fuzzy match:** If the proposed slug is semantically close to an existing slug
-   (e.g. `pricing_model` when `pricing` exists), use the existing one.
-4. **New topic:** If genuinely new, add it to the topic registry first, then create the file.
+3. **Fuzzy match** existing slugs before creating new topic files.
+4. **New topic:** add to topic registry first, then create the file.
 
-Create a topic page whenever a meaningful signal appears.
-Early-stage startups often have weak signals that become important later.
-Low-confidence signals are allowed but must include evidence.
+### Area files layout
 
+Detect: area files (`Product.md`, `Me.md`, etc.) exist at `Memory/<Project>/` root → use them. Otherwise use classic topic slugs.
+
+**Do not** create or append to `Product/<topic>.md`, `Org/<topic>.md`, `Personal/ai_evaluation.md`, legacy decision logs, or `_legacy/` files when area files exist.
+
+Append only to:
+- Product signals → `Product.md` `# Evidence`
+- Org signals → `Org.md` `# Evidence`
+- Cross-partner validation → `Validation.md` `# Evidence` or `## Open hypotheses` (if still testing)
+- Partner-specific → `Partners/<Company>.md` `# Evidence`
+- Personal eval → `Me.md` `# Evidence`
+- Pending decisions (from meeting) → area `## Open decisions` / `## Open hypotheses` (dated line + source)
+
+Create a topic page (classic layout) whenever a meaningful signal appears.
 
 ## Step 3 — Distill from each section (what to extract)
 
-### 3.1 Signals (neutral) → primary source
-Signals are primary input for distillation.
-
-Extract signals generously.
-Include subtle, weak, or ambiguous signals if they may matter later.
-
-Do NOT filter based on current importance.
-Future patterns may emerge.
-
-Always keep evidence and attribution.
-
-### 3.2 Decisions → Decisions memory
-Copy decisions with owner + reason if present.
-If unclear, record as “Decision (pending)” and keep evidence.
-
-### 3.3 Action Items → (optional)
-Only record durable action items (multi-week or strategic).
-Daily tactical to-dos should remain only in the meeting note.
-
-### 3.4 AI Evaluation → Personal memory
-Always extract AI evaluation bullets.
-This is allowed to be subjective.
-
-## Evidence-first principle
-
-When unsure whether something is important, store it in Evidence Log.
-
-Do not discard ambiguous observations.
-
-Memory pages should keep both:
-- interpreted insights
-- raw evidence bullets
-
-Future AI may reinterpret them.
-
-
-## Step 4 — People pages (vague working style, evidence-backed)
-
-Update People/<Project>/<Name>.md only when routing category includes People-focused routing. Use the meeting note's `project` frontmatter to determine `<Project>`.
-
-Recommended People page structure (create if missing):
-- # Working Style (observations)
-- # Preferences / Constraints (explicit)
-- # Current Interests / Concerns
-- # Relationships
-- # Feedback (attributed)
-- # Evidence Log (append-only)
-
-Working Style observations may be added from a single signal if clearly evidenced.  Mark confidence explicitly.
-Prefer cautious language.
-
-Example:
-- May prefer async updates. (confidence: low, source: 2026-02-01)
-
-Evidence Log entry format (append-only):
-- YYYY-MM-DD — <short paraphrase> (confidence: low|med|high) — Source: [[<Meeting Note>]]
-
-### Relationships
-
-When a signal reveals interpersonal dynamics, update the Relationships section.
-
-Entry format:
-- **[[OtherPerson]]** — <relationship description>. (confidence: low|med|high, source: YYYY-MM-DD)
-
-Relationship types (suggested, not exhaustive): collaborates-with, reports-to / manages,
-mentors / mentored-by, tension-with, influenced-by / influences, sponsors / sponsored-by,
-partners-with.
-
-Rules:
-1. Write an entry on **both** people's pages (with evidence and date).
-2. If a relationship already has an entry, append a new dated observation (don't overwrite).
-3. Use inline `#topic` when the relationship centers on a specific subject.
-
-When to extract: explicit feedback between people, visible alignment or misalignment,
-delegation patterns, mentoring/coaching moments, tension or conflict (neutral language).
-When NOT to: casual conversation with no signal, standard status updates.
-
-## Step 5 — Topic memory pages (Product/Org)
-
-### Memory/<Project>/Product/<topic>.md
-Structure:
-- # What we learned (durable)
-- # Evidence (links)
-
-Add any bullets for product use cases, feedback, requests, confusion, adoption blockers, positioning, pricing, even subtle or speculative.
-For external feedback, subtle comments could be important, let's keep track on them. Early-stage signals are often weak but critical.
+### 3.1 Signals → `# Evidence`
+Extract generously. Include subtle or ambiguous signals with attribution.
 
 Each bullet:
 - short statement
 - date
 - link to meeting note
-- if the fact also relates to another registered topic, append `#topic_slug` inline
+- optional `#topic_slug` inline (canonical from registry)
 
-### Memory/<Project>/Org/<topic>.md
-Structure:
-- # Signals (durable)
-- # Evidence (links)
+### 3.2 Decisions → decisions log or `## Open decisions`
+- **Decided:** append to Decisions log (classic) or `# Evidence` with "Decision:" prefix
+- **Pending:** append to `## Open decisions` / `## Open hypotheses` — triage resolves later
 
-Add bullets for durable internal patterns: blockers, alignment issues, hiring/process concerns.
-Use neutral language; no blame.
+### 3.3 Action Items → (optional)
+Only durable strategic items; daily todos stay in the meeting note.
 
-### Inline `#topic` cross-references
+### 3.4 AI Evaluation → Me / Personal log
+Subjective; append-only.
 
-When writing any bullet to a Memory or People page, check whether the fact also relates
-to another topic in `Metadata/topic_registry.md`. If yes, append `#topic_slug` inline.
-Only use canonical slugs (never aliases). This enables Cursor to grep across topics.
+## Step 4 — People pages
 
-Example: a bullet in `partnership.md` about a pricing constraint →
-- Partner X won't accept usage-based pricing; needs flat fee. #pricing (2026-02-15, [[Meeting Note]])
+Append to `# Evidence Log` only during distill.
 
-## Step 6 — Decisions log
+Entry format:
+- YYYY-MM-DD — <short paraphrase> (confidence: low|med|high) — Source: [[<Meeting Note>]]
 
-Memory/<Project>/Decisions/decisions.md append format (use the meeting note's `project`):
+Relationships: append when clearly evidenced (both pages if bilateral).
+
+## Step 5 — Topic memory pages (classic layout only)
+
+Append to `# Evidence` (or `# What we learned` only if file has no Evidence section yet — prefer `# Evidence`).
+
+## Step 6 — Decisions log (classic layout)
+
 - YYYY-MM-DD — Decision: <...> (Owner: <...>) — Source: [[<Meeting Note>]]
-If pending:
 - YYYY-MM-DD — Pending decision: <...> — Source: [[<Meeting Note>]]
 
-## Step 7 — Personal AI evaluation log
+## Step 7 — Personal AI evaluation log (classic layout)
 
-Memory/<Project>/Personal/ai_evaluation.md append format (use the meeting note's `project`):
-- YYYY-MM-DD — Meeting: <title>
-  - Did well: ...
-  - Could improve: ...
-  - Experiment: ...
-  - Source: [[<Meeting Note>]]
+- YYYY-MM-DD — Meeting: <title> / Did well / Could improve / Source: [[<Meeting Note>]]
 
 ## Step 8 — Traceability back to the meeting note
 
-Always update the meeting note section:
-# Distilled
+Update meeting note `# Distilled` — list every file touched.
 
-List every file you touched, e.g.
-- [[People/personal/Alice]]
-- [[Memory/personal/Product/pricing]]
-- [[Memory/personal/Org/hiring]]
-- [[Memory/personal/Decisions/decisions]]
-- [[Memory/personal/Personal/ai_evaluation]]
+Do not set `triaged` on meeting notes. Triage does not process meetings.
 
-If nothing was updated, write:
+If nothing was updated:
 - (No durable updates.)
-
-Do not list Product Direction / roadmap unless the user explicitly asked you to update it. Write in **durable, concise** form.

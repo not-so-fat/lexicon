@@ -17,18 +17,44 @@ If either is missing, ask: "Which date and which account?"
 ## Steps
 
 1. **Init** — `python scripts/lexicon_init.py` (safe to re-run).
-2. **Fetch** — Resolve date, then:
-   ```
+
+2. **Fetch** — Resolve date, then run:
+   ```bash
    python scripts/fireflies_collection.py process-date YYYY-MM-DD <account>
    ```
-   If no new transcripts, tell user and stop.
-3. **Summarize** — For each new transcript in `Transcripts/Fireflies/<account>/`:
-   - Read `project` from frontmatter. If missing, ask user.
-   - Create `Meetings/<Project>/YYYY-MM-DD [Title].md` following `.cursor/rules/summarize.mdc`.
-4. **Distill** — For each new meeting note:
-   - Apply `.cursor/rules/distill.mdc`.
+   - This step may be re-run during the day; it just syncs new transcripts into `Transcripts/Fireflies/<account>/`.
+   - Do **not** decide what to summarize based on the `fireflies_YYYY-MM-DD_<account>.log` date or file name prefixes.
+
+3. **Select transcripts to summarize (by frontmatter date, not filename)**  
+   For the requested `date`:
+   - Because Fireflies stores timestamps in UTC and local time may differ, treat the requested date as a **local date** and search a **three-day window**: `date-1`, `date`, and `date+1` in frontmatter.
+   - For each of these three dates, search `Transcripts/Fireflies/<account>/` for files whose **frontmatter** contains:
+   ```yaml
+   date: YYYY/MM/DD
+   ```
+   - Filter to `project: <project>` (or ask the user which project if missing).
+   - This selection is based **only on the `date:` field**, not on which `process-date` command produced the file or what date appears in the filename.  
+   - This avoids missing meetings when Fireflies saves a `2026-03-10_*.md` file during a `process-date 2026-03-11` run, or when UTC vs local time causes a one-day shift.
+
+   A simple way to find candidate files for this three-day window is to run `rg` for each date:
+   ```bash
+   rg "^date:\s*YYYY/MM/DD" "Transcripts/Fireflies/<account>/" --glob "*.md" --files-with-matches
+   rg "^date:\s*YYYY/MM/DD_MINUS_1" "Transcripts/Fireflies/<account>/" --glob "*.md" --files-with-matches
+   rg "^date:\s*YYYY/MM/DD_PLUS_1" "Transcripts/Fireflies/<account>/" --glob "*.md" --files-with-matches
+   ```
+   Then, for each matching file, read the frontmatter and confirm `project: <project>` before summarizing.
+
+4. **Summarize** — For each matching transcript:
+   - If a meeting note for `(project, date, title)` does **not** exist:
+     - Create `Meetings/<Project>/YYYY-MM-DD [Title].md` following `.cursor/rules/summarize.mdc`.
+   - If it already exists, only re-summarize when the user explicitly asks to refresh.
+
+5. **Distill** — For each new meeting note:
+   - Apply `.cursor/rules/distill.mdc` — **evidence only** (`# Evidence`, People `# Evidence Log`); **never** `# Current model`.
    - Fill the note's **# Distilled** section with links to updated files.
-5. **Report** — Tell user: transcripts fetched, notes created, memory updated.
+   - Triage (separate habit) synthesizes into `# Current model` later.
+
+6. **Report** — Tell user: transcripts fetched, notes created, memory updated.
 
 ## Error handling
 

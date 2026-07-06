@@ -1,0 +1,33 @@
+---
+description: Process external meetings (customer, interview, partner) — summarize from transcript then distill. Use expanded topic registry including tech topics.
+globs: Meetings/**/*.md, Transcripts/**/*.md
+alwaysApply: false
+---
+
+# External meetings: summarize then distill
+
+**When:** Processing a meeting with `context: external` OR `meeting_type: customer` OR `meeting_type: interview` (or clearly external: partner discovery, customer call, candidate interview).
+
+**Same flow as 1:1 internal:** Summarize from transcript → **distill** (evidence only, no `# Current model`) → synthesis happens in **triage** when you review.
+
+## Differences from internal 1:1s
+
+1. **Routing (distill — `# Evidence` only):** Extract learnings to:
+   - `Validation.md` `# Evidence` for cross-partner market patterns
+   - `Partners/<Company>.md` `# Evidence` for partner-specific signals
+   - `Product.md` `# Evidence` for product/tech signals
+   - Legacy by-source archive under `_legacy/` only when explicitly archiving
+
+   **Do not** update `# Current model` during distill — triage synthesizes later.
+
+2. **Topics:** External meetings often need **more and more specific** topics. Always check `Metadata/topic_registry.md` and use canonical slugs. Expect a mature project's registry to grow two families of slugs:
+   - **Tech:** specific technologies and product surfaces (e.g. architecture, api, integration, onboarding)
+   - **External:** customer_feedback, competitor, hiring, interview, partnership, roadmap
+
+   Add genuinely new slugs to the registry before using them (per registry rules).
+
+3. **Frontmatter:** If the meeting note lacks `meeting_type` or `context`, set them before distilling:
+   - Partner/customer discovery → `meeting_type: customer` or `small_group`, `context: external`
+   - Candidate conversation → `meeting_type: interview`, `context: external`
+
+4. **Signals:** Extract partner/customer pain points as **evidence** bullets. Cross-cutting patterns → Validation `# Evidence`; partner-specific → Partners `# Evidence`. Fold into `# Current model` in **triage**.

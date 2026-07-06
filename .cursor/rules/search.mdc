@@ -21,9 +21,24 @@ or needs context for preparation — use this strategy to find the answer.
 
 Always start from the most distilled layer and drill down only if needed.
 
+## Memory layout (project-aware)
+
+| Layout | Projects | Read first |
+|--------|----------|------------|
+| **Area files** | Mature projects (see docs/MEMORY_MODEL.md) | `Direction.md` → `Validation.md` → `Product.md` / `Org.md` / `Me.md` → `Partners/<Co>.md` → `# Evidence` sections |
+| **Topic slugs** | `personal`, `career`, default | `Memory/<Project>/Product/<topic>.md`, `Org/<topic>.md`, `Decisions/decisions.md` |
+
+Detect layout: if `Memory/<Project>/Product.md` exists at top level, use area files; else use topic slugs.
+
 ## Search strategies by question type
 
 ### "What do we know about [subject]?"
+**Area-file projects:**
+1. Read `Memory/<Project>/Validation.md` and `Product.md` `# Current model` for the subject.
+2. Grep: `rg "<subject>" Memory/<Project>/Validation.md Memory/<Project>/Product.md Memory/<Project>/Partners/`
+3. Drill to `# Evidence` sections if current model is thin.
+
+**Topic-slug projects (default):**
 1. Check `Metadata/topic_registry.md` for the canonical slug (and aliases).
 2. Read `Memory/<Project>/Product/<topic>.md` or `Memory/<Project>/Org/<topic>.md` directly.
 3. Sweep for cross-references: `rg "#<topic_slug>" Memory/ People/`
@@ -40,9 +55,11 @@ Always start from the most distilled layer and drill down only if needed.
 3. For deeper context, follow links to People/Memory pages referenced in the # Distilled section.
 
 ### "What decisions have we made about [subject]?"
-1. Read `Memory/<Project>/Decisions/decisions.md` and grep for the subject.
-2. Also check: `rg "key-decision" Meetings/ --include "*.md"` for notes tagged with key-decision.
-3. Read the Decisions section of matching meeting notes.
+**Area-file projects:** Read `Direction.md` (principles), then area `# Current model` and `## Open decisions` on Product/Org/Validation/Partners. Run `python3 scripts/triage_queue.py --project <project>` for pending list.
+
+**Topic-slug projects:** Read `Memory/<Project>/Decisions/decisions.md` and grep for the subject.
+
+Also check: `rg "key-decision" Meetings/ --include "*.md"` for notes tagged with key-decision. Read the Decisions section of matching meeting notes.
 
 ### "What's the relationship between [person A] and [person B]?"
 1. Read both People pages — check their `# Relationships` sections.
@@ -50,14 +67,15 @@ Always start from the most distilled layer and drill down only if needed.
 
 ### "Prepare me for a meeting with [person] about [subject]"
 Combine strategies:
-1. Read `People/<Project>/<Name>.md` — working style, interests, recent concerns.
-2. Read `Memory/<Project>/Product/<topic>.md` for the subject.
-3. Sweep: `rg "#<topic_slug>" People/` for topic-related observations about attendees.
-4. Read recent meeting notes with this person: `rg "<Name>" Meetings/ --include "*.md"` — pick the 2-3 most recent.
+1. Read `People/<Project>/<Name>.md` — `# Current read`, working style, recent concerns.
+2. **Partner prep:** Read `Memory/<Project>/Partners/<Co>.md` `# Current model` and `## Open decisions`.
+3. **Subject prep:** Area files → `Validation.md` / `Product.md`; topic slugs → `Product/<topic>.md`.
+4. Sweep: `rg "#<topic_slug>" People/` for topic-related observations about attendees.
+5. Read recent meeting notes with this person: `rg "<Name>" Meetings/ --include "*.md"` — pick the 2-3 most recent.
 
 ### "What should I be careful about?" / "What are open risks?"
 1. Grep for follow-up-needed: `rg "follow-up-needed" Meetings/ --include "*.md"` — read recent matches.
-2. Read `Memory/<Project>/Decisions/decisions.md` for pending decisions.
+2. Pending decisions: area files → `triage_queue.py --project <project>`; topic slugs → `Decisions/decisions.md`.
 3. Check recent meeting notes for Unresolved Points sections.
 
 ## Grep patterns for the classification system

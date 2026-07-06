@@ -6,7 +6,7 @@ alwaysApply: false
 
 # Meeting Note Creation (Lexicon)
 
-Trigger: When processing a raw transcript file (Fireflies, HiNotes, other) into a meeting note.
+Trigger: When processing a raw transcript file (Fireflies, HiDock, manual, other) into a meeting note.
 Goal: Produce a clean, structured, traceable meeting note that is safe to distill later.
 Transcript -(Summarize)-> Structured Evidence -(Distill)-> Knowledge
 
@@ -39,13 +39,23 @@ Fill only what is clear.
 - participants
 
 **Project assignment:**
-The transcript's `project` frontmatter is the default. Before accepting it, check
-if the meeting content clearly belongs to a different project listed in
-`Metadata/project_registry.md`. Reassign if clearly mismatched; when uncertain,
-keep the default. Common overrides:
+Fireflies / Manual — the transcript's `project` frontmatter is the default when present.
+HiDock — transcripts have **no** `project` field; infer from content and
+`Metadata/project_registry.md`. Ask the user if unclear.
+Before accepting a project, check if the meeting content clearly belongs elsewhere.
+Reassign if clearly mismatched; when uncertain, keep the default. Common overrides:
 - Personal account meeting about career → `career`
 - Personal account meeting with non-work friends → `friendship`
 - Company account meeting about personal mentoring → `career`
+
+**HiDock source** (`source: HiDock` in transcript):
+- Set meeting note `source: HiDock` and `hidock_signature: <signature>` from transcript frontmatter.
+- `# Transcript Link` → wikilink to `Transcripts/HiDock/<basename without .md>`.
+- Body starts as `Speaker N:` from diarization. During summarize, infer names from dialogue (spoken names, roles, third parties). When confident:
+  1. Add `participants:` to the **transcript** frontmatter (list of full names).
+  2. Replace `Speaker N:` prefixes in `# Raw Transcript` with `Full Name:` (e.g. `Alice Smith:`). Replace higher numbers first (`Speaker 3` before `Speaker 2` before `Speaker 1`).
+  3. Drop the "attributions inferred" callout on the meeting note if write-back is complete.
+- If still uncertain, keep `Speaker N:` on the transcript and add a Context callout on the meeting note only.
 
 **Topics** (3–5 max, snake_case nouns):
 Check `Metadata/topic_registry.md` for existing canonical slugs before inventing
@@ -93,6 +103,12 @@ Bad:
 Good:
 - Alice said pricing tiers confuse customers.
 - Bob said flexibility is more important.
+
+Additional capture rules:
+
+- **Decision criteria / values (Tier 1 in career, mentor, 1:1, decline/accept calls):** When the user states *why* they join, leave, accept, or decline — including emotional or relational criteria (team feeling, shared goal, trust, belonging) — capture that in Summary and in Decisions → Why. Do **not** collapse it into "appreciation" or skip it because another topic follows.
+- **Long monologue after a decision:** Treat it as likely *rationale or identity evidence* for the decision, not only a side topic. Record both the mechanics (what they showed) and any stated link to values/fit.
+- **Noisy ASR:** Prefer recall over dropping. If wording is garbled but the stretch is long and follows a decision/thanks, note **low-confidence candidate rationale** in Summary or Unresolved rather than omitting. Do not invent quotes; paraphrase with "(ASR unclear)" when needed.
 
 ## Step 5 — Extract Decisions
 
@@ -145,9 +161,11 @@ Capture signals:
   - learnings: new technical/business knowledge, tips not specific to the project
 
 Priority:
-Tier 1 – always capture: decisions, customer feedback, blockers, explicit feedback, major risks
+Tier 1 – always capture: decisions, **decision criteria / values the user articulates for fit (join, leave, role-shape)**, customer feedback, blockers, explicit feedback, major risks
 Tier 2 – capture if clear: communication style, motivation, partnership intent, strategy disagreement
 Tier 3 – usually skip: status updates, casual comments, small clarifications
+
+**Career / mentor / decline calls:** A signal of type `people` or `decision` with topic `career` should include the user's fit criteria when present (even if emotional). Demos or side projects used as "this is how I work" are evidence of those criteria — capture the link, not only the features.
 
 Use this minimal format:
 
@@ -179,6 +197,7 @@ Analyze:
 - What the user did well in the conversation
 - What they could improve (communication, pacing, framing)
 - One concrete experiment to try in similar meetings
+- If the user tried to convey **values / fit criteria** but they may not have been legible (buried in a demo, ASR noise, no label sentence): say so explicitly and suggest a **label-before-evidence** wording fix — do not only critique "missing why."
 
 ## Philosophy
 

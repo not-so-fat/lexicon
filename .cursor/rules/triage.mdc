@@ -1,0 +1,120 @@
+---
+description: Project triage — interactive recap, memory synthesis, ideas cleanup. Not for meetings. User-kicked; optional period filter.
+globs: Ideas/**/*.md, Clippings/**/*.md, Memory/**/*.md, People/**/*.md, Metadata/recap/**/*.md, Meetings/**/*.md
+alwaysApply: false
+---
+
+# Lexicon Triage Protocol
+
+**Trigger:** User says "Triage \<project\>", "Recap \<project\>", or similar.
+
+**Charter:** [[Ideas/personal/Lexicon Processing Strategy]]
+
+## What triage is
+
+An **interactive thinking session** with the user — not a meeting inbox processor.
+
+| In scope | Out of scope |
+|---|---|
+| Recap: what happened, how the user is doing | Editing meeting notes |
+| Discuss open problems and direction shifts | Distilling meetings (use **distill** separately) |
+| Update Memory **`# Current model`**, resolve **`## Open decisions`** | Setting `triaged` on `Meetings/` |
+| Refresh People **`# Current read`** | Bulk-processing meeting files |
+| Clean **Ideas/** and **Clippings/** queue | Appending meeting `# Evidence` (distill's job) |
+
+**Meetings are read-only evidence** during triage. Read recent notes to inform the recap; do not mutate them.
+
+**Distill** captures important statements into `# Evidence` (and related append sections). **Triage** synthesizes those facts into `# Current model` when the user agrees.
+
+## Principles
+
+- **User-kicked** — no automatic schedule; always confirm **period** if unclear.
+- **Conversation first** — narrative recap before file actions.
+- **Synthesis only here** — `# Current model`, `# Current read`, **Direction** edits happen in triage after user approval.
+- **Ideas queue only** — `triage_queue.py` scans Ideas + Clippings, not Meetings.
+- **Skip stays in queue** — do not set `triaged` on Skip.
+- **Retire = delete** — git preserves history.
+- **Promote keeps capture** — set `triaged`, `status: promoted`, `promotes-to` on Ideas.
+
+## Step 0 — Confirm project and period
+
+1. **Project** — from user (`Meetings/<project>/`, `Ideas/<project>/`).
+2. **Period** — ask if not specified: *"Since when?"* (e.g. last two weeks, since April). Default suggestion: **since last triage date** or **last 14 days** — never all-time unless user asks.
+3. **Run queue script:**
+
+```bash
+python3 scripts/triage_queue.py --project <project> [--since YYYY-MM-DD] [--until YYYY-MM-DD]
+```
+
+Read: **Previous triage**, **Pending decisions**, **Recent meetings (recap context)**, **Ideas queue**.
+
+## Step 1 — Recap (conversation)
+
+Produce for the user — **discuss, don't dump file lists**:
+
+1. **Since last triage** — from recap log (script output).
+2. **This period** — themes, people, momentum; use **Recent meetings** + Memory `# Evidence` + `Me.md` as sources.
+3. **How you're doing** — patterns from `Me.md`, recent 1:1s, AI Evaluation themes (read-only from meeting notes).
+4. **Open problems** — pending decisions from script; ask what's changed or resolved.
+
+Pause for user corrections before proposing memory writes.
+
+## Step 2 — Memory updates (propose → approve → write)
+
+After recap discussion, propose **Memory** changes:
+
+| Action | Target |
+|---|---|
+| **Update Current model** | `Validation.md`, `Product.md`, `Org.md`, `Partners/<Co>.md`, `Me.md` — refresh `# Current model` from evidence + conversation |
+| **Resolve decision** | Move resolved items from `## Open decisions` / `## Open hypotheses` into `# Current model`; remove or mark resolved |
+| **Canon** | Rare edit to `Direction.md` (principles only; user must explicitly approve) |
+| **People read** | Refresh `# Current read` (~5 bullets) on People touched this session |
+
+Do **not** append new `# Evidence` from meetings here — that is **distill**. Triage may reference existing evidence when rewriting `# Current model`.
+
+Wait for approval before mutating Memory.
+
+## Step 3 — Ideas queue (propose → approve → write)
+
+For each item in **Ideas / Clippings queue** only:
+
+| Disposition | Action |
+|---|---|
+| **Promote** | Durable knowledge → Memory (`# Current model`, area files, Partners); idea: `triaged`, `status: promoted`, `promotes-to`. **Retire (delete)** idea file once Memory has it unless you still want a scratch copy. |
+| **Keep** | **You expect to edit this file again** in `Ideas/` — not ready to promote. Set `triaged` when queue-reviewed. If you won't edit again → **Promote** or **Retire**, not Keep. |
+| **Skip** | Not now — **no `triaged`** |
+| **Retire** | Delete idea file |
+| **Move** | Relocate; set `triaged` when done |
+
+Cluster proposals when possible (e.g. "all Competitive Research → Validation").
+
+## Step 4 — Recap log
+
+Append to `Metadata/recap/<project>/YYYY-MM.md`:
+
+```markdown
+## YYYY-MM-DD triage
+
+**Period:** …
+**Ideas reviewed:** N
+
+### Recap
+<narrative from conversation>
+
+### Memory updates
+- Current model: [[Memory/.../Product]] — …
+- Resolved: …
+- Canon: …
+
+### Ideas
+- Promote: [[...]] → [[Memory/...]]
+- Retire: (deleted) …
+- Skip: [[...]]
+
+### Pending decisions (carry forward)
+- …
+```
+
+## Step 5 — Reply
+
+Confirm: recap log path, Memory files updated, ideas processed, ideas still in queue, suggested next kick.

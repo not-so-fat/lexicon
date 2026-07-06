@@ -73,7 +73,7 @@ Who, context, main points, decisions. For 1:1s, include a short **Sentiment chec
 - Bullets. Use "(None explicit)" if no clear action items.
 
 # Transcript Link
-Raw transcript → path under `Transcripts/Fireflies/<account>/` or `Transcripts/Manual/<Area>/`.
+Raw transcript → path under `Transcripts/Fireflies/<account>/`, `Transcripts/HiDock/`, or `Transcripts/Manual/`.
 
 # Distilled
 (Initially empty or "(Run **distill** after reviewing this summary.)" After distillation, list every destination updated.)

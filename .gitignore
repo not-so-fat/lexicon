@@ -1,11 +1,21 @@
 # Local config (never commit secrets)
 .env
 
+# Generated from .env by lexicon_init.py (holds the user's name)
+Metadata/User.md
+
 # macOS
 .DS_Store
 
+# Python
+__pycache__/
+*.pyc
+
 # Temporal files: one-off scripts, logs, scratch. Do not commit.
 .tmp/
+
+# HiDock timestamp sidecars (Lexicon uses .md transcripts only)
+**/*.segments.json
 
 # Internal development docs (not for distribution)
 dev/

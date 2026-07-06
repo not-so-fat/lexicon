@@ -3,8 +3,10 @@
 Fetch Fireflies transcripts for a date and account. Saves to Transcripts/Fireflies/<account>/.
 
 Usage:
-  python scripts/fireflies_collection.py process-date YYYY-MM-DD <account>
-  python scripts/fireflies_collection.py fetch <transcript_id> <account>
+  python scripts/fireflies_collection.py process-date YYYY-MM-DD <account> [--force]
+  python scripts/fireflies_collection.py fetch <transcript_id> <account> [--force]
+
+  --force  Re-download and overwrite local files even when the path and transcript id already match.
 
 Required .env per account: FIREFLIES_API_KEY_<account>, EMAIL_<account>. See .env.example.
 
@@ -121,7 +123,7 @@ def get_date_title_pattern(m_date_ms, title, output_dir):
     return os.path.join(output_dir, f"{date_dash}_{safe_title}_*.md")
 
 
-def fetch_and_save(meeting_id, config):
+def fetch_and_save(meeting_id, config, force=False):
     query = """
     query GetTranscript($id: String!) {
       transcript(id: $id) {
@@ -135,7 +137,7 @@ def fetch_and_save(meeting_id, config):
     if not m:
         return None
     filename = get_target_filename(m["date"], m["title"], m["id"], config["output_dir"])
-    if os.path.exists(filename):
+    if os.path.exists(filename) and not force:
         return ("EXISTING", filename)
 
     participants_str = "\n".join([f"  - {p}" for p in (m.get("participants") or [])])
@@ -199,7 +201,7 @@ def dedup_transcripts(transcripts, priority_email, min_duration_min=5, time_buck
     return chosen, ignored
 
 
-def process_date(date_str, config):
+def process_date(date_str, config, force=False):
     """Fetch all transcripts for the given date; one file per logical meeting (dedup by title + 15min bucket)."""
     dt = parse_date(date_str)
     date_str = dt.strftime("%Y-%m-%d")
@@ -208,14 +210,32 @@ def process_date(date_str, config):
     to_date = dt.replace(hour=23, minute=59, second=59, microsecond=999000).strftime("%Y-%m-%dT%H:%M:%S.000Z")
 
     query = """
-    query GetTranscripts($fromDate: DateTime, $toDate: DateTime) {
-      transcripts(fromDate: $fromDate, toDate: $toDate) {
+    query GetTranscripts($fromDate: DateTime, $toDate: DateTime, $limit: Int!, $skip: Int!) {
+      transcripts(fromDate: $fromDate, toDate: $toDate, limit: $limit, skip: $skip) {
         id, title, date, organizer_email, duration, transcript_url
       }
     }
     """
-    data = run_query(query, config, {"fromDate": from_date, "toDate": to_date})
-    transcripts = data.get("transcripts", [])
+    # Fireflies caps transcripts() at 50 per request; paginate so busy days are complete.
+    page_size = 50
+    transcripts = []
+    skip = 0
+    while True:
+        data = run_query(
+            query,
+            config,
+            {
+                "fromDate": from_date,
+                "toDate": to_date,
+                "limit": page_size,
+                "skip": skip,
+            },
+        )
+        batch = data.get("transcripts") or []
+        transcripts.extend(batch)
+        if len(batch) < page_size:
+            break
+        skip += page_size
 
     chosen, ignored_short = dedup_transcripts(transcripts, config["email"])
     summary = {"saved": [], "skipped": [], "ignored_short": ignored_short, "replaced": []}
@@ -226,12 +246,13 @@ def process_date(date_str, config):
         if existing_files:
             existing_path = existing_files[0]
             existing_id = os.path.basename(existing_path).replace(".md", "").split("_")[-1]
-            if existing_id == target["id"]:
+            if existing_id == target["id"] and not force:
                 summary["skipped"].append(existing_path)
                 continue
-            os.remove(existing_path)
-            summary["replaced"].append(existing_path)
-        result = fetch_and_save(target["id"], config)
+            if existing_id != target["id"]:
+                os.remove(existing_path)
+                summary["replaced"].append(existing_path)
+        result = fetch_and_save(target["id"], config, force=force)
         if result:
             kind, path = result
             if kind == "EXISTING":
@@ -254,25 +275,30 @@ def process_date(date_str, config):
 def main():
     mode = sys.argv[1] if len(sys.argv) > 1 else None
     val = sys.argv[2] if len(sys.argv) > 2 else None
-    account = (sys.argv[3] if len(sys.argv) > 3 else "personal").lower()
+    rest = [a for a in sys.argv[3:] if a != "--force"]
+    account = (rest[0] if rest else "personal").lower()
+    force = "--force" in sys.argv
     config = get_config(account)
     validate_config(config, account)
     if mode == "process-date":
         if not val:
-            print("Usage: python scripts/fireflies_collection.py process-date YYYY-MM-DD <account>", file=sys.stderr)
+            print("Usage: python scripts/fireflies_collection.py process-date YYYY-MM-DD <account> [--force]", file=sys.stderr)
             print("Example: python scripts/fireflies_collection.py process-date 2026-02-17 personal", file=sys.stderr)
             sys.exit(1)
-        process_date(val, config)
+        process_date(val, config, force=force)
     elif mode == "fetch":
         if not val:
-            print("Usage: python scripts/fireflies_collection.py fetch <transcript_id> <account>", file=sys.stderr)
+            print("Usage: python scripts/fireflies_collection.py fetch <transcript_id> <account> [--force]", file=sys.stderr)
             sys.exit(1)
-        result = fetch_and_save(val, config)
+        result = fetch_and_save(val, config, force=force)
         if result:
             kind, path = result
             print(f"{kind}: {path}")
     else:
-        print("Usage: process-date YYYY-MM-DD <account>  |  fetch <transcript_id> <account>", file=sys.stderr)
+        print(
+            "Usage: process-date YYYY-MM-DD <account> [--force]  |  fetch <transcript_id> <account> [--force]",
+            file=sys.stderr,
+        )
         sys.exit(1)
 
 

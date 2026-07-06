@@ -15,10 +15,12 @@ REPO_ROOT = os.path.join(SCRIPT_DIR, "..")
 DIRS = [
     "Transcripts",
     "Transcripts/Fireflies",
+    "Transcripts/HiDock",
     "Transcripts/Manual",
     "Meetings",
     "People",
     "Memory",
+    "Ideas",
     "Metadata",
 ]
 
@@ -46,6 +48,7 @@ def main():
         os.makedirs(path, exist_ok=True)
         print(f"  {path}")
     print("\nFolders OK.")
+    print("Next: python scripts/verify_setup.py")
 
     _load_env(root)
     user_name = (os.getenv("LEXICON_USER_NAME") or "").strip()
@@ -59,9 +62,12 @@ def main():
 
     env = os.path.join(root, ".env")
     if not os.path.isfile(env):
-        print("Copy .env.example to .env and set FIREFLIES_API_KEY_<account>, EMAIL_<account> (default account: personal), and optionally LEXICON_USER_NAME.")
+        print("Copy .env.example to .env and set FIREFLIES_API_KEY_<account>, EMAIL_<account>, and optionally LEXICON_USER_NAME.")
+        print("HiDock: set HIDOCK_ORGANIZER_ROOT and configure hinotes_organizer output.dir → Transcripts/HiDock/.")
     else:
-        print(".env present. Run process-date via the agent or: python scripts/fireflies_collection.py process-date YYYY-MM-DD <account> (e.g. personal)")
+        print(".env present.")
+        print("  Fireflies: python scripts/fireflies_collection.py process-date YYYY-MM-DD <account>")
+        print("  HiDock:    python scripts/hidock_collection.py run  →  python scripts/hidock_pending.py list")
 
 
 if __name__ == "__main__":

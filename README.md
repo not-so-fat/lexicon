@@ -2,36 +2,63 @@
 
 **AI-ready organizational memory from meeting transcripts.**
 
-Your Cursor agent turns transcripts (Fireflies, manual, or pasted) into structured Markdown: meeting notes → People, Product, and Org memory. So you can query naturally: "What did we agree with Sarah?" No new app, no extra LLM API—your agent runs this repo's scripts and skills when you ask.
+Your Cursor agent turns transcripts (Fireflies, HiDock, manual, or pasted) into structured Markdown: meeting notes → People, Product, and Org memory. Query naturally in Cursor — no extra LLM API for summarize/distill.
 
 ---
 
-## Quick start
+## Installation
 
-1. **Clone** this repo.
-2. **Configure** – Copy `.env.example` to `.env`. Minimum setup is a few variables:
-   - **LEXICON_USER_NAME** – Your name (for AI Evaluation in meeting notes).
-   - For Fireflies, one account is enough to start. Use the suffix **personal** (default), e.g.:
-     ```bash
-     LEXICON_USER_NAME=Thomas A. Anderson
-     FIREFLIES_API_KEY_personal=ff_...
-     EMAIL_personal=you@example.com
-     PROJECT_personal=personal
-     ```
-   You can add more Fireflies accounts with a different suffix (e.g. `_acme`, `_work`): add `FIREFLIES_API_KEY_<suffix>`, `EMAIL_<suffix>`, and optionally `PROJECT_<suffix>` so notes go to the right project.  
-   Then run `pip install -r requirements.txt`.
-3. **Fireflies** – Ask: *"Process my Fireflies meetings for today on my personal account."* Agent runs fetch → summarize → distill. Transcripts in `Transcripts/Fireflies/<account>/`, notes in `Meetings/<Project>/`, memory updated.
-4. **Manual** – Ask: *"Create a manual transcript template."* Give date, title, with whom, project. Agent creates a file in `Transcripts/Manual/`; you paste the transcript, then say *"Summarize this transcript"* and (after review) *"Distill this meeting note."*
+**Full guide:** [docs/SETUP.md](docs/SETUP.md)
+
+```bash
+git clone <url-to-lexicon> lexicon
+cd lexicon
+cp .env.example .env          # set LEXICON_USER_NAME at minimum
+pip install -r requirements.txt
+python scripts/lexicon_init.py
+python scripts/verify_setup.py
+```
+
+Open the folder in **Cursor**. Add Fireflies and/or HiDock when you need them — see [SETUP.md](docs/SETUP.md).
+
+Your clone **is** your vault: content stays local/private, engine updates pull from this repo — see [docs/UPDATING.md](docs/UPDATING.md). Customize via `.cursor/rules/local-*.mdc`, not by editing shipped rules.
+
+| You use | Also configure |
+|---------|----------------|
+| Fireflies | `FIREFLIES_API_KEY_*`, `EMAIL_*` in `.env` |
+| HiDock P1 | [hinotes_organizer](docs/SETUP.md#3-hidock-optional) + `HIDOCK_ORGANIZER_ROOT` in `.env` |
+| Manual paste only | Nothing else |
+
+---
+
+## Quick start (after install)
+
+**Fireflies** — *"Process my Fireflies meetings for today on my personal account."*
+
+**HiDock** — plug device, quit HiNotes, then *"Process my HiDock meetings."*
+
+**Manual** — *"Create a manual transcript template."* Paste transcript → *"Summarize this transcript"* → *"Distill this meeting note."*
+
+---
+
+## Daily loop (user guide)
+
+1. **Ingest** — after meetings: *"Process my Fireflies meetings for today"* / *"Process my HiDock meetings"* / paste into a manual template. Transcripts land under `Transcripts/`, meeting notes under `Meetings/<Project>/`.
+2. **Review** — skim the meeting note; fix speaker labels or project if the agent guessed wrong.
+3. **Distill** — *"Distill this meeting note."* Facts append to People pages and Memory `# Evidence` (append-only; nothing is synthesized yet).
+4. **Triage (weekly-ish)** — *"Triage [project]."* Interactive recap: you and the agent review recent evidence and the Ideas queue, and only here does `# Current model` get updated. See [docs/MEMORY_MODEL.md](docs/MEMORY_MODEL.md).
+5. **Query anytime** — just ask in Cursor: *"What do we know about pricing?"*, *"Prepare me for a meeting with Alex"*, *"What decisions did we make last month?"* The agent searches Memory → People → Meetings, most-distilled first.
+
+Capture your own thoughts as files under `Ideas/<Project>/` — they enter the triage queue automatically until marked `triaged`.
 
 ---
 
 ## What it does
 
-- **Fetch** – Fireflies by date/account, or manual template (you edit, then summarize).
-- **Summarize** – Raw transcript → structured meeting note (Context, Summary, Decisions, Action Items, Unresolved Points, Signals, AI Evaluation).
-- **Distill** – Meeting note → durable memory in `People/<Project>/`, `Memory/<Project>/` (product, org, decisions, personal).
-
-Philosophy: prefer recall over compression; notes are evidence. Early-stage signals matter—preserve them.
+- **Fetch** – Fireflies by date/account; HiDock via hinotes_organizer (pending list); or manual template.
+- **Summarize** – Raw transcript → structured meeting note (Context, Summary, Decisions, Signals, AI Evaluation).
+- **Distill** – Meeting note → **`# Evidence`** in People/Memory only.
+- **Triage** – Interactive recap; updates **`# Current model`**. See [docs/MEMORY_MODEL.md](docs/MEMORY_MODEL.md).
 
 ---
 
@@ -39,9 +66,10 @@ Philosophy: prefer recall over compression; notes are evidence. Early-stage sign
 
 | What | Path |
 |------|------|
-| Transcripts | `Transcripts/Fireflies/<account>/`, `Transcripts/Manual/` (project in frontmatter) |
+| Transcripts | `Transcripts/Fireflies/<account>/`, `Transcripts/HiDock/`, `Transcripts/Manual/` |
 | Meeting notes | `Meetings/<Project>/` |
-| People / Memory | `People/<Project>/`, `Memory/<Project>/` (Product, Org, Decisions, Personal) |
+| People / Memory | `People/<Project>/`, `Memory/<Project>/` |
+| Ideas queue | `Ideas/<Project>/` |
 | Scratch / logs | **`.tmp/`** only |
 
 ---
@@ -50,15 +78,33 @@ Philosophy: prefer recall over compression; notes are evidence. Early-stage sign
 
 | Say | Skill does |
 |-----|------------|
-| "Process my Fireflies meetings for [date] on my [account] account" | Fetch → summarize each → distill each |
-| "Create a manual transcript template" | Stub file in `Transcripts/Manual/`; you paste, then summarize |
+| "Process my Fireflies meetings for [date] on my [account] account" | Fetch → summarize → distill |
+| "Process my HiDock meetings" | Sync → pending list → summarize → distill |
+| "Create a manual transcript template" | Stub in `Transcripts/Manual/` |
 | "Summarize this transcript" | Meeting note at `Meetings/<Project>/` |
-| "Distill this meeting note" | Update People/Memory/Metadata, fill # Distilled |
+| "Distill this meeting note" | Append `# Evidence`; fill `# Distilled` |
+| "Triage [project]" | Recap + `# Current model` + Ideas queue |
 
-Edit skills in `.cursor/skills/<name>/SKILL.md`. Rules in `.cursor/rules/` (summarize, distill).
+Skills: `.cursor/skills/`. Rules: `.cursor/rules/`.
+
+```bash
+python3 scripts/triage_queue.py --project <project> [--since YYYY-MM-DD]
+python3 scripts/hidock_pending.py list
+python3 scripts/verify_setup.py
+```
+
+---
+
+## Docs
+
+| Doc | What it covers |
+|-----|----------------|
+| [docs/SETUP.md](docs/SETUP.md) | Full install: Fireflies, HiDock (hinotes_organizer), manual |
+| [docs/MEMORY_MODEL.md](docs/MEMORY_MODEL.md) | How knowledge is organized: evidence vs current model, layouts, triage |
+| [docs/UPDATING.md](docs/UPDATING.md) | Pulling engine updates without touching your content; `local-*.mdc` customization |
 
 ---
 
 ## License
 
-MIT. See [LICENSE](LICENSE). Software provided as is; no warranty or liability.
+MIT. See [LICENSE](LICENSE).
