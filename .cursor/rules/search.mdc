@@ -25,16 +25,16 @@ Always start from the most distilled layer and drill down only if needed.
 
 | Layout | Detect | Read first |
 |--------|--------|------------|
-| **Area files** | `Memory/<Project>/Product.md` exists (see docs/MEMORY_MODEL.md) | `Direction.md` → `Validation.md` → `Product.md` / `Org.md` / `Me.md` → `Partners/<Co>.md` → `# Evidence` |
+| **Area files** | `Memory/<Project>/Product.md` exists (see docs/MEMORY_MODEL.md) | `Direction.md` → `Validation.md` → `Product.md` / `Org.md` / `Me.md` → `Partners/<Co>.md` — model files are small (synthesis only); drill into `<Area>.evidence.md` only when the model is thin |
 | **Topic slugs** | default | `Memory/<Project>/Product/<topic>.md`, `Org/<topic>.md`, `Decisions/decisions.md` |
 
 ## Search strategies by question type
 
 ### "What do we know about [subject]?"
 **Area-file projects:**
-1. Read `Validation.md` and `Product.md` `# Current model`.
-2. Grep: `rg "<subject>" Memory/<Project>/Validation.md Memory/<Project>/Product.md Memory/<Project>/Partners/`
-3. Drill to `# Evidence` if current model is thin.
+1. Read `Validation.md` and `Product.md` `# Current model` (cheap — models are synthesis-only files).
+2. Grep models: `rg "<subject>" Memory/<Project>/*.md Memory/<Project>/Partners/ --glob '!*.evidence.md'`
+3. Drill to evidence if the current model is thin: `rg "<subject>" Memory/<Project>/*.evidence.md Memory/<Project>/Partners/*.evidence.md`
 
 **Topic-slug projects:**
 1. Check `Metadata/topic_registry.md` for the canonical slug (and aliases).

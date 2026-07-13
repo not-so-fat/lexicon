@@ -30,6 +30,11 @@ FILENAME_DATE_RE = re.compile(r"^(\d{4}-\d{2}-\d{2})")
 RECAP_SECTION_RE = re.compile(
     r"^## (\d{4}-\d{2}-\d{2}) triage\s*$", re.MULTILINE
 )
+EVIDENCE_BULLET_DATE_RE = re.compile(r"^\s*-\s*(\d{4}-\d{2}-\d{2})")
+MODEL_HEADING_DATE_RE = re.compile(
+    r"^#\s*Current model\s*\(last updated:\s*(\d{4}-\d{2}-\d{2})\)", re.IGNORECASE | re.MULTILINE
+)
+STALE_DAYS = 21
 
 SCAN_ROOTS = [
     ("Ideas", lambda project, rel: rel.parts[1:2] == (project,) if len(rel.parts) > 2 else False),
@@ -312,6 +317,119 @@ def pending_decisions_snippet(project: str, limit: int = 20) -> list[str]:
     return pending[-limit:]
 
 
+def _all_bullet_dates(text: str) -> list[str]:
+    return sorted(
+        m.group(1) for ln in text.splitlines() if (m := EVIDENCE_BULLET_DATE_RE.match(ln))
+    )
+
+
+def _inline_evidence(text: str) -> tuple[bool, list[str]]:
+    """Legacy inline `# Evidence` section in a model file: (present, bullet dates)."""
+    in_section = False
+    present = False
+    dates: list[str] = []
+    for ln in text.splitlines():
+        stripped = ln.strip().lower()
+        if stripped.startswith("# evidence"):
+            in_section = True
+            present = True
+            continue
+        if in_section and ln.startswith("# "):
+            in_section = False
+            continue
+        if in_section:
+            m = EVIDENCE_BULLET_DATE_RE.match(ln)
+            if m:
+                dates.append(m.group(1))
+    return present, sorted(dates)
+
+
+def _model_updated(text: str) -> str:
+    fm = parse_frontmatter(text)
+    d = normalize_date(fm.get("model_updated"))
+    if d:
+        return d
+    m = MODEL_HEADING_DATE_RE.search(text)
+    return m.group(1) if m else ""
+
+
+def _days_between(older: str, newer: str) -> int:
+    return (
+        datetime.strptime(newer, "%Y-%m-%d") - datetime.strptime(older, "%Y-%m-%d")
+    ).days
+
+
+def _area_model_files(project: str) -> list[Path]:
+    memory = REPO_ROOT / "Memory" / project
+    files: list[Path] = []
+    skip = {"readme.md", "index.md", "direction.md"}
+    if memory.is_dir():
+        for p in sorted(memory.glob("*.md")):
+            if p.name.lower() in skip or p.name.endswith(".evidence.md"):
+                continue
+            files.append(p)
+        partners = memory / "Partners"
+        if partners.is_dir():
+            for p in sorted(partners.glob("*.md")):
+                if p.name.lower() in skip or p.name.endswith(".evidence.md"):
+                    continue
+                files.append(p)
+    return files
+
+
+def evidence_debt(project: str) -> dict:
+    """Per-area un-drained evidence + staleness, plus legacy flags.
+
+    Un-drained = evidence bullets dated after `model_updated`. Stale = current
+    model lags newest evidence by more than STALE_DAYS (or has no date at all).
+    """
+    areas: list[dict] = []
+    for model_path in _area_model_files(project):
+        try:
+            model_text = model_path.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            continue
+        sibling = model_path.with_name(model_path.stem + ".evidence.md")
+        sibling_dates: list[str] = []
+        if sibling.is_file():
+            try:
+                sibling_dates = _all_bullet_dates(
+                    sibling.read_text(encoding="utf-8", errors="replace")
+                )
+            except OSError:
+                pass
+        inline_present, inline_dates = _inline_evidence(model_text)
+        all_dates = sorted(sibling_dates + inline_dates)
+        if not all_dates and not inline_present:
+            continue
+
+        model_date = _model_updated(model_text)
+        undrained = [d for d in all_dates if not model_date or d > model_date]
+        newest = all_dates[-1] if all_dates else ""
+        lag_days = _days_between(model_date, newest) if model_date and newest else None
+        stale = bool(all_dates) and (not model_date or (lag_days or 0) > STALE_DAYS)
+
+        rel = str(model_path.relative_to(REPO_ROOT / "Memory" / project))
+        areas.append(
+            {
+                "area": rel.removesuffix(".md"),
+                "model_updated": model_date,
+                "newest_evidence": newest,
+                "undrained_count": len(undrained),
+                "oldest_undrained": undrained[0] if undrained else "",
+                "lag_days": lag_days,
+                "stale": stale,
+                "inline_legacy": inline_present,
+            }
+        )
+
+    legacy_dir = REPO_ROOT / "Memory" / project / "_legacy"
+    legacy_files = (
+        sum(1 for p in legacy_dir.rglob("*") if p.is_file()) if legacy_dir.is_dir() else 0
+    )
+    return {"areas": areas, "legacy_files": legacy_files}
+
+
 def iter_recent_meetings(
     project: str, since: str | None, until: str | None, limit: int = 25
 ) -> list[dict]:
@@ -383,6 +501,7 @@ def main():
     recent_meetings = iter_recent_meetings(args.project, since, until)
     recap_path, last_section = load_last_recap(args.project)
     pending = pending_decisions_snippet(args.project)
+    debt = evidence_debt(args.project)
 
     if args.json:
         print(
@@ -397,6 +516,7 @@ def main():
                     "last_recap_file": recap_path,
                     "last_recap_section": last_section,
                     "pending_decisions": pending,
+                    "evidence_debt": debt,
                 },
                 indent=2,
             )
@@ -435,6 +555,36 @@ def main():
         lines.extend(["## Pending decisions (carry forward)", ""])
         for p in pending:
             lines.append(f"- {p}")
+        lines.append("")
+
+    if debt["areas"] or debt["legacy_files"]:
+        lines.extend(["## Evidence debt (drain in Memory step — or defer explicitly)", ""])
+        for a in debt["areas"]:
+            parts = [f"- **{a['area']}**"]
+            if a["undrained_count"]:
+                oldest = f" (oldest {a['oldest_undrained']})" if a["oldest_undrained"] else ""
+                plural = "s" if a["undrained_count"] != 1 else ""
+                parts.append(f" — {a['undrained_count']} un-drained bullet{plural}{oldest}")
+            else:
+                parts.append(" — drained")
+            if a["model_updated"]:
+                parts.append(f"; model updated {a['model_updated']}")
+            else:
+                parts.append("; model has no `model_updated:` date")
+            if a["newest_evidence"]:
+                parts.append(f", newest evidence {a['newest_evidence']}")
+            if a["stale"]:
+                lag = f" ({a['lag_days']} days behind)" if a["lag_days"] is not None else ""
+                parts.append(f" ⚠ STALE{lag}")
+            if a["inline_legacy"]:
+                parts.append(
+                    f" — inline `# Evidence` (legacy): migrate to {a['area']}.evidence.md"
+                )
+            lines.append("".join(parts))
+        if debt["legacy_files"]:
+            lines.append(
+                f"- **_legacy/** contains {debt['legacy_files']} file(s) — migrate or archive"
+            )
         lines.append("")
 
     if recent_meetings:

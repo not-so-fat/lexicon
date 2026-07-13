@@ -50,7 +50,7 @@ If either is missing, ask: "Which date and which account?"
    - If it already exists, only re-summarize when the user explicitly asks to refresh.
 
 5. **Distill** — For each new meeting note:
-   - Apply `.cursor/rules/distill.mdc` — **evidence only** (`# Evidence`, People `# Evidence Log`); **never** `# Current model`.
+   - Apply `.cursor/rules/distill.mdc` — **evidence only** (`<Area>.evidence.md` on area layout, `# Evidence` on topic pages, People `# Evidence Log`); **never** `# Current model`.
    - Fill the note's **# Distilled** section with links to updated files.
 
 6. **Report** — Tell user: transcripts fetched, notes created, memory updated. Remind that **triage** (interactive recap + Ideas queue) is a separate user-kicked step — not part of this batch run.

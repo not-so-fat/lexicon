@@ -42,11 +42,11 @@ There is **no separate reconcile stage**. Synthesis happens only in **triage** (
 
 | Tier | What | Mutability |
 |---|---|---|
-| **Evidence** | Meetings, transcripts, `# Evidence Log`, append sections | Append-only |
+| **Evidence** | Meetings, transcripts, `# Evidence Log`, `<Area>.evidence.md` logs | Append-only |
 | **Working** | `# Current read` / `# Current model` on Memory area files | Updated in **triage** |
 | **Direction** | Principles only (`Direction.md`) | Updated in **triage** (rare; human approval) |
 
-Agents read **top-down**: Direction → current model → evidence.
+Agents read **top-down**: Direction → current model → evidence. Area layout keeps working truth and evidence in separate files so the top-down read stays cheap.
 
 ---
 
@@ -56,28 +56,43 @@ Agents read **top-down**: Direction → current model → evidence.
 
 ```
 Memory/<project>/
-  Direction.md          # principles only
-  Validation.md         # market learnings + ## Open hypotheses
-  Org.md                # + ## Open decisions
-  Product.md            # + ## Open decisions
+  Direction.md               # principles only
+  Validation.md              # market learnings + ## Open hypotheses
+  Validation.evidence.md     # append-only evidence log (distill)
+  Org.md                     # + ## Open decisions
+  Org.evidence.md
+  Product.md                 # + ## Open decisions
+  Product.evidence.md
   Me.md
-  Partners/<Company>.md # + ## Open decisions
+  Me.evidence.md
+  Partners/<Company>.md      # + ## Open decisions
+  Partners/<Company>.evidence.md
 
 People/<project>/<Person>.md   # # Current read (triage) + # Evidence Log (distill)
 ```
 
-Each area file:
+Each area **model file** holds synthesis only:
 
 ```markdown
-# Current model (last updated: YYYY-MM-DD)
+---
+model_updated: YYYY-MM-DD    # stamped by triage on every # Current model refresh
+---
+
+# Current model
 <what a stranger needs now>
 
 ## Open decisions
 - YYYY-MM-DD — Pending: … — Source: [[…]]
-
-# Evidence (append-only)
-- YYYY-MM-DD — … — Source: [[Meeting or Idea]]
 ```
+
+The sibling **evidence file** (`<Area>.evidence.md`) is an append-only log:
+
+```markdown
+# Evidence (append-only)
+- YYYY-MM-DD — <one line, ~30 words max> — Source: [[Meeting or Idea]]
+```
+
+Detail stays in the linked meeting note; evidence bullets are greppable pointers, not re-summaries. Legacy inline `# Evidence` sections in model files are read-only — new bullets go to the sibling file, and triage migrates the old section over.
 
 ### Topic slugs (default for new / small projects)
 
@@ -113,13 +128,13 @@ User kicks triage — confirm **period** if unclear (suggest since last triage o
 python3 scripts/triage_queue.py --project <project> [--since YYYY-MM-DD] [--until YYYY-MM-DD]
 ```
 
-Script returns: **previous triage**, **pending decisions**, **recent meetings (context)**, **ideas queue**.
+Script returns: **previous triage**, **pending decisions**, **evidence debt** (area layout), **recent meetings (context)**, **ideas queue**.
 
 ### Session flow
 
 1. **Recap together** — what happened, how you're doing, open problems.
 2. **Discuss** — direction shifts, resolve or carry forward open decisions.
-3. **Update Memory** — `# Current model` / durable sections, `# Current read`, rare Direction (you approve writes).
+3. **Update Memory** — `# Current model` / durable sections, `# Current read`, rare Direction (you approve writes). **Drain evidence debt:** fold un-drained bullets into `# Current model` and stamp `model_updated:` — or explicitly defer. A **⚠ STALE** flag (model lagging newest evidence > 21 days) must not survive the session unaddressed.
 4. **Clean Ideas** — Promote → memory, Retire stale drafts, Keep / Skip exploring notes.
 5. **Recap log** — append `Metadata/recap/<project>/YYYY-MM.md`.
 
@@ -169,8 +184,8 @@ Templates: `.cursor/templates/ideas_template.md`, `.cursor/templates/clipping_te
 | Stage | Memory impact | Meetings | Ideas |
 |---|---|---|---|
 | **Summarize** | Creates meeting note | Created/updated | — |
-| **Distill** | Append **`# Evidence`** only; factual **Open decisions** from meeting | `# Distilled` updated; **no `triaged`** | — |
-| **Triage** | Refresh **`# Current model`** (or durable sections); resolve open decisions; People **`# Current read`** | **Read-only** for recap | Promote / Retire / Keep queue |
+| **Distill** | Append evidence only (**`<Area>.evidence.md`** on area layout); factual **Open decisions** from meeting | `# Distilled` updated; **no `triaged`** | — |
+| **Triage** | Refresh **`# Current model`** + stamp `model_updated:` (or durable sections); drain evidence debt; resolve open decisions; People **`# Current read`** | **Read-only** for recap | Promote / Retire / Keep queue |
 
 ---
 

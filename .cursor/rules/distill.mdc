@@ -44,6 +44,8 @@ Signals are primary input.
 
 ## Step 1 — Determine routing category (deterministic)
 
+**Route by subject, not by source.** Evidence goes to the Memory project it is *about*, regardless of which account or venue captured the meeting or where the meeting note lives. A personal-account conference chat containing market intel for project X appends to `Memory/X/` (e.g. `Validation.evidence.md`), not to the personal project. List every cross-project destination in `# Distilled`.
+
 Use meeting_type + context (not signal taxonomy) to route most outputs:
 
 A) People-focused routing
@@ -52,13 +54,13 @@ A) People-focused routing
 
 B) Product routing
 - If context in [external] OR meeting_type in [customer, interview]
-  → append Memory `# Evidence` (Product or Partners)
-  → **area layout:** `Memory/<Project>/Product.md` `# Evidence` or `Partners/<Co>.md`
+  → append Memory evidence (Product or Partners)
+  → **area layout:** `Memory/<Project>/Product.evidence.md` or `Partners/<Co>.evidence.md`
 
 C) Org routing
 - If meeting_type in [leadership, team] AND context in [internal]
-  → append Memory `# Evidence` on Org
-  → **area layout:** `Memory/<Project>/Org.md` `# Evidence`
+  → append Memory evidence on Org
+  → **area layout:** `Memory/<Project>/Org.evidence.md`
 
 D) Decisions routing (always)
 - If Decisions section contains entries (not “(None)”)
@@ -66,7 +68,7 @@ D) Decisions routing (always)
   → area layout: append to area `## Open decisions` or `## Open hypotheses` when meeting records **pending** (factual capture)
 
 E) Personal routing
-- Meaningful **# AI Evaluation** → append `Memory/<Project>/Me.md` `# Evidence` when that file exists; else `Personal/ai_evaluation.md` (classic layout)
+- Meaningful **# AI Evaluation** → append `Memory/<Project>/Me.evidence.md` when `Me.md` exists (area layout); else `Personal/ai_evaluation.md` (classic layout)
 - One compact evidence line per meeting (growth signal); full Did well / Could improve / Experiment stays in the meeting note
 - Promote recurring patterns to `Me.md` `# Current model` in **triage**, not distill
 
@@ -87,7 +89,7 @@ Decisions:
 - Memory/<Project>/Decisions/decisions.md
 
 Personal (self-improvement):
-- Memory/<Project>/Me.md `# Evidence` (preferred — create in triage when patterns recur)
+- Memory/<Project>/Me.evidence.md (area layout — create in triage when patterns recur)
 - Memory/<Project>/Personal/ai_evaluation.md (classic layout only, when no `Me.md`)
 
 Topic naming — match-before-create:
@@ -102,26 +104,32 @@ Detect: area files (`Product.md`, `Me.md`, etc.) exist at `Memory/<Project>/` ro
 
 **Do not** create or append to `Product/<topic>.md`, `Org/<topic>.md`, `Personal/ai_evaluation.md`, legacy decision logs, or `_legacy/` files when area files exist.
 
+Evidence lives in the **sibling evidence file**, never in the model file. Create `<Area>.evidence.md` (with a `# Evidence (append-only)` heading) if it does not exist yet. If the model file still has a legacy inline `# Evidence` section, leave it untouched — append new bullets to the sibling file only; triage migrates the old section.
+
 Append only to:
-- Product signals → `Product.md` `# Evidence`
-- Org signals → `Org.md` `# Evidence`
-- Cross-partner validation → `Validation.md` `# Evidence` or `## Open hypotheses` (if still testing)
-- Partner-specific → `Partners/<Company>.md` `# Evidence`
-- Personal eval → `Me.md` `# Evidence`
-- Pending decisions (from meeting) → area `## Open decisions` / `## Open hypotheses` (dated line + source)
+- Product signals → `Product.evidence.md`
+- Org signals → `Org.evidence.md`
+- Cross-partner validation → `Validation.evidence.md`, or `Validation.md` `## Open hypotheses` (if still testing)
+- Partner-specific → `Partners/<Company>.evidence.md`
+- Personal eval → `Me.evidence.md`
+- Pending decisions (from meeting) → area `## Open decisions` / `## Open hypotheses` on the model file (dated line + source)
+
+The `## Open decisions` / `## Open hypotheses` append is the **only** write distill makes to a model file.
 
 Create a topic page (classic layout) whenever a meaningful signal appears.
 
 ## Step 3 — Distill from each section (what to extract)
 
-### 3.1 Signals → `# Evidence`
+### 3.1 Signals → evidence
 Extract generously. Include subtle or ambiguous signals with attribution.
 
 Each bullet:
-- short statement
+- **one line, ~30 words max** — a statement, not a paragraph
 - date
 - link to meeting note
 - optional `#topic_slug` inline (canonical from registry)
+
+**Hard cap.** The bullet is a greppable pointer; detail stays in the linked meeting note. Do not re-summarize the meeting into the evidence line — that is Summarize's job, already done. If a signal cannot fit one line, split it into separate signals or tighten the paraphrase.
 
 ### 3.2 Decisions → decisions log or `## Open decisions`
 - **Decided:** append to Decisions log (classic) or `# Evidence` with "Decision:" prefix

@@ -201,8 +201,8 @@ Same for all sources:
 
 1. **Summarize** → `Meetings/<Project>/YYYY-MM-DD Title.md`
 2. **Review** the note (especially HiDock speaker labels)
-3. **Distill** → append `# Evidence` to People / Memory
-4. **Triage** (later) → update `# Current model` in interactive sessions
+3. **Distill** → append evidence to People / Memory (`<Area>.evidence.md` on area layout)
+4. **Triage** (later) → update `# Current model`, drain evidence debt, in interactive sessions
 
 ---
 

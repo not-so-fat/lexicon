@@ -34,9 +34,9 @@ For a **large** triage (memory + many ideas), start in **Plan mode** so phases a
 
 | Phase | What happens |
 |-------|----------------|
-| 1. Queue | Run `triage_queue.py`; read recap + pending decisions + meetings context |
+| 1. Queue | Run `triage_queue.py`; read recap + pending decisions + **evidence debt** + meetings context |
 | 2. Recap | Conversation — narrative, mental state, corrections (**no writes**) |
-| 3. Memory | Propose updates; user approves |
+| 3. Memory | Propose updates; drain evidence debt; user approves |
 | 4. Ideas | Cluster queue → Promote / Keep / **Retire (delete)**; user approves |
 | 5. Log | Append `Metadata/recap/<project>/YYYY-MM.md` |
 
@@ -48,11 +48,11 @@ Switch to **Agent mode** to execute approved writes. Small sessions can stay in 
    ```bash
    python3 scripts/triage_queue.py --project <project> [--since YYYY-MM-DD] [--until YYYY-MM-DD]
    ```
-   Read: previous triage, pending decisions, **recent meetings (context)**, **ideas queue**.
+   Read: previous triage, pending decisions, **evidence debt** (area layout), **recent meetings (context)**, **ideas queue**.
 
 2. **Recap (conversation)** — Narrative from recent meetings + Memory + Me.md (if present). Discuss open problems. Wait for user input before writes.
 
-3. **Memory updates** — Propose changes, resolve open decisions, rare Direction edits, People `# Current read`. User approves first.
+3. **Memory updates** — Propose changes, resolve open decisions, rare Direction edits, People `# Current read`. **Drain evidence debt:** every area listed in the script's Evidence debt section gets its un-drained bullets folded into `# Current model` (stamp `model_updated: YYYY-MM-DD` in frontmatter) or an explicit user-approved deferral. Migrate legacy inline `# Evidence` sections to the sibling `.evidence.md` when flagged. User approves first.
 
 4. **Ideas queue** — Propose Promote / Keep / Skip / Retire per idea (cluster when possible). User approves first.
 

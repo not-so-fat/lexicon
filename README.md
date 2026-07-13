@@ -45,7 +45,7 @@ Your clone **is** your vault: content stays local/private, engine updates pull f
 
 1. **Ingest** — after meetings: *"Process my Fireflies meetings for today"* / *"Process my HiDock meetings"* / paste into a manual template. Transcripts land under `Transcripts/`, meeting notes under `Meetings/<Project>/`.
 2. **Review** — skim the meeting note; fix speaker labels or project if the agent guessed wrong.
-3. **Distill** — *"Distill this meeting note."* Facts append to People pages and Memory `# Evidence` (append-only; nothing is synthesized yet).
+3. **Distill** — *"Distill this meeting note."* Facts append to People pages and Memory evidence logs (append-only, one line per fact; nothing is synthesized yet).
 4. **Triage (weekly-ish)** — *"Triage [project]."* Interactive recap: you and the agent review recent evidence and the Ideas queue, and only here does `# Current model` get updated. See [docs/MEMORY_MODEL.md](docs/MEMORY_MODEL.md).
 5. **Query anytime** — just ask in Cursor: *"What do we know about pricing?"*, *"Prepare me for a meeting with Alex"*, *"What decisions did we make last month?"* The agent searches Memory → People → Meetings, most-distilled first.
 
@@ -86,13 +86,14 @@ Philosophy: prefer recall over compression; notes are evidence. Early-stage sign
 | "Process my HiDock meetings" | Sync → pending list → summarize → distill |
 | "Create a manual transcript template" | Stub in `Transcripts/Manual/` |
 | "Summarize this transcript" | Meeting note at `Meetings/<Project>/` |
-| "Distill this meeting note" | Append `# Evidence`; fill `# Distilled` |
+| "Distill this meeting note" | Append evidence bullets; fill `# Distilled` |
 | "Triage \<project\>" or "Recap \<project\>" | Interactive recap, update Memory current truth, clean Ideas queue |
 
 Skills: `.cursor/skills/`. Rules: `.cursor/rules/`.
 
 ```bash
 python3 scripts/triage_queue.py --project <project> [--since YYYY-MM-DD]
+python3 scripts/lint_vault.py
 python3 scripts/hidock_pending.py list
 python3 scripts/verify_setup.py
 ```

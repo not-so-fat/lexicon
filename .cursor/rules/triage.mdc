@@ -29,7 +29,7 @@ An **interactive thinking session** with the user — not a meeting inbox proces
 
 ## Layout detection
 
-- **Area files:** `Memory/<project>/Product.md` exists → update `# Current model`, `## Open decisions`, `Direction.md`, `Validation.md`, `Partners/*.md`, `Me.md`.
+- **Area files:** `Memory/<project>/Product.md` exists → update `# Current model`, `## Open decisions`, `Direction.md`, `Validation.md`, `Partners/*.md`, `Me.md`. Evidence lives in sibling `<Area>.evidence.md` files (read-only input for synthesis).
 - **Topic slugs (default):** update `# What we learned` / `# Signals` on topic pages; refresh `Decisions/decisions.md` narrative; People `# Current read` if present.
 
 ## Principles
@@ -52,7 +52,9 @@ An **interactive thinking session** with the user — not a meeting inbox proces
 python3 scripts/triage_queue.py --project <project> [--since YYYY-MM-DD] [--until YYYY-MM-DD]
 ```
 
-Read: **Previous triage**, **Pending decisions**, **Recent meetings (recap context)**, **Ideas queue**.
+Read: **Previous triage**, **Pending decisions**, **Evidence debt** (area layout), **Recent meetings (recap context)**, **Ideas queue**.
+
+**Evidence debt is an obligation, not FYI.** The script lists, per area, bullets appended since the model was last updated, **⚠ STALE** flags (model lags newest evidence > 21 days), un-migrated inline `# Evidence` sections, and `_legacy/` content. Each debt line must be drained into `# Current model` or explicitly deferred with the user during Step 2 — never silently skipped.
 
 ## Step 1 — Recap (conversation)
 
@@ -71,10 +73,14 @@ After recap discussion, propose **Memory** changes:
 
 | Action | Target (area layout) | Target (topic-slug layout) |
 |---|---|---|
-| **Update current truth** | `# Current model` on Validation, Product, Org, Partners, Me | `# What we learned` / `# Signals` on topic pages |
+| **Drain evidence** | Fold un-drained `<Area>.evidence.md` bullets into `# Current model`; stamp frontmatter `model_updated: YYYY-MM-DD` | — |
+| **Update current truth** | `# Current model` on Validation, Product, Org, Partners, Me + stamp `model_updated:` | `# What we learned` / `# Signals` on topic pages |
 | **Resolve decision** | Move from `## Open decisions` / `## Open hypotheses` into `# Current model` | Update decisions log + durable sections |
+| **Migrate legacy evidence** | Move inline `# Evidence` section from model file into sibling `<Area>.evidence.md` (verbatim, append-only) | — |
 | **Canon** | Rare edit to `Direction.md` (principles only; explicit approval) | — |
 | **People read** | Refresh `# Current read` (~5 bullets) | Same if section exists |
+
+Every `# Current model` refresh stamps `model_updated:` — that is what resets the evidence-debt counter and the staleness alarm.
 
 Do **not** append new `# Evidence` from meetings here — that is **distill**.
 

@@ -18,11 +18,15 @@ Appends **evidence only** from a meeting note. **Triage** later updates `# Curre
 - `triaged` on meeting notes
 
 **Do append:**
-- Memory `# Evidence` (Product, Org, Validation, Partners, **Me**)
+- Memory evidence files — area layout: `<Area>.evidence.md` siblings (Product, Org, Validation, Partners, **Me**); create if missing, never write evidence into the model file
 - People `# Evidence Log`
-- `## Open decisions` / `## Open hypotheses` when meeting records pending items
+- `## Open decisions` / `## Open hypotheses` when meeting records pending items (the only model-file write)
 - Classic topic slugs: `Product/<topic>.md`, `Decisions/decisions.md` — only when the project has no area files
-- AI Evaluation → `Me.md` `# Evidence` when it exists; `Personal/ai_evaluation.md` only in classic layout
+- AI Evaluation → `Me.evidence.md` when `Me.md` exists; `Personal/ai_evaluation.md` only in classic layout
+
+**Bullet cap:** one line, ~30 words max, dated, with meeting-note source link. Detail stays in the meeting note — never re-summarize the meeting into the evidence line.
+
+**Route by subject:** evidence about another project goes to that project's Memory files, wherever the meeting note lives. List cross-project destinations in `# Distilled`.
 
 **Not triage.** Distill appends **evidence** only. Synthesis (`# Current model`, `# Current read`, Direction) happens in **lexicon-triage** after user approval. See `Memory/Lexicon/processing-strategy.md`.
 
