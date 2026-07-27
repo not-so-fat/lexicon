@@ -1,0 +1,2 @@
+# Dev only — end users install requirements.txt and never need this.
+pytest>=7.0.0
