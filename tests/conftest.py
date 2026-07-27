@@ -14,16 +14,16 @@ sys.path.insert(0, str(SCRIPTS))
 def vault(tmp_path: Path) -> Path:
     """Minimal vault: one area with a direction file and one evidence log."""
     (tmp_path / "Direction").mkdir()
-    (tmp_path / "Direction" / "kite.md").write_text(
-        "---\narea: kite\ndirection_updated: 2026-07-01\n---\n\n"
-        "# Direction — Kite\n\n"
+    (tmp_path / "Direction" / "acme.md").write_text(
+        "---\narea: acme\ndirection_updated: 2026-07-01\n---\n\n"
+        "# Direction — Acme\n\n"
         "## Purpose\n\nWhy this area exists.\n\n"
         "## Principles\n\nA standing constraint.\n\n"
         "## Standards\n\nA quality bar.\n",
         encoding="utf-8",
     )
-    (tmp_path / "Memory" / "kite").mkdir(parents=True)
-    (tmp_path / "Memory" / "kite" / "Product.evidence.md").write_text(
+    (tmp_path / "Memory" / "acme").mkdir(parents=True)
+    (tmp_path / "Memory" / "acme" / "Product.evidence.md").write_text(
         "# Evidence (append-only)\n"
         "- 2026-07-10 — a thing happened — Source: [[Some Meeting]]\n",
         encoding="utf-8",

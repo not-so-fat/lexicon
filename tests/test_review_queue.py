@@ -2,17 +2,17 @@ from datetime import date
 
 import review_queue
 
-ONE_WIG = """### [WIG] Decide the Circle hinge
-- **Area:** kite
+ONE_WIG = """### [WIG] Decide the platform migration
+- **Area:** acme
 - **Horizon:** 2026-08-30
-- **Done when:** a written stay-or-go call exists
-- **Obstacle:** the bonus decides it by default
-- **Evidence:** Memory/kite/Product.evidence.md
+- **Done when:** a written go/no-go call exists
+- **Obstacle:** the deadline passes and nobody decides
+- **Evidence:** Memory/acme/Product.evidence.md
 - **Opened:** 2026-07-26
 """
 
 TWO_OBJECTIVES = ONE_WIG + """
-### Resolve the external track
+### Resolve the vendor evaluation
 - **Area:** personal
 - **Horizon:** 2026-09-30
 - **Done when:** an offer exists to weigh, or both tracks are closed in writing
@@ -29,11 +29,11 @@ def test_parses_wig_flag_and_fields(write_objectives):
     assert len(objectives) == 1
     obj = objectives[0]
     assert obj["wig"] is True
-    assert obj["title"] == "Decide the Circle hinge"
-    assert obj["area"] == "kite"
+    assert obj["title"] == "Decide the platform migration"
+    assert obj["area"] == "acme"
     assert obj["horizon"] == "2026-08-30"
     assert obj["opened"] == "2026-07-26"
-    assert obj["evidence"] == ["Memory/kite/Product.evidence.md"]
+    assert obj["evidence"] == ["Memory/acme/Product.evidence.md"]
     assert obj["missing_fields"] == []
 
 
@@ -42,8 +42,8 @@ def test_parses_multiple_and_marks_non_wig(write_objectives):
     objectives = review_queue.parse_objectives(path.read_text(encoding="utf-8"))
 
     assert [o["title"] for o in objectives] == [
-        "Decide the Circle hinge",
-        "Resolve the external track",
+        "Decide the platform migration",
+        "Resolve the vendor evaluation",
     ]
     assert [o["wig"] for o in objectives] == [True, False]
 
@@ -51,7 +51,7 @@ def test_parses_multiple_and_marks_non_wig(write_objectives):
 def test_reports_missing_required_fields(write_objectives):
     path = write_objectives(
         "### Half-written objective\n"
-        "- **Area:** kite\n"
+        "- **Area:** acme\n"
         "- **Opened:** 2026-07-26\n"
     )
     objectives = review_queue.parse_objectives(path.read_text(encoding="utf-8"))
@@ -66,7 +66,7 @@ def test_reports_missing_required_fields(write_objectives):
 
 def test_ignores_content_after_active_section(write_objectives):
     path = write_objectives(
-        ONE_WIG + "\n## Notes\n\n### Not an objective\n- **Area:** kite\n"
+        ONE_WIG + "\n## Notes\n\n### Not an objective\n- **Area:** acme\n"
     )
     objectives = review_queue.parse_objectives(path.read_text(encoding="utf-8"))
 
@@ -76,15 +76,15 @@ def test_ignores_content_after_active_section(write_objectives):
 def test_splits_multiple_evidence_paths(write_objectives):
     path = write_objectives(
         ONE_WIG.replace(
-            "- **Evidence:** Memory/kite/Product.evidence.md",
-            "- **Evidence:** Memory/kite/Product.evidence.md, Meetings/kite",
+            "- **Evidence:** Memory/acme/Product.evidence.md",
+            "- **Evidence:** Memory/acme/Product.evidence.md, Meetings/acme",
         )
     )
     objectives = review_queue.parse_objectives(path.read_text(encoding="utf-8"))
 
     assert objectives[0]["evidence"] == [
-        "Memory/kite/Product.evidence.md",
-        "Meetings/kite",
+        "Memory/acme/Product.evidence.md",
+        "Meetings/acme",
     ]
 
 
@@ -116,8 +116,8 @@ def test_real_objective_after_a_commented_example_is_still_parsed(write_objectiv
     objectives = review_queue.parse_objectives(path.read_text(encoding="utf-8"))
 
     assert len(objectives) == 1
-    assert objectives[0]["title"] == "Decide the Circle hinge"
-    assert objectives[0]["area"] == "kite"
+    assert objectives[0]["title"] == "Decide the platform migration"
+    assert objectives[0]["area"] == "acme"
 
 
 def test_fenced_wig_example_is_not_parsed_as_a_live_objective(write_objectives):
@@ -141,7 +141,7 @@ def test_fenced_wig_example_is_not_parsed_as_a_live_objective(write_objectives):
     objectives = review_queue.parse_objectives(path.read_text(encoding="utf-8"))
 
     assert len(objectives) == 1
-    assert objectives[0]["title"] == "Decide the Circle hinge"
+    assert objectives[0]["title"] == "Decide the platform migration"
     assert sum(1 for o in objectives if o["wig"]) == 1
 
 
@@ -155,7 +155,7 @@ def test_fenced_heading_does_not_terminate_the_scan(write_objectives):
         "```markdown\n"
         "## Something that looks like a section break\n"
         "```\n\n"
-        "### Resolve the external track\n"
+        "### Resolve the vendor evaluation\n"
         "- **Area:** personal\n"
         "- **Horizon:** 2026-09-30\n"
         "- **Done when:** an offer exists to weigh, or both tracks are closed in writing\n"
@@ -166,8 +166,8 @@ def test_fenced_heading_does_not_terminate_the_scan(write_objectives):
     objectives = review_queue.parse_objectives(path.read_text(encoding="utf-8"))
 
     assert [o["title"] for o in objectives] == [
-        "Decide the Circle hinge",
-        "Resolve the external track",
+        "Decide the platform migration",
+        "Resolve the vendor evaluation",
     ]
 
 
@@ -183,28 +183,28 @@ def test_shipped_objectives_scaffold_has_no_live_objectives():
 
 def test_newest_evidence_reads_dated_bullets_in_a_file(vault):
     assert (
-        review_queue.newest_evidence_date(vault, ["Memory/kite/Product.evidence.md"])
+        review_queue.newest_evidence_date(vault, ["Memory/acme/Product.evidence.md"])
         == "2026-07-10"
     )
 
 
 def test_newest_evidence_reads_dated_filenames_in_a_directory(vault):
-    meetings = vault / "Meetings" / "kite"
+    meetings = vault / "Meetings" / "acme"
     meetings.mkdir(parents=True)
     (meetings / "2026-07-15 Some Meeting.md").write_text("x", encoding="utf-8")
     (meetings / "2026-06-01 Older Meeting.md").write_text("x", encoding="utf-8")
 
-    assert review_queue.newest_evidence_date(vault, ["Meetings/kite"]) == "2026-07-15"
+    assert review_queue.newest_evidence_date(vault, ["Meetings/acme"]) == "2026-07-15"
 
 
 def test_newest_evidence_takes_the_max_across_paths(vault):
-    meetings = vault / "Meetings" / "kite"
+    meetings = vault / "Meetings" / "acme"
     meetings.mkdir(parents=True)
     (meetings / "2026-07-22 Later.md").write_text("x", encoding="utf-8")
 
     assert (
         review_queue.newest_evidence_date(
-            vault, ["Memory/kite/Product.evidence.md", "Meetings/kite"]
+            vault, ["Memory/acme/Product.evidence.md", "Meetings/acme"]
         )
         == "2026-07-22"
     )
@@ -234,14 +234,14 @@ def test_known_areas_from_direction_files(vault):
     (vault / "Direction" / "personal.md").write_text("# Direction", encoding="utf-8")
     (vault / "Direction" / "README.md").write_text("# Readme", encoding="utf-8")
 
-    assert review_queue.known_areas(vault) == ["kite", "personal"]
+    assert review_queue.known_areas(vault) == ["acme", "personal"]
 
 
 def test_known_areas_excludes_the_lexicon_charter(vault):
     """Direction/Lexicon.md is the tool's own charter, not a user area."""
     (vault / "Direction" / "Lexicon.md").write_text("# Direction", encoding="utf-8")
 
-    assert review_queue.known_areas(vault) == ["kite"]
+    assert review_queue.known_areas(vault) == ["acme"]
 
 
 def test_report_flags_cap_breach_and_wig_count(write_objectives, vault, monkeypatch):
@@ -250,11 +250,11 @@ def test_report_flags_cap_breach_and_wig_count(write_objectives, vault, monkeypa
     for i in range(3):
         body += (
             f"### Objective {i}\n"
-            "- **Area:** kite\n"
+            "- **Area:** acme\n"
             "- **Horizon:** 2026-12-31\n"
             "- **Done when:** something observable\n"
             "- **Obstacle:** something likely\n"
-            "- **Evidence:** Memory/kite/Product.evidence.md\n"
+            "- **Evidence:** Memory/acme/Product.evidence.md\n"
             "- **Opened:** 2026-07-01\n\n"
         )
     write_objectives(body)
@@ -275,7 +275,7 @@ def test_days_between_returns_none_on_malformed_date():
 
 
 def test_report_survives_a_malformed_evidence_date(write_objectives, vault):
-    (vault / "Memory" / "kite" / "Product.evidence.md").write_text(
+    (vault / "Memory" / "acme" / "Product.evidence.md").write_text(
         "# Evidence (append-only)\n"
         "- 2026-07-10 — a thing happened — Source: [[Some Meeting]]\n"
         "- 2026-13-45 — a typo'd date — Source: [[Some Meeting]]\n",
@@ -307,17 +307,17 @@ def test_report_flags_past_horizon_and_soon(write_objectives, vault):
 
     report = review_queue.build_report(vault, date(2026, 7, 27))
 
-    assert report["past_horizon"] == ["Decide the Circle hinge"]
+    assert report["past_horizon"] == ["Decide the platform migration"]
     assert report["objectives"][0]["days_to_horizon"] == -26
 
 
 def test_report_lists_areas_governed_only_by_standards(write_objectives, vault):
-    (vault / "Direction" / "aaron.md").write_text("# Direction", encoding="utf-8")
+    (vault / "Direction" / "research.md").write_text("# Direction", encoding="utf-8")
     write_objectives(ONE_WIG)
 
     report = review_queue.build_report(vault, date(2026, 7, 27))
 
-    assert report["areas_without_objectives"] == ["aaron"]
+    assert report["areas_without_objectives"] == ["research"]
 
 
 def test_report_flags_stale_review(write_objectives, vault):
@@ -332,12 +332,12 @@ def test_report_flags_stale_review(write_objectives, vault):
 def test_render_labels_zero_objective_areas_as_governed_by_standards(
     write_objectives, vault
 ):
-    (vault / "Direction" / "aaron.md").write_text("# Direction", encoding="utf-8")
+    (vault / "Direction" / "research.md").write_text("# Direction", encoding="utf-8")
     write_objectives(ONE_WIG)
 
     text = review_queue.render(review_queue.build_report(vault, date(2026, 7, 27)))
 
-    assert "aaron" in text
+    assert "research" in text
     assert "governed by Standards" in text
     assert "WARN" not in text
 
@@ -345,7 +345,7 @@ def test_render_labels_zero_objective_areas_as_governed_by_standards(
 def test_render_flags_cap_breach_and_missing_wig(write_objectives, vault, monkeypatch):
     monkeypatch.setenv("LEXICON_OBJECTIVE_CAP", "1")
     write_objectives(ONE_WIG.replace("[WIG] ", "") + "\n" + ONE_WIG.replace(
-        "Decide the Circle hinge", "Another objective"
+        "Decide the platform migration", "Another objective"
     ).replace("[WIG] ", ""))
 
     text = review_queue.render(review_queue.build_report(vault, date(2026, 7, 27)))

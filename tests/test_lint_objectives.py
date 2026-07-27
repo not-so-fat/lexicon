@@ -2,12 +2,12 @@ from datetime import date
 
 import lint_vault
 
-GOOD = """### [WIG] Decide the Circle hinge
-- **Area:** kite
+GOOD = """### [WIG] Decide the platform migration
+- **Area:** acme
 - **Horizon:** 2026-08-30
-- **Done when:** a written stay-or-go call exists
-- **Obstacle:** the bonus decides it by default
-- **Evidence:** Memory/kite/Product.evidence.md
+- **Done when:** a written go/no-go call exists
+- **Obstacle:** the deadline passes and nobody decides
+- **Evidence:** Memory/acme/Product.evidence.md
 - **Opened:** 2026-07-26
 """
 
@@ -40,7 +40,7 @@ def test_missing_wig_is_an_error(vault, write_objectives, monkeypatch):
 
 
 def test_missing_required_field_is_an_error(vault, write_objectives, monkeypatch):
-    write_objectives(GOOD.replace("- **Obstacle:** the bonus decides it by default\n", ""))
+    write_objectives(GOOD.replace("- **Obstacle:** the deadline passes and nobody decides\n", ""))
 
     issues = _issues(vault, monkeypatch, "lint_objectives")
 
@@ -48,7 +48,7 @@ def test_missing_required_field_is_an_error(vault, write_objectives, monkeypatch
 
 
 def test_unknown_area_is_an_error(vault, write_objectives, monkeypatch):
-    write_objectives(GOOD.replace("- **Area:** kite", "- **Area:** nosucharea"))
+    write_objectives(GOOD.replace("- **Area:** acme", "- **Area:** nosucharea"))
 
     issues = _issues(vault, monkeypatch, "lint_objectives")
 
@@ -70,8 +70,8 @@ def test_missing_objectives_file_produces_no_issues(vault, monkeypatch):
 
 
 def test_disallowed_direction_section_is_an_error(vault, monkeypatch):
-    (vault / "Direction" / "kite.md").write_text(
-        "---\narea: kite\n---\n\n# Direction — Kite\n\n"
+    (vault / "Direction" / "acme.md").write_text(
+        "---\narea: acme\n---\n\n# Direction — Acme\n\n"
         "## Purpose\n\nx\n\n## Objectives\n\nnope\n",
         encoding="utf-8",
     )
@@ -84,7 +84,7 @@ def test_disallowed_direction_section_is_an_error(vault, monkeypatch):
 
 
 def test_leftover_memory_direction_file_is_a_warning(vault, monkeypatch):
-    (vault / "Memory" / "kite" / "Direction.md").write_text("# old", encoding="utf-8")
+    (vault / "Memory" / "acme" / "Direction.md").write_text("# old", encoding="utf-8")
 
     issues = _issues(vault, monkeypatch, "lint_direction")
 
@@ -136,8 +136,8 @@ def test_empty_objectives_file_produces_no_issues(vault, write_objectives, monke
 
 
 def test_disallowed_section_inside_fence_is_not_an_error(vault, monkeypatch):
-    (vault / "Direction" / "kite.md").write_text(
-        "---\narea: kite\n---\n\n# Direction — Kite\n\n"
+    (vault / "Direction" / "acme.md").write_text(
+        "---\narea: acme\n---\n\n# Direction — Acme\n\n"
         "## Purpose\n\nx\n\n"
         "## Standards\n\n"
         "Example of what not to write:\n\n"
@@ -151,8 +151,8 @@ def test_disallowed_section_inside_fence_is_not_an_error(vault, monkeypatch):
 
 
 def test_disallowed_section_outside_fence_still_errors(vault, monkeypatch):
-    (vault / "Direction" / "kite.md").write_text(
-        "---\narea: kite\n---\n\n# Direction — Kite\n\n"
+    (vault / "Direction" / "acme.md").write_text(
+        "---\narea: acme\n---\n\n# Direction — Acme\n\n"
         "## Purpose\n\nx\n\n## Objectives\n\nnope\n",
         encoding="utf-8",
     )
@@ -165,8 +165,8 @@ def test_disallowed_section_outside_fence_still_errors(vault, monkeypatch):
 
 
 def test_fenced_section_ignored_but_real_disallowed_section_caught(vault, monkeypatch):
-    (vault / "Direction" / "kite.md").write_text(
-        "---\narea: kite\n---\n\n# Direction — Kite\n\n"
+    (vault / "Direction" / "acme.md").write_text(
+        "---\narea: acme\n---\n\n# Direction — Acme\n\n"
         "## Purpose\n\nx\n\n"
         "Example of what not to write:\n\n"
         "```markdown\n## Objectives\n\nnope\n```\n\n"
@@ -190,8 +190,8 @@ def test_inner_fence_marker_with_info_string_does_not_close_outer_fence(vault, m
     prematurely "close" on the inner opening marker, re-enabling the section
     whitelist partway through content that is still fenced.
     """
-    (vault / "Direction" / "kite.md").write_text(
-        "---\narea: kite\n---\n\n# Direction — Kite\n\n"
+    (vault / "Direction" / "acme.md").write_text(
+        "---\narea: acme\n---\n\n# Direction — Acme\n\n"
         "## Purpose\n\nx\n\n"
         "## Standards\n\n"
         "Example of an example inside an example:\n\n"
