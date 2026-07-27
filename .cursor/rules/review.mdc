@@ -1,10 +1,12 @@
 ---
 description: Weekly cross-area objectives review — re-anchor, evidence, status, retire. Global, not per-project. User-kicked.
-globs: Objectives.md, Objectives.evidence.md, Direction/**/*.md, Metadata/review/**/*.md
-alwaysApply: false
+globs: Objectives.md, Objectives.evidence.md, Direction/**/*.md, Metadata/review/**/*.md, Memory/**/*.md, People/**/*.md, Meetings/**/*.md
+alwaysApply: true
 ---
 
 # Normative tier — routing and boundaries
+
+**Trigger:** User says "review objectives", "weekly review", "how am I doing against my goals", or similar.
 
 Lexicon has two tiers. **Descriptive** (`Memory/`, `People/`, `Meetings/`) records
 what is true. **Normative** (`Direction/<area>.md`, `Objectives.md`) records what
