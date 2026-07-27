@@ -8,7 +8,7 @@ description: Interactive triage — recap with user, update Memory current truth
 Interactive session: **recap → discuss → update Memory → clean Ideas**. Meetings are read-only context.
 
 **Rule:** `.cursor/rules/triage.mdc`  
-**Charter:** `Memory/Lexicon/processing-strategy.md`
+**Charter:** `Direction/Lexicon.md`
 
 ## What triage is / is not
 

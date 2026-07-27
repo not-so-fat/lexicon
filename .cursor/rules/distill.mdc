@@ -23,10 +23,10 @@ Do not rewrite past evidence unless clearly wrong.
 
 - `# Current model` on any Memory area file
 - `# Current read` on People pages
-- `Direction.md`
+- `Direction/<area>.md` and `Objectives.md`
 - Meeting note body (except `# Distilled` traceability section)
 
-**Triage** owns synthesis, `# Current model`, `# Current read`, and Direction. See `.cursor/rules/triage.mdc` and `Memory/Lexicon/processing-strategy.md`.
+**Triage** owns synthesis, `# Current model` and `# Current read`; the normative tier (`Direction/<area>.md`, `Objectives.md`) belongs to **review**. See `.cursor/rules/triage.mdc` and `Direction/Lexicon.md`.
 
 Do not set `triaged` on meeting notes.
 

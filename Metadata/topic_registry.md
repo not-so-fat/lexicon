@@ -43,3 +43,4 @@ in meeting notes or transcripts.
 
 | Slug | Aliases | Description |
 |------|---------|-------------|
+| goal_alignment | drift, objectives | Whether work is serving stated objectives; drift, re-anchoring, retirement |

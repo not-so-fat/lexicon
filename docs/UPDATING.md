@@ -7,8 +7,8 @@ Your vault starts as a clone of this repo. After that, **your content is yours**
 | Engine (synced from template) | Content (never synced — yours) |
 |---|---|
 | `.cursor/rules/`, `.cursor/skills/`, `.cursor/templates/` | `Meetings/`, `Memory/` (except `Memory/Lexicon/`), `People/`, `Ideas/`, `Transcripts/` |
-| `scripts/`, `Memory/Lexicon/` (process charter) | `Metadata/` (registries, recap logs, `User.md`) |
-| `docs/`, `README.md`, `requirements.txt`, `.env.example` | `.env`, `.cursor/rules/local-*.mdc` |
+| `scripts/`, `Memory/Lexicon/`, `Direction/Lexicon.md`, `Direction/README.md` (process charter) | `Metadata/` (registries, recap logs, review logs, `User.md`) |
+| `docs/`, `README.md`, `requirements.txt`, `.env.example` | `.env`, `.cursor/rules/local-*.mdc`, `Objectives.md`, `Objectives.evidence.md`, `Direction/<area>.md` |
 
 ## Recommended setup (private vault + template upstream)
 
@@ -22,12 +22,34 @@ git push -u origin main
 
 # whenever you want updates
 git fetch template
-git checkout template/main -- .cursor/rules .cursor/skills .cursor/templates scripts docs Memory/Lexicon README.md requirements.txt .env.example
+git checkout template/main -- .cursor/rules .cursor/skills .cursor/templates scripts docs Memory/Lexicon Direction/Lexicon.md Direction/README.md README.md requirements.txt .env.example
 git diff --stat                          # review what changed
 # commit to your private repo as usual
 ```
 
 `git checkout template/main -- <paths>` overwrites only files the template ships. Files that exist only in your vault — `local-*.mdc` rules, extra scripts, all content — are untouched.
+
+## Migrating to the normative tier
+
+The normative tier moved out of `Memory/`. Per area that has a `Direction.md`:
+
+```bash
+mkdir -p Direction
+git mv Memory/<area>/Direction.md Direction/<area>.md
+```
+
+Then sort each file's body into `## Purpose`, `## Principles` and `## Standards` —
+`lint_vault.py` rejects any other `##` section. Anything with a date that can be
+missed is not a principle: it is an objective, and belongs in `Objectives.md`.
+
+```bash
+python3 scripts/lexicon_init.py   # scaffolds Objectives.md and missing Direction files
+python3 scripts/lint_vault.py     # warns on anything left un-migrated
+```
+
+Migration is not complete until `lint_vault.py` stops warning about
+`Memory/<area>/Direction.md`. See [OBJECTIVES.md](OBJECTIVES.md) for what belongs
+in each section.
 
 ## Customizing without forking the engine
 

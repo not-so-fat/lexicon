@@ -16,7 +16,7 @@ Copy from `.cursor/templates/ideas_template.md` when creating a new idea.
 
 Meetings: **Summarize → Distill** (automated or per-note).
 
-Ideas: **Triage** when you are ready — interactive session; see `Memory/Lexicon/processing-strategy.md`.
+Ideas: **Triage** when you are ready — interactive session; see `Direction/Lexicon.md`.
 
 ```bash
 python3 scripts/triage_queue.py --project <project>

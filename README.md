@@ -44,10 +44,11 @@ Your clone **is** your vault: content stays local/private, engine updates pull f
 ## Daily loop (user guide)
 
 1. **Ingest** — after meetings: *"Process my Fireflies meetings for today"* / *"Process my HiDock meetings"* / paste into a manual template. Transcripts land under `Transcripts/`, meeting notes under `Meetings/<Project>/`.
-2. **Review** — skim the meeting note; fix speaker labels or project if the agent guessed wrong.
+2. **Check** — skim the meeting note; fix speaker labels or project if the agent guessed wrong.
 3. **Distill** — *"Distill this meeting note."* Facts append to People pages and Memory evidence logs (append-only, one line per fact; nothing is synthesized yet).
 4. **Triage (weekly-ish)** — *"Triage [project]."* Interactive recap: you and the agent review recent evidence and the Ideas queue, and only here does `# Current model` get updated. See [docs/MEMORY_MODEL.md](docs/MEMORY_MODEL.md).
 5. **Query anytime** — just ask in Cursor: *"What do we know about pricing?"*, *"Prepare me for a meeting with Alex"*, *"What decisions did we make last month?"* The agent searches Memory → People → Meetings, most-distilled first.
+6. **Review (weekly)** — *"Review my objectives."* Cross-area session: re-anchor on what you're trying to make true, read the evidence, retire what's done or missed. Max 5 objectives across all areas, one named WIG. See [docs/OBJECTIVES.md](docs/OBJECTIVES.md).
 
 Capture your own thoughts as files under `Ideas/<Project>/` — they enter the triage queue automatically until marked `triaged`.
 
@@ -59,6 +60,7 @@ Capture your own thoughts as files under `Ideas/<Project>/` — they enter the t
 - **Summarize** – Raw transcript → structured meeting note (Context, Summary, Decisions, Action Items, Unresolved Points, Signals, AI Evaluation).
 - **Distill** – Meeting note → durable **evidence** in `People/<Project>/`, `Memory/<Project>/`. Evidence only — no synthesis.
 - **Triage** – Interactive session you kick when ready: recap recent work, update **current truth** in Memory, clean **Ideas/Clippings** queue, write recap log. See [docs/MEMORY_MODEL.md](docs/MEMORY_MODEL.md).
+- **Review** – Weekly cross-area session over **intent**, not truth: re-anchor on your objectives, read their evidence, retire what's done or missed. No score — the agent proposes `moving` / `stalled` / `drifting`, you decide. See [docs/OBJECTIVES.md](docs/OBJECTIVES.md).
 
 Philosophy: prefer recall over compression; notes are evidence. Early-stage signals matter — preserve them. Synthesis happens in **triage**, not distill.
 
@@ -73,7 +75,10 @@ Philosophy: prefer recall over compression; notes are evidence. Early-stage sign
 | People / Memory | `People/<Project>/`, `Memory/<Project>/` |
 | Ideas / Clippings | `Ideas/<Project>/`, `Clippings/` (empty `triaged:` = in queue) |
 | Triage recap logs | `Metadata/recap/<Project>/YYYY-MM.md` |
-| Process charter | `Memory/Lexicon/processing-strategy.md` |
+| Objectives (all areas) | `Objectives.md`, `Objectives.evidence.md` |
+| Direction (per area) | `Direction/<area>.md` |
+| Review logs | `Metadata/review/YYYY-Www.md` |
+| Process charter | `Direction/Lexicon.md` |
 | Scratch / logs | **`.tmp/`** only |
 
 ---
@@ -88,11 +93,13 @@ Philosophy: prefer recall over compression; notes are evidence. Early-stage sign
 | "Summarize this transcript" | Meeting note at `Meetings/<Project>/` |
 | "Distill this meeting note" | Append evidence bullets; fill `# Distilled` |
 | "Triage \<project\>" or "Recap \<project\>" | Interactive recap, update Memory current truth, clean Ideas queue |
+| "Review my objectives" / "weekly review" | Cross-area objectives review; retire and re-anchor |
 
 Skills: `.cursor/skills/`. Rules: `.cursor/rules/`.
 
 ```bash
 python3 scripts/triage_queue.py --project <project> [--since YYYY-MM-DD]
+python3 scripts/review_queue.py
 python3 scripts/lint_vault.py
 python3 scripts/hidock_pending.py list
 python3 scripts/verify_setup.py
@@ -106,8 +113,9 @@ python3 scripts/verify_setup.py
 |-----|----------------|
 | [docs/SETUP.md](docs/SETUP.md) | Full install: Fireflies, HiDock (hinotes_organizer), manual |
 | [docs/MEMORY_MODEL.md](docs/MEMORY_MODEL.md) | How knowledge is organized: evidence vs current model, layouts, triage |
+| [docs/OBJECTIVES.md](docs/OBJECTIVES.md) | The normative tier: horizons, the cap and the WIG, the weekly review, why there is no score |
 | [docs/UPDATING.md](docs/UPDATING.md) | Pulling engine updates without touching your content; `local-*.mdc` customization |
-| `Memory/Lexicon/processing-strategy.md` | Process charter: the five-stage pipeline and triage discipline |
+| `Direction/Lexicon.md` | Process charter: the two loops, the stages and the write boundaries |
 
 ---
 

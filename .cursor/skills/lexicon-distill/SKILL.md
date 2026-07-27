@@ -28,7 +28,7 @@ Appends **evidence only** from a meeting note. **Triage** later updates `# Curre
 
 **Route by subject:** evidence about another project goes to that project's Memory files, wherever the meeting note lives. List cross-project destinations in `# Distilled`.
 
-**Not triage.** Distill appends **evidence** only. Synthesis (`# Current model`, `# Current read`, Direction) happens in **lexicon-triage** after user approval. See `Memory/Lexicon/processing-strategy.md`.
+**Not triage.** Distill appends **evidence** only. Synthesis (`# Current model`, `# Current read`) happens in **lexicon-triage** after user approval; the normative tier (`Direction/<area>.md`, `Objectives.md`) belongs to **lexicon-review**. See `Direction/Lexicon.md`.
 
 ## Prerequisites
 

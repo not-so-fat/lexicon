@@ -191,7 +191,7 @@ Tooling (already in repo):
 - Skill: `.cursor/skills/lexicon-triage/SKILL.md`
 - Rule: `.cursor/rules/triage.mdc`
 - Queue: `python3 scripts/triage_queue.py --project <project>`
-- Charter: `Memory/Lexicon/processing-strategy.md`
+- Charter: `Direction/Lexicon.md`
 
 The file-based runner (if implemented) covers **fetch → summarize → distill** only. Do not automate triage.
 

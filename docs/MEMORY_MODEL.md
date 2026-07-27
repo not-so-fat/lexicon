@@ -6,15 +6,20 @@ How Lexicon organizes durable knowledge after meetings are summarized and distil
 
 ---
 
-## Three tiers of truth
+## Four tiers
 
 | Tier | What | Mutability |
 |------|------|------------|
 | **Evidence** | Meeting notes, transcripts, `<Area>.evidence.md` logs | Append-only |
 | **Working** | `# Current model`, `# Current read`, `## Open decisions` | Updated in **triage** |
-| **Direction** | Principles only (`Direction.md`) | Rare; human approval in triage |
+| **Direction** | `Direction/<area>.md` — purpose, principles, standards | Rare; human-approved in **review** |
+| **Intent** | `Objectives.md` — horizon-bound, capped, one WIG | Weekly in **review** |
 
-Agents read **top-down**: Direction → current model → evidence. In the area layout, working truth and evidence live in **separate files**, so loading the current model never pays for the evidence log.
+Agents read **top-down** for truth questions: Direction → current model → evidence.
+For intent questions ("what am I trying to do", "is this still aligned") read
+`Objectives.md` first — see [OBJECTIVES.md](OBJECTIVES.md).
+
+In the area layout, working truth and evidence live in **separate files**, so loading the current model never pays for the evidence log. The top two tiers are **normative** (what you intend) and live outside `Memory/`; `Memory/` is purely descriptive.
 
 ---
 
@@ -40,7 +45,6 @@ Best when topic slugs overlap or synthesis needs a single current truth per doma
 
 ```
 Memory/<project>/
-  Direction.md               # principles only
   Validation.md              # market learnings (optional but recommended)
   Validation.evidence.md     # append-only evidence log
   Product.md                 # + ## Open decisions
@@ -53,6 +57,8 @@ Memory/<project>/
   Partners/<Company>.evidence.md
   _legacy/                   # archives, topic dumps, old logs
 ```
+
+There is no `Direction.md` here any more — the normative tier lives at `Direction/<area>.md` at the repo root, and is edited in **review**, not triage. See [OBJECTIVES.md](OBJECTIVES.md) and [UPDATING.md](UPDATING.md) for the migration.
 
 **Model files** (`Product.md`, `Org.md`, …) hold synthesis only: frontmatter `model_updated: YYYY-MM-DD`, `# Current model`, and `## Open decisions` / `## Open hypotheses`. Keep them small — this is the layer agents load first, and the loadable working-truth layer for cross-project Q&A.
 
@@ -67,7 +73,7 @@ Detail stays in the linked meeting note — evidence bullets are pointers, not s
 
 **Distill:** append to `<Area>.evidence.md` only (create it if missing) — **never** `# Current model`. Run after meetings, not in triage.  
 **Triage Promote:** drain un-drained evidence into `# Current model`, stamp `model_updated:`, resolve open decisions.  
-**Triage Canon:** edit `Direction.md` for principle-level commits.
+**Review Canon:** principle-level commits are edited in `Direction/<area>.md` during **review** — triage never writes the normative tier.
 
 **Legacy inline evidence:** older vaults kept `# Evidence` inside the model file. Treat that section as read-only legacy: new bullets go to the sibling `.evidence.md`, and the old section is moved over during a triage session. `triage_queue.py` counts both and flags un-migrated sections.
 
@@ -104,7 +110,7 @@ People/<project>/<Name>.md
 | Cross-partner market pattern | **Validation** `# Current model` |
 | Still testing | **Validation** `## Open hypotheses` |
 | Product consequence | **Product** `# Current model` |
-| Committed principle | **Direction** (human approval) |
+| Committed principle | **`Direction/<area>.md`** (in **review**, not triage) |
 | Partner deal | **Partners/<Co>.md` |
 | Org/process | **Org** |
 | Your performance pattern | **Me** |
@@ -146,7 +152,7 @@ Metadata/recap/<project>/YYYY-MM.md
 7. **Route by subject, not source** — evidence goes to the Memory project it is *about*; the capture account/venue is only a default hint.
 8. **No hand-maintained maps** — registries and folder structure are the index; `lint_vault.py` keeps them trustworthy. Never hand-write `Index.md`-style files.
 
-See also: `.cursor/rules/triage.mdc`, `.cursor/rules/distill.mdc`, `.cursor/skills/lexicon-triage/`.
+See also: `.cursor/rules/triage.mdc`, `.cursor/rules/distill.mdc`, `.cursor/rules/review.mdc`, `.cursor/skills/lexicon-triage/`, [OBJECTIVES.md](OBJECTIVES.md).
 
 
 ## Meetings vs Ideas
