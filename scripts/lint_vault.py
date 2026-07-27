@@ -27,7 +27,7 @@ import sys
 from pathlib import Path
 from datetime import date
 
-from review_queue import objective_cap, parse_objectives
+from review_queue import objective_cap, parse_objectives, unfenced_lines
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_DIR.parent
@@ -47,7 +47,7 @@ SKIP_NAMES = {"readme.md", "index.md"}
 MODEL_SKIP = {"readme.md", "index.md", "direction.md"}
 
 DIRECTION_ALLOWED_SECTIONS = ("purpose", "principles", "standards")
-FENCE_RE = re.compile(r"^\s{0,3}(`{3,}|~{3,})(.*)$")
+LEGACY_LEXICON_CHARTER = "Memory/Lexicon/processing-strategy.md"
 OBJECTIVE_FIELD_LABELS = {
     "area": "Area",
     "horizon": "Horizon",
@@ -297,31 +297,7 @@ def lint_direction() -> list[dict]:
             if path.stem.lower() in ("readme", "index"):
                 continue
             rel = str(path.relative_to(REPO_ROOT))
-            fence_char: str | None = None
-            fence_len = 0
-            for line in read(path).splitlines():
-                m = FENCE_RE.match(line)
-                if m:
-                    marker, trailing = m.group(1), m.group(2)
-                    if fence_char is None:
-                        # Opening a fence — an info string (e.g. ```python) is allowed.
-                        fence_char, fence_len = marker[0], len(marker)
-                    elif (
-                        marker[0] == fence_char
-                        and len(marker) >= fence_len
-                        and trailing.strip() == ""
-                    ):
-                        # Matching close (CommonMark: same char, >= opening length,
-                        # and nothing but whitespace after the marker — a marker
-                        # line carrying an info string, e.g. a nested worked
-                        # example's own opening fence, does not close us).
-                        fence_char, fence_len = None, 0
-                    continue
-                if fence_char is not None:
-                    # Inside a fence — an unterminated fence runs to EOF, which
-                    # matches how Markdown itself renders it (everything after
-                    # an unclosed ``` is code, not headings).
-                    continue
+            for line in unfenced_lines(read(path)):
                 if not line.startswith("## "):
                     continue
                 name = line[3:].strip()
@@ -341,6 +317,20 @@ def lint_direction() -> list[dict]:
     memory = REPO_ROOT / "Memory"
     if not memory.is_dir():
         return issues
+
+    legacy_charter = REPO_ROOT / LEGACY_LEXICON_CHARTER
+    if legacy_charter.is_file():
+        issues.append(
+            {
+                "level": "warning",
+                "path": LEGACY_LEXICON_CHARTER,
+                "issue": (
+                    "superseded by Direction/Lexicon.md — `git checkout` does not "
+                    "delete files the template removed; `git rm -f` it "
+                    "(see docs/UPDATING.md)"
+                ),
+            }
+        )
 
     areas = set(known_direction_areas())
     for area_dir in sorted(p for p in memory.iterdir() if p.is_dir() and p.name != "Lexicon"):

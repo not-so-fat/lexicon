@@ -29,6 +29,8 @@ git diff --stat                          # review what changed
 
 `git checkout template/main -- <paths>` overwrites only files the template ships. Files that exist only in your vault — `local-*.mdc` rules, extra scripts, all content — are untouched.
 
+**Deletions are not propagated.** `git checkout <tree-ish> -- <path>` copies files that exist in `<tree-ish>`; it has no file to copy for one the template *removed*, so it silently leaves your stale copy in place. This is a general trap, not a one-off — any future template reorg that deletes a file needs an explicit `git rm -f <path>` on your side, because the sync command alone cannot know to remove it. Watch template release notes for removals, or a `lint_vault.py` warning that names the replacement.
+
 ## Migrating to the normative tier
 
 The normative tier moved out of `Memory/`. Per area that has a `Direction.md`:
@@ -36,20 +38,35 @@ The normative tier moved out of `Memory/`. Per area that has a `Direction.md`:
 ```bash
 mkdir -p Direction
 git mv Memory/<area>/Direction.md Direction/<area>.md
+git rm -f Memory/Lexicon/processing-strategy.md   # superseded by Direction/Lexicon.md
 ```
 
-Then sort each file's body into `## Purpose`, `## Principles` and `## Standards` —
-`lint_vault.py` rejects any other `##` section. Anything with a date that can be
-missed is not a principle: it is an objective, and belongs in `Objectives.md`.
+The `git rm` line applies once, regardless of how many areas you have: it clears
+the old Lexicon process charter, which is exactly the deletion described above
+that `git checkout` cannot propagate for you. Left in place it keeps asserting
+the pre-this-tier boundary ("Human gate on **Direction**... **Triage** — rare
+Direction edits") against `Direction/Lexicon.md`'s current one, from a path
+(`Memory/Lexicon/`) agents search but `lint_vault.py` never scanned — until now:
+it warns if it finds this file.
+
+Then sort each area file's body into `## Purpose`, `## Principles` and
+`## Standards` — `lint_vault.py` rejects any other `##` section. Anything with a
+date that can be missed is not a principle: it is an objective, and belongs in
+`Objectives.md`.
 
 ```bash
 python3 scripts/lexicon_init.py   # scaffolds Objectives.md and missing Direction files
-python3 scripts/lint_vault.py     # warns on anything left un-migrated
+python3 scripts/lint_vault.py     # must exit 0 when migration is complete
 ```
 
-Migration is not complete until `lint_vault.py` stops warning about
-`Memory/<area>/Direction.md`. See [OBJECTIVES.md](OBJECTIVES.md) for what belongs
-in each section.
+Migration is complete when `lint_vault.py` **exits 0** — not when it stops
+warning about `Memory/<area>/Direction.md`: that warning disappears the moment
+you `git mv` the file, before its body is sorted. The real completion test is
+the section whitelist: every `##` heading on `Direction/<area>.md` other than
+Purpose, Principles or Standards is an **error**, not a warning, so expect a
+wall of errors right after the `git mv` — that's expected, and it clears once
+the body is sorted. See [OBJECTIVES.md](OBJECTIVES.md) for what belongs in each
+section.
 
 ## Customizing without forking the engine
 

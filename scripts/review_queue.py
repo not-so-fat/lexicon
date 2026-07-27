@@ -34,8 +34,50 @@ FIELD_RE = re.compile(r"^\s*-\s+\*\*(?P<key>[^:*]+):\*\*\s*(?P<val>.*?)\s*$")
 DATED_BULLET_RE = re.compile(r"^\s*-\s*(\d{4}-\d{2}-\d{2})")
 FILENAME_DATE_RE = re.compile(r"^(\d{4}-\d{2}-\d{2})")
 REVIEW_FILE_RE = re.compile(r"^(\d{4})-W(\d{2})\.md$")
+FENCE_RE = re.compile(r"^\s{0,3}(`{3,}|~{3,})(.*)$")
 
 REQUIRED_FIELDS = ("area", "horizon", "done when", "obstacle", "evidence", "opened")
+
+
+def unfenced_lines(text: str) -> list[str]:
+    """`text`'s lines with fenced code blocks (and their marker lines) removed.
+
+    Shared by `parse_objectives` (here) and `lint_direction` (`lint_vault.py`) —
+    both are line-by-line Markdown scanners that must not treat fenced worked
+    examples as live content. One state machine, two callers, so this species
+    of bug (a scanner blind to what encloses the line) can't recur by drifting
+    copies out of sync.
+
+    A fence opens on a marker line (```` ``` ```` or `~~~`, up to 3 leading
+    spaces, optional info string) and closes on a line with the same character,
+    at least as long, followed by nothing but whitespace (CommonMark). An
+    unterminated fence runs to EOF, matching how Markdown itself renders it.
+    """
+    out: list[str] = []
+    fence_char: str | None = None
+    fence_len = 0
+    for line in text.splitlines():
+        m = FENCE_RE.match(line)
+        if m:
+            marker, trailing = m.group(1), m.group(2)
+            if fence_char is None:
+                # Opening a fence — an info string (e.g. ```python) is allowed.
+                fence_char, fence_len = marker[0], len(marker)
+            elif (
+                marker[0] == fence_char
+                and len(marker) >= fence_len
+                and trailing.strip() == ""
+            ):
+                # Matching close: same char, >= opening length, and nothing but
+                # whitespace after the marker — a marker line carrying an info
+                # string (e.g. a nested worked example's own opening fence)
+                # does not close us.
+                fence_char, fence_len = None, 0
+            continue
+        if fence_char is not None:
+            continue
+        out.append(line)
+    return out
 
 
 def objective_cap() -> int:
@@ -51,14 +93,19 @@ def parse_objectives(text: str) -> list[dict]:
 
     HTML comments (`<!-- ... -->`, single- or multi-line) are stripped first,
     so a commented-out example — the shipped scaffold's convention for an
-    inert placeholder — is never parsed as a live objective.
+    inert placeholder — is never parsed as a live objective. Fenced code
+    blocks are then dropped via `unfenced_lines` — the docs present the
+    objective schema inside a ```markdown fence (docs/OBJECTIVES.md), so a
+    worked example copied verbatim must not parse as a live objective, and a
+    fenced `## ` line must not be mistaken for the end of `## Active` and
+    silently truncate every objective after it.
     """
     text = HTML_COMMENT_RE.sub("", text)
     objectives: list[dict] = []
     current: dict | None = None
     in_active = False
 
-    for line in text.splitlines():
+    for line in unfenced_lines(text):
         stripped = line.strip()
         if stripped.lower() == "## active":
             in_active = True
@@ -174,7 +221,13 @@ def known_areas(root: Path) -> list[str]:
 def _days_between(earlier: str, later: date) -> int | None:
     if not earlier:
         return None
-    return (later - date.fromisoformat(earlier)).days
+    try:
+        return (later - date.fromisoformat(earlier)).days
+    except ValueError:
+        # A malformed date (e.g. a typo'd `2026-13-45` evidence bullet) must
+        # not take down the whole queue — treat it as "no date" rather than
+        # crashing on a value DATED_BULLET_RE's regex doesn't validate.
+        return None
 
 
 def build_report(root: Path, today: date) -> dict:

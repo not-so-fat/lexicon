@@ -22,6 +22,8 @@ DIRS = [
     "Memory",
     "Ideas",
     "Metadata",
+    "Metadata/review",
+    "Direction",
 ]
 
 DIRECTION_TEMPLATE = """---

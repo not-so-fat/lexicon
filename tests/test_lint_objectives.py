@@ -101,6 +101,32 @@ def test_area_without_direction_file_is_a_warning(vault, monkeypatch):
     )
 
 
+def test_leftover_lexicon_processing_strategy_is_a_warning(vault, monkeypatch):
+    """git checkout does not delete files the template removed — this leftover
+    is the deleted `Memory/Lexicon/processing-strategy.md`, which contradicts
+    `Direction/Lexicon.md` and sits under a path lint never otherwise scans."""
+    (vault / "Memory" / "Lexicon").mkdir(parents=True)
+    (vault / "Memory" / "Lexicon" / "processing-strategy.md").write_text(
+        "# old charter", encoding="utf-8"
+    )
+
+    issues = _issues(vault, monkeypatch, "lint_direction")
+
+    assert any(
+        i["level"] == "warning" and "Direction/Lexicon.md" in i["issue"]
+        for i in issues
+        if i["path"] == "Memory/Lexicon/processing-strategy.md"
+    )
+
+
+def test_no_leftover_lexicon_charter_warning_when_file_absent(vault, monkeypatch):
+    issues = _issues(vault, monkeypatch, "lint_direction")
+
+    assert not any(
+        i["path"] == "Memory/Lexicon/processing-strategy.md" for i in issues
+    )
+
+
 def test_empty_objectives_file_produces_no_issues(vault, write_objectives, monkeypatch):
     write_objectives("")
 

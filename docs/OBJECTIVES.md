@@ -130,12 +130,41 @@ nothing else in the vault changes shape to support this.
 
 ---
 
+## Frontmatter
+
+`Objectives.md` carries three frontmatter fields, none of them read by
+`parse_objectives` — they describe the file, not an objective:
+
+```yaml
+---
+horizon:
+objectives_updated:
+reviewed:
+---
+```
+
+| Field | Meaning | Stamped by |
+|---|---|---|
+| **horizon** | The cycle label (e.g. `2026-Q3`) all objectives in this file are bound to. | Set by hand when a new cycle starts. |
+| **objectives_updated** | The date `## Active` last actually changed — a retirement or a new objective. | The review skill, step 5, only when `## Active` changes. |
+| **reviewed** | The date of the last full review session, whether or not anything changed. | The review skill, step 5, every session. |
+
+`reviewed:` is a fallback signal, not the primary one: `review_queue.py` also
+reads the newest `Metadata/review/YYYY-Www.md` file and takes the later of the
+two, so a session that forgets to log the week file still moves "days since
+review" forward.
+
+---
+
 ## The WIG
 
-Exactly one objective carries the `[WIG]` prefix — the Wildly Important Goal. Zero
-or two is a lint error, not a warning: the discipline is only real when the choice
-is forced. 4DX's premise is that naming *one* changes what the week actually does;
-five equal priorities are none.
+Exactly one objective carries the `[WIG]` prefix — the Wildly Important Goal. Once
+at least one objective exists, zero or two `[WIG]`s is a lint error, not a
+warning: the discipline is only real when the choice is forced. (An empty
+`## Active` — the shipped scaffold — has no objective to attach a WIG to, so
+`lint_objectives` returns clean rather than errors on zero.) 4DX's premise is
+that naming *one* changes what the week actually does; five equal priorities
+are none.
 
 The cap and the WIG are the **entire** 4DX borrow. No lead and lag measures, no
 scoreboard, no cadence of accountability.
@@ -172,10 +201,11 @@ Skill: `.cursor/skills/lexicon-review/SKILL.md`. Rule: `.cursor/rules/review.mdc
 | 2. Re-anchor | Agent restates each objective **and its obstacle**, before reading any evidence | none |
 | 3. Evidence | Per objective: what happened since the last review, from its `Evidence:` paths only | none |
 | 4. Status | Agent proposes `moving` / `stalled` / `drifting`; you accept or edit | none |
-| 5. Retire | Achieved or past-horizon objectives leave `## Active` with an outcome line | `Objectives.md`, `Objectives.evidence.md` |
+| 5. Retire | Achieved or past-horizon objectives leave `## Active` with an outcome line; frontmatter `reviewed:` (and `objectives_updated:` if `## Active` changed) gets stamped | `Objectives.md`, `Objectives.evidence.md` |
 | 6. Route | What turned out to be a standard or a project leaves for its real home | `Direction/<area>.md` |
 | 7. Log | Append the session | `Metadata/review/YYYY-Www.md` |
-| 8. Report | What changed, what was retired, what remains, and the named WIG | none |
+| 8. Verify | `python3 scripts/lint_vault.py` must exit 0 before the session ends | none |
+| 9. Report | What changed, what was retired, what remains, the named WIG, and the lint result | none |
 
 Two orderings are load-bearing:
 

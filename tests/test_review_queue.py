@@ -120,6 +120,57 @@ def test_real_objective_after_a_commented_example_is_still_parsed(write_objectiv
     assert objectives[0]["area"] == "kite"
 
 
+def test_fenced_wig_example_is_not_parsed_as_a_live_objective(write_objectives):
+    """docs/OBJECTIVES.md presents the objective schema inside a ```markdown
+    fence — copying that shape verbatim as a worked example under `## Active`
+    must not add a second, phantom [WIG]."""
+    path = write_objectives(
+        ONE_WIG
+        + "\n"
+        "Example of the shape:\n\n"
+        "```markdown\n"
+        "### [WIG] <outcome, not activity>\n"
+        "- **Area:** <area>\n"
+        "- **Horizon:** YYYY-MM-DD\n"
+        "- **Done when:** <condition>\n"
+        "- **Obstacle:** <thing>\n"
+        "- **Evidence:** <paths>\n"
+        "- **Opened:** YYYY-MM-DD\n"
+        "```\n"
+    )
+    objectives = review_queue.parse_objectives(path.read_text(encoding="utf-8"))
+
+    assert len(objectives) == 1
+    assert objectives[0]["title"] == "Decide the Circle hinge"
+    assert sum(1 for o in objectives if o["wig"]) == 1
+
+
+def test_fenced_heading_does_not_terminate_the_scan(write_objectives):
+    """A fenced `## Something` line must not be mistaken for the end of
+    `## Active` — the un-fence-aware scanner used to `break` on it and drop
+    every objective that followed, silently defeating the cap check."""
+    path = write_objectives(
+        ONE_WIG
+        + "\n"
+        "```markdown\n"
+        "## Something that looks like a section break\n"
+        "```\n\n"
+        "### Resolve the external track\n"
+        "- **Area:** personal\n"
+        "- **Horizon:** 2026-09-30\n"
+        "- **Done when:** an offer exists to weigh, or both tracks are closed in writing\n"
+        "- **Obstacle:** the sprint absorbs every week\n"
+        "- **Evidence:** Memory/personal\n"
+        "- **Opened:** 2026-07-26\n"
+    )
+    objectives = review_queue.parse_objectives(path.read_text(encoding="utf-8"))
+
+    assert [o["title"] for o in objectives] == [
+        "Decide the Circle hinge",
+        "Resolve the external track",
+    ]
+
+
 def test_shipped_objectives_scaffold_has_no_live_objectives():
     """Regression: the committed root Objectives.md is a scaffold with a
     commented-out example only. It must parse as zero active objectives —
@@ -214,6 +265,29 @@ def test_report_flags_cap_breach_and_wig_count(write_objectives, vault, monkeypa
     assert report["cap"] == 2
     assert report["cap_breach"] is True
     assert report["wig_count"] == 0
+
+
+def test_days_between_returns_none_on_malformed_date():
+    """A typo'd evidence bullet date (e.g. `2026-13-45`, month 13) must not
+    crash the queue — `DATED_BULLET_RE` matches the digit shape without
+    validating the calendar value."""
+    assert review_queue._days_between("2026-13-45", date(2026, 7, 27)) is None
+
+
+def test_report_survives_a_malformed_evidence_date(write_objectives, vault):
+    (vault / "Memory" / "kite" / "Product.evidence.md").write_text(
+        "# Evidence (append-only)\n"
+        "- 2026-07-10 — a thing happened — Source: [[Some Meeting]]\n"
+        "- 2026-13-45 — a typo'd date — Source: [[Some Meeting]]\n",
+        encoding="utf-8",
+    )
+    write_objectives(ONE_WIG)
+
+    report = review_queue.build_report(vault, date(2026, 7, 27))
+    obj = report["objectives"][0]
+
+    assert obj["newest_evidence"] == "2026-13-45"
+    assert obj["days_since_evidence"] is None
 
 
 def test_report_computes_horizon_and_evidence_staleness(write_objectives, vault):

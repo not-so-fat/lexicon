@@ -52,6 +52,8 @@ Global across all areas. Memory and meeting notes are read-only here.
    ```
    **At cap, no new objective opens without either a retirement or an explicit reaffirmation of all current ones.** Say this out loud when the user proposes a new objective at cap.
 
+   Before ending the session, stamp `Objectives.md`'s frontmatter with today's date: `reviewed:` always (the file was read end-to-end this session regardless of whether anything changed), and `objectives_updated:` only if `## Active` actually changed (a retirement or a new objective).
+
 6. **Route** — anything that turned out not to be an objective goes where it belongs:
    - No finish line, can't be failed → `## Principles` in `Direction/<area>.md`
    - No finish line, has a quality bar → `## Standards` in `Direction/<area>.md`
@@ -59,7 +61,13 @@ Global across all areas. Memory and meeting notes are read-only here.
 
 7. **Log** — append to `Metadata/review/YYYY-Www.md` (ISO week). Record: status per objective, retirements with outcomes, what was routed out, and the WIG for the coming week.
 
-8. **Report** — what changed, what was retired, what remains, and the named WIG.
+8. **Verify** — run:
+   ```bash
+   python3 scripts/lint_vault.py
+   ```
+   Do not end the session on a non-zero exit. A sixth objective, two WIGs, a missing `Obstacle:`, or a disallowed `Direction/<area>.md` section is exactly what this ritual exists to prevent, and none of it is enforced until this runs — fix what it flags before reporting.
+
+9. **Report** — what changed, what was retired, what remains, the named WIG, and the lint result from step 8.
 
 ## Error handling
 
@@ -74,4 +82,5 @@ Global across all areas. Memory and meeting notes are read-only here.
 - Write to `Memory/`, `People/` or meeting notes.
 - Open an objective missing `Done when` or `Obstacle`.
 - Open a sixth objective. Retire first.
+- End the session on a non-zero `lint_vault.py` exit (step 8).
 - Treat a `Done when` as a metric — it is a recognition condition.
