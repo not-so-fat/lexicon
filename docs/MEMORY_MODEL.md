@@ -25,12 +25,12 @@ In the area layout, working truth and evidence live in **separate files**, so lo
 
 ## Two memory layouts (both supported)
 
-### Classic layout (default for new projects)
+### Classic layout (default for new areas)
 
-Best for personal vaults and early-stage projects.
+Best for personal vaults and early-stage areas.
 
 ```
-Memory/<project>/
+Memory/<area>/
   Product/<topic>.md      # e.g. pricing, session, partnership
   Org/<topic>.md          # e.g. hiring, execution
   Decisions/decisions.md  # pending + decided log
@@ -39,12 +39,12 @@ Memory/<project>/
 
 Distill appends to topic files and logs. Triage can later migrate to area files.
 
-### Area files layout (mature projects)
+### Area files layout (mature areas)
 
 Best when topic slugs overlap or synthesis needs a single current truth per domain.
 
 ```
-Memory/<project>/
+Memory/<area>/
   Validation.md              # market learnings (optional but recommended)
   Validation.evidence.md     # append-only evidence log
   Product.md                 # + ## Open decisions
@@ -60,7 +60,7 @@ Memory/<project>/
 
 There is no `Direction.md` here any more — the normative tier lives at `Direction/<area>.md` at the repo root, and is edited in **review**, not triage. See [OBJECTIVES.md](OBJECTIVES.md) and [UPDATING.md](UPDATING.md) for the migration.
 
-**Model files** (`Product.md`, `Org.md`, …) hold synthesis only: frontmatter `model_updated: YYYY-MM-DD`, `# Current model`, and `## Open decisions` / `## Open hypotheses`. Keep them small — this is the layer agents load first, and the loadable working-truth layer for cross-project Q&A.
+**Model files** (`Product.md`, `Org.md`, …) hold synthesis only: frontmatter `model_updated: YYYY-MM-DD`, `# Current model`, and `## Open decisions` / `## Open hypotheses`. Keep them small — this is the layer agents load first, and the loadable working-truth layer for cross-area Q&A.
 
 **Evidence files** (`Product.evidence.md`, …) are append-only logs of dated one-line bullets:
 
@@ -96,7 +96,7 @@ Evidence lives in the sibling `Validation.evidence.md` — append-only dated bul
 ## People pages
 
 ```
-People/<project>/<Name>.md
+People/<area>/<Name>.md
   # Current read        (~5 bullets — refreshed in triage)
   # Evidence Log        (append-only)
 ```
@@ -122,10 +122,10 @@ People/<project>/<Name>.md
 **Untriaged** = **Ideas/Clippings** with no `triaged:` date. Meetings are never in the queue.
 
 ```bash
-python3 scripts/triage_queue.py --project <project> [--since YYYY-MM-DD]
+python3 scripts/triage_queue.py --area <area> [--since YYYY-MM-DD]
 ```
 
-On area-file projects the queue also reports **evidence debt** per area: bullets newer than `model_updated:`, a **⚠ STALE** flag when the current model lags the newest evidence by more than 21 days, plus un-migrated inline `# Evidence` sections and `_legacy/` content. Every triage session reviews this section — drain the debt into `# Current model` or explicitly defer it.
+On vaults using the area-files layout, the queue also reports **evidence debt** per area: bullets newer than `model_updated:`, a **⚠ STALE** flag when the current model lags the newest evidence by more than 21 days, plus un-migrated inline `# Evidence` sections and `_legacy/` content. Every triage session reviews this section — drain the debt into `# Current model` or explicitly defer it.
 
 Frontmatter and evidence hygiene is checked by:
 
@@ -136,7 +136,7 @@ python3 scripts/lint_vault.py
 Each triage session appends to:
 
 ```
-Metadata/recap/<project>/YYYY-MM.md
+Metadata/recap/<area>/YYYY-MM.md
 ```
 
 ---
@@ -149,7 +149,7 @@ Metadata/recap/<project>/YYYY-MM.md
 4. **One triage habit** — Ideas/Clippings queue; meetings via distill only.
 5. **Skip stays in queue** — only set `triaged` when processed or explicitly Keep'd.
 6. **Retire = delete** — git preserves history; promote keeps capture with `status: promoted`.
-7. **Route by subject, not source** — evidence goes to the Memory project it is *about*; the capture account/venue is only a default hint.
+7. **Route by subject, not source** — evidence goes to the Memory area it is *about*; the capture account/venue is only a default hint.
 8. **No hand-maintained maps** — registries and folder structure are the index; `lint_vault.py` keeps them trustworthy. Never hand-write `Index.md`-style files.
 
 See also: `.cursor/rules/triage.mdc`, `.cursor/rules/distill.mdc`, `.cursor/rules/review.mdc`, `.cursor/skills/lexicon-triage/`, [OBJECTIVES.md](OBJECTIVES.md).

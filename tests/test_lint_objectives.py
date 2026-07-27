@@ -1,10 +1,15 @@
+import subprocess
+import sys
 from datetime import date
+from pathlib import Path
 
 import lint_vault
 
+SCRIPTS_DIR = Path(__file__).resolve().parent.parent / "scripts"
+
 GOOD = """### [WIG] Decide the platform migration
 - **Area:** acme
-- **Horizon:** 2026-08-30
+- **By:** 2026-08-30
 - **Done when:** a written go/no-go call exists
 - **Obstacle:** the deadline passes and nobody decides
 - **Evidence:** Memory/acme/Product.evidence.md
@@ -62,7 +67,7 @@ def test_past_horizon_is_a_warning(vault, write_objectives, monkeypatch):
 
     issues = _issues(vault, monkeypatch, "lint_objectives")
 
-    assert any(i["level"] == "warning" and "past its Horizon" in i["issue"] for i in issues)
+    assert any(i["level"] == "warning" and "past its due date" in i["issue"] for i in issues)
 
 
 def test_missing_objectives_file_produces_no_issues(vault, monkeypatch):
@@ -209,3 +214,54 @@ def test_inner_fence_marker_with_info_string_does_not_close_outer_fence(vault, m
 
     offenders = [i["issue"] for i in issues if i["level"] == "error"]
     assert not any("section `## Objectives`" in msg for msg in offenders)
+
+
+def test_legacy_project_key_is_a_warning(vault, monkeypatch):
+    (vault / "Ideas").mkdir()
+    (vault / "Ideas" / "2026-07-01 Old.md").write_text(
+        "---\nproject: acme\ncreated: 2026-07-01\n---\n\n# Old\n", encoding="utf-8"
+    )
+    monkeypatch.setattr(lint_vault, "REPO_ROOT", vault)
+
+    issues = lint_vault.lint_capture_files(None)
+
+    assert any(
+        i["level"] == "warning" and "legacy `project:`" in i["issue"]
+        for i in issues
+    )
+
+
+def test_area_key_produces_no_warning(vault, monkeypatch):
+    (vault / "Ideas").mkdir()
+    (vault / "Ideas" / "2026-07-01 New.md").write_text(
+        "---\narea: acme\ncreated: 2026-07-01\n---\n\n# New\n", encoding="utf-8"
+    )
+    monkeypatch.setattr(lint_vault, "REPO_ROOT", vault)
+
+    issues = lint_vault.lint_capture_files(None)
+
+    assert not any("legacy `project:`" in i["issue"] for i in issues)
+
+
+def test_area_flag_works(tmp_path):
+    result = subprocess.run(
+        [sys.executable, str(SCRIPTS_DIR / "lint_vault.py"), "--area", "nosuchvault"],
+        cwd=tmp_path, capture_output=True, text=True,
+    )
+    assert result.returncode == 0
+
+
+def test_deprecated_project_flag_still_works(tmp_path):
+    result = subprocess.run(
+        [sys.executable, str(SCRIPTS_DIR / "lint_vault.py"), "--project", "nosuchvault"],
+        cwd=tmp_path, capture_output=True, text=True,
+    )
+    assert result.returncode == 0
+
+
+def test_missing_area_and_project_succeeds(tmp_path):
+    result = subprocess.run(
+        [sys.executable, str(SCRIPTS_DIR / "lint_vault.py")],
+        cwd=tmp_path, capture_output=True, text=True,
+    )
+    assert result.returncode == 0

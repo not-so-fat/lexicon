@@ -16,7 +16,7 @@ Checks (agents and humans both drift — this keeps the maps trustworthy):
 Errors exit 1 (missing frontmatter/dates, oversized bullets); warnings exit 0.
 
 Usage:
-  python3 scripts/lint_vault.py [--project <project>] [--json]
+  python3 scripts/lint_vault.py [--area <area>] [--json]
 """
 from __future__ import annotations
 
@@ -50,7 +50,7 @@ DIRECTION_ALLOWED_SECTIONS = ("purpose", "principles", "standards")
 LEGACY_LEXICON_CHARTER = "Memory/Lexicon/processing-strategy.md"
 OBJECTIVE_FIELD_LABELS = {
     "area": "Area",
-    "horizon": "Horizon",
+    "by": "By",
     "done when": "Done when",
     "obstacle": "Obstacle",
     "evidence": "Evidence",
@@ -95,6 +95,16 @@ def lint_capture_files(project: str | None) -> list[dict]:
             if fm is None:
                 issues.append(
                     {"level": "error", "path": str(rel), "issue": "missing YAML frontmatter"}
+                )
+            if fm and re.search(r"^project:\s*\S", fm, re.MULTILINE) and not re.search(
+                r"^area:\s*\S", fm, re.MULTILINE
+            ):
+                issues.append(
+                    {
+                        "level": "warning",
+                        "path": str(rel),
+                        "issue": "legacy `project:` key — run scripts/migrate_area_key.py to rewrite as `area:`",
+                    }
                 )
             if not has_date(fm, path.name):
                 issues.append(
@@ -263,14 +273,14 @@ def lint_objectives() -> list[dict]:
                     "issue": f"`{title}`: area `{obj['area']}` has no Direction/{obj['area']}.md",
                 }
             )
-        if obj["horizon"] and obj["horizon"] < today:
+        if obj["by"] and obj["by"] < today:
             issues.append(
                 {
                     "level": "warning",
                     "path": rel,
                     "issue": (
-                        f"`{title}`: past its Horizon ({obj['horizon']}) and still active — "
-                        "retire it or reopen with a new horizon in review"
+                        f"`{title}`: past its due date ({obj['by']}) and still active — "
+                        "retire it or reopen with a new date in review"
                     ),
                 }
             )
@@ -360,13 +370,14 @@ def lint_direction() -> list[dict]:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Lint Lexicon vault hygiene")
-    parser.add_argument("--project", help="Limit to one project slug")
+    parser.add_argument("--area", dest="area", help="Limit to one area slug")
+    parser.add_argument("--project", dest="area", help=argparse.SUPPRESS)  # deprecated alias for --area
     parser.add_argument("--json", action="store_true", help="JSON output")
     args = parser.parse_args()
 
     issues = (
-        lint_capture_files(args.project)
-        + lint_memory(args.project)
+        lint_capture_files(args.area)
+        + lint_memory(args.area)
         + lint_objectives()
         + lint_direction()
     )

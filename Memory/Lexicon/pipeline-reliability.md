@@ -170,7 +170,7 @@ Each step must return validated output, using **frontmatter** and, when availabl
 | Step | Expected Output | Validation |
 |------|-----------------|------------|
 | fetch | List of transcript file paths | Files exist, valid YAML, have `date:` and (ideally) `project:` |
-| summarize | List of meeting note paths | Valid YAML frontmatter, required sections, `project` matches `project_registry` when present |
+| summarize | List of meeting note paths | Valid YAML frontmatter, required sections, `project` matches `area_registry` when present |
 | distill | List of updated file paths | Files modified, structure matches distill rule, topics match `topic_registry` when present |
 
 ### 4. Triage (outside the automated runner)

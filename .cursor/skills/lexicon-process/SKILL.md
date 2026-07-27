@@ -32,7 +32,7 @@ If either is missing, ask: "Which date and which account?"
    ```yaml
    date: YYYY/MM/DD
    ```
-   - Filter to `project: <project>` (or ask the user which project if missing).
+   - Filter to `area: <area>` (or ask the user which area if missing).
    - This selection is based **only on the `date:` field**, not on which `process-date` command produced the file or what date appears in the filename.  
    - This avoids missing meetings when Fireflies saves a `2026-03-10_*.md` file during a `process-date 2026-03-11` run, or when UTC vs local time causes a one-day shift.
 
@@ -42,11 +42,11 @@ If either is missing, ask: "Which date and which account?"
    rg "^date:\s*YYYY/MM/DD_MINUS_1" "Transcripts/Fireflies/<account>/" --glob "*.md" --files-with-matches
    rg "^date:\s*YYYY/MM/DD_PLUS_1" "Transcripts/Fireflies/<account>/" --glob "*.md" --files-with-matches
    ```
-   Then, for each matching file, read the frontmatter and confirm `project: <project>` before summarizing.
+   Then, for each matching file, read the frontmatter and confirm `area: <area>` before summarizing.
 
 4. **Summarize** — For each matching transcript:
-   - If a meeting note for `(project, date, title)` does **not** exist:
-     - Create `Meetings/<Project>/YYYY-MM-DD [Title].md` following `.cursor/rules/summarize.mdc`.
+   - If a meeting note for `(area, date, title)` does **not** exist:
+     - Create `Meetings/<Area>/YYYY-MM-DD [Title].md` following `.cursor/rules/summarize.mdc`.
    - If it already exists, only re-summarize when the user explicitly asks to refresh.
 
 5. **Distill** — For each new meeting note:
@@ -59,4 +59,4 @@ If either is missing, ask: "Which date and which account?"
 
 - **No .env or missing key** — Script prints a clear message. Relay it and suggest checking `.env.example`.
 - **No transcripts for that date** — Normal. Say "No meetings found" and stop.
-- **Missing `project` in frontmatter** — Ask user which project to use for this run.
+- **Missing `area` in frontmatter** — Ask user which area to use for this run.

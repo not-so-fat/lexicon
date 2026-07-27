@@ -12,7 +12,7 @@ Creates `Transcripts/Manual/YYYY-MM-DD_<slug>_manual.md` with frontmatter. User 
 - **date** — YYYY-MM-DD or "today"
 - **title** — e.g. "Catch up Satish"
 - **with_whom** — person name
-- **project** — personal, company, career, general
+- **area** — personal, company, career, general
 
 If any are missing, ask for them.
 
@@ -20,7 +20,7 @@ If any are missing, ask for them.
 
 1. Run from repo root:
    ```
-   python scripts/manual_ingest.py --stub --date YYYY-MM-DD --title "Title" --with-whom "Name" --project <project>
+   python scripts/manual_ingest.py --stub --date YYYY-MM-DD --title "Title" --with-whom "Name" --area <area>
    ```
 2. Tell user: "Open `<path>`, paste your transcript under **# Raw Transcript**, save. Then ask me to **summarize this transcript**."
 

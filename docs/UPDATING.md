@@ -7,7 +7,7 @@ Your vault starts as a clone of this repo. After that, **your content is yours**
 | Engine (synced from template) | Content (never synced — yours) |
 |---|---|
 | `.cursor/rules/`, `.cursor/skills/`, `.cursor/templates/` | `Meetings/`, `Memory/` (except `Memory/Lexicon/`), `People/`, `Ideas/`, `Transcripts/` |
-| `scripts/`, `Memory/Lexicon/`, `Direction/README.md`, `Direction/Lexicon.md` (process charter) | `Metadata/` (registries, recap logs, review logs, `User.md`) |
+| `scripts/`, `Memory/Lexicon/`, `Direction/README.md`, `Direction/Lexicon.md` (direction file) | `Metadata/` (registries, recap logs, review logs, `User.md`) |
 | `docs/`, `README.md`, `requirements.txt`, `.env.example` | `.env`, `.cursor/rules/local-*.mdc`, `Objectives.md`, `Objectives.evidence.md`, `Direction/<area>.md` |
 
 ## Recommended setup (private vault + template upstream)
@@ -31,6 +31,14 @@ git diff --stat                          # review what changed
 
 **Deletions are not propagated.** `git checkout <tree-ish> -- <path>` copies files that exist in `<tree-ish>`; it has no file to copy for one the template *removed*, so it silently leaves your stale copy in place. This is a general trap, not a one-off — any future template reorg that deletes a file needs an explicit `git rm -f <path>` on your side, because the sync command alone cannot know to remove it. Watch template release notes for removals, or a `lint_vault.py` warning that names the replacement.
 
+## Terminology renames (2026-07)
+
+Two renames shipped after the objectives tier:
+
+1. **`project:` → `area:`** (frontmatter). Readers accept both forever; writers emit only `area:`. Run `python3 scripts/migrate_area_key.py` to rewrite remaining keys. `lint_vault.py` warns on any file still carrying `project:`. CLI flags: prefer `--area`; `--project` still works as a hidden alias. Env: prefer `AREA_<account>`; `PROJECT_<account>` still works.
+
+2. **`**Horizon:**` / `horizon:` → `**By:**` / `cycle:`** (objectives fields). Hard rename — no fallback. Update `Objectives.md` by hand when you pull this engine: frontmatter `horizon:` becomes `cycle:`, and each objective's `**Horizon:**` date becomes `**By:**`.
+
 ## Migrating to the normative tier
 
 The normative tier moved out of `Memory/`. Per area that has a `Direction.md`:
@@ -42,7 +50,7 @@ git rm -f Memory/Lexicon/processing-strategy.md   # superseded by Direction/Lexi
 ```
 
 The `git rm` line applies once, regardless of how many areas you have: it clears
-the old Lexicon process charter, which is exactly the deletion described above
+the old Lexicon direction file, which is exactly the deletion described above
 that `git checkout` cannot propagate for you. Left in place it keeps asserting
 the pre-this-tier boundary ("Human gate on **Direction**... **Triage** — rare
 Direction edits") against `Direction/Lexicon.md`'s current one, from a path
@@ -72,14 +80,14 @@ section.
 
 Don't edit the shipped rules/skills in place — your edits would be overwritten on the next sync. Instead:
 
-- **Project-specific guidance** (your topic slugs, routing conventions, folder quirks): put it in `.cursor/rules/local-<name>.mdc`. Cursor loads it alongside the shipped rules; the sync never touches `local-*` files.
+- **Vault-specific guidance** (your topic slugs, routing conventions, folder quirks): put it in `.cursor/rules/local-<name>.mdc`. Cursor loads it alongside the shipped rules; the sync never touches `local-*` files.
 - **Registries** (`Metadata/*_registry.md`) are content — edit freely; they are never synced.
 
 ## Contributing improvements back
 
 If you improve a shipped rule/skill/script in your vault:
 
-1. **Generalize it** — remove your project names, people, paths, and domain-specific topic lists (those belong in your `local-*.mdc`).
+1. **Generalize it** — remove your area names, people, paths, and domain-specific topic lists (those belong in your `local-*.mdc`).
 2. Open a PR against the template repo.
 
 This keeps one engine everyone shares, with personal knowledge and conventions layered locally.

@@ -1,5 +1,5 @@
 ---
-project: <project>
+area: <area>
 created: YYYY-MM-DD
 tags:
   - idea

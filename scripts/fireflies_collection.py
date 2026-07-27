@@ -41,18 +41,18 @@ if os.path.isfile(env_path):
 
 
 def get_config(account):
-    """Env: FIREFLIES_API_KEY_<account>, EMAIL_<account>; optional OUTPUT_DIR_<account>."""
+    """Env: FIREFLIES_API_KEY_<account>, EMAIL_<account>; optional OUTPUT_DIR_<account>, AREA_<account> (optional PROJECT_<account> fallback)."""
     key = account.lower()
     output_dir = os.getenv(f"OUTPUT_DIR_{key}")
     if not output_dir:
         output_dir = os.path.join(REPO_ROOT, "Transcripts", "Fireflies", key)
-    project = (os.getenv(f"PROJECT_{key}") or "").strip()
+    area = (os.getenv(f"AREA_{key}") or os.getenv(f"PROJECT_{key}") or "").strip()
     return {
         "api_key": (os.getenv(f"FIREFLIES_API_KEY_{key}") or "").strip(),
         "email": (os.getenv(f"EMAIL_{key}") or "").strip(),
         "output_dir": output_dir,
         "name": key,
-        "project": project,
+        "area": area,
     }
 
 
@@ -145,11 +145,11 @@ def fetch_and_save(meeting_id, config, force=False):
     transcript_str = "\n".join([f"{s.get('speaker_name', '')}: {s.get('text', '')}" for s in sentences])
     meta_date = datetime.fromtimestamp(m["date"] / 1000).strftime("%Y/%m/%d")
 
-    project_line = f"project: {config['project']}\n" if config.get("project") else ""
+    area_line = f"area: {config['area']}\n" if config.get("area") else ""
     content = f"""---
 title: {m['title']}
 date: {meta_date}
-{project_line}participants:
+{area_line}participants:
 {participants_str}
 meeting_link: {m['transcript_url']}
 fireflies_id: {m['id']}

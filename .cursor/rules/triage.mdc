@@ -1,14 +1,14 @@
 ---
-description: Project triage — interactive recap, memory synthesis, ideas cleanup. Not for meetings. User-kicked; optional period filter.
+description: Area triage — interactive recap, memory synthesis, ideas cleanup. Not for meetings. User-kicked; optional period filter.
 globs: Ideas/**/*.md, Clippings/**/*.md, Memory/**/*.md, People/**/*.md, Metadata/recap/**/*.md, Meetings/**/*.md
 alwaysApply: false
 ---
 
 # Lexicon Triage Protocol
 
-**Trigger:** User says "Triage \<project\>", "Recap \<project\>", or similar.
+**Trigger:** User says "Triage \<area\>", "Recap \<area\>", or similar.
 
-**Charter:** `Direction/Lexicon.md`
+**Direction file:** `Direction/Lexicon.md`
 
 ## What triage is
 
@@ -25,11 +25,11 @@ An **interactive thinking session** with the user — not a meeting inbox proces
 
 **Meetings are read-only evidence** during triage. Read recent notes to inform the recap; do not mutate them.
 
-**Distill** captures important statements into `# Evidence` (and related append sections). **Triage** synthesizes those facts into `# Current model` (or `# What we learned` on topic-slug projects) when the user agrees.
+**Distill** captures important statements into `# Evidence` (and related append sections). **Triage** synthesizes those facts into `# Current model` (or `# What we learned` on topic-slug areas) when the user agrees.
 
 ## Layout detection
 
-- **Area files:** `Memory/<project>/Product.md` exists → update `# Current model`, `## Open decisions`, `Validation.md`, `Partners/*.md`, `Me.md`. Evidence lives in sibling `<Area>.evidence.md` files (read-only input for synthesis).
+- **Area files:** `Memory/<area>/Product.md` exists → update `# Current model`, `## Open decisions`, `Validation.md`, `Partners/*.md`, `Me.md`. Evidence lives in sibling `<Area>.evidence.md` files (read-only input for synthesis).
 - **Topic slugs (default):** update `# What we learned` / `# Signals` on topic pages; refresh `Decisions/decisions.md` narrative; People `# Current read` if present.
 
 ## Principles
@@ -42,14 +42,14 @@ An **interactive thinking session** with the user — not a meeting inbox proces
 - **Retire = delete** — git preserves history.
 - **Promote keeps capture** — set `triaged`, `status: promoted`, `promotes-to` on Ideas.
 
-## Step 0 — Confirm project and period
+## Step 0 — Confirm area and period
 
-1. **Project** — from user (`Meetings/<project>/`, `Ideas/<project>/`).
+1. **Area** — from user (`Meetings/<area>/`, `Ideas/<area>/`).
 2. **Period** — ask if not specified: *"Since when?"* Default suggestion: **since last triage date** or **last 14 days** — never all-time unless user asks.
 3. **Run queue script:**
 
 ```bash
-python3 scripts/triage_queue.py --project <project> [--since YYYY-MM-DD] [--until YYYY-MM-DD]
+python3 scripts/triage_queue.py --area <area> [--since YYYY-MM-DD] [--until YYYY-MM-DD]
 ```
 
 Read: **Previous triage**, **Pending decisions**, **Evidence debt** (area layout), **Recent meetings (recap context)**, **Ideas queue**.
@@ -103,7 +103,7 @@ Cluster proposals when possible (e.g. "all competitive research → Validation")
 
 ## Step 4 — Recap log
 
-Append to `Metadata/recap/<project>/YYYY-MM.md`:
+Append to `Metadata/recap/<area>/YYYY-MM.md`:
 
 ```markdown
 ## YYYY-MM-DD triage

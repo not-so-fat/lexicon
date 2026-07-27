@@ -47,14 +47,14 @@ tasks. Work with a finish line belongs where the work happens.
 
 ---
 
-## `project:` is H2
+## `area:` is H2
 
-The frontmatter `project:` field (`personal`, `acme`, …) does not name H1 projects.
+The frontmatter `area:` field (`personal`, `acme`, …) does not name H1 projects. (It was called `project:` before this rename; the old key still works — see UPDATING.md.)
 Those values are **Areas of Responsibility** — ongoing hats with no finish line. So
 H2 needs no new structure: it is already the directory layout under `Memory/`,
 `People/` and `Meetings/`.
 
-Throughout these docs, **area** means what `project:` holds. The key is *not*
+Throughout these docs, **area** is the value of the `area:` frontmatter key. The key is *not*
 renamed — the churn across every existing note is not worth the terminology gain.
 
 ---
@@ -108,7 +108,7 @@ The heading is the outcome, not the activity. Six fields, all required —
 ```markdown
 ### [WIG] <outcome, not activity>
 - **Area:** <area — must match a Direction/<area>.md>
-- **Horizon:** YYYY-MM-DD
+- **By:** YYYY-MM-DD
 - **Done when:** <observable recognition condition — not a metric>
 - **Obstacle:** <the thing most likely to prevent it>
 - **Evidence:** <comma-separated vault paths the review reads>
@@ -118,7 +118,7 @@ The heading is the outcome, not the activity. Six fields, all required —
 | Field | Why |
 |---|---|
 | **Area** | Ties the objective to a `Direction/<area>.md`, so it is answerable to a stated purpose rather than free-floating. |
-| **Horizon** | The date it can be missed by — the one property that makes this an objective and not a standard. |
+| **By** | The date it can be missed by — the one property that makes this an objective and not a standard. |
 | **Done when** | A recognition condition, not a metric: a state you could point at on sight. A number would become the thing served, and the objective would get hit while the intent behind it did not. |
 | **Obstacle** | The V2MOM borrow. For a failure mode that is specifically drift, naming the expected cause of drift *in advance* is the highest-value line on the card. |
 | **Evidence** | The vault paths review reads for this objective — and only these. Keeps the weekly read bounded, and turns "nothing found" into a finding rather than a failed search. |
@@ -137,7 +137,7 @@ nothing else in the vault changes shape to support this.
 
 ```yaml
 ---
-horizon:
+cycle:
 objectives_updated:
 reviewed:
 ---
@@ -145,7 +145,7 @@ reviewed:
 
 | Field | Meaning | Stamped by |
 |---|---|---|
-| **horizon** | The cycle label (e.g. `2026-Q3`) all objectives in this file are bound to. | Set by hand when a new cycle starts. |
+| **cycle** | The cycle label (e.g. `2026-Q3`) all objectives in this file are bound to. | Set by hand when a new cycle starts. |
 | **objectives_updated** | The date `## Active` last actually changed — a retirement or a new objective. | The review skill, step 5, only when `## Active` changes. |
 | **reviewed** | The date of the last full review session, whether or not anything changed. | The review skill, step 5, every session. |
 
