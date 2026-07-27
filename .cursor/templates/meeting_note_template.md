@@ -1,7 +1,7 @@
 ---
 title:
 date:
-project:           # from Metadata/project_registry.md — may override transcript default
+area:           # from Metadata/area_registry.md — may override transcript default
 participants:
 meeting_link:
 meeting_type:
