@@ -47,14 +47,14 @@ tasks. Work with a finish line belongs where the work happens.
 
 ---
 
-## `project:` is H2
+## `area:` is H2
 
-The frontmatter `project:` field (`personal`, `acme`, …) does not name H1 projects.
+The frontmatter `area:` field (`personal`, `acme`, …) does not name H1 projects. (It was called `project:` before this rename; the old key still works — see UPDATING.md.)
 Those values are **Areas of Responsibility** — ongoing hats with no finish line. So
 H2 needs no new structure: it is already the directory layout under `Memory/`,
 `People/` and `Meetings/`.
 
-Throughout these docs, **area** means what `project:` holds. The key is *not*
+Throughout these docs, **area** is the value of the `area:` frontmatter key. The key is *not*
 renamed — the churn across every existing note is not worth the terminology gain.
 
 ---

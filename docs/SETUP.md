@@ -160,7 +160,7 @@ python scripts/hidock_pending.py list
 **Agent:** *"Process my HiDock meetings"* — sync, list pending, summarize each, optionally distill.
 
 **Notes:**
-- One HiDock device can feed **multiple projects** — project is chosen at **summarize** time, not in organizer config.
+- One HiDock device can feed **multiple areas** — area is chosen at **summarize** time, not in organizer config.
 - Transcripts start as `Speaker N:` — the agent writes back full names during summarize when confident; review before distill.
 - Selection is **pending-based**, not by date.
 
@@ -182,13 +182,13 @@ Optional automation: hinotes_organizer `scripts/run_pipeline.sh` + macOS LaunchA
 
 ## 4. Manual transcripts (optional)
 
-No extra install. Ask the agent: *"Create a manual transcript template"* with date, title, with whom, project.
+No extra install. Ask the agent: *"Create a manual transcript template"* with date, title, with whom, area.
 
 Or:
 
 ```bash
 python scripts/manual_ingest.py --stub --date 2026-01-15 --title "Catch up" \
-  --with-whom "Alex" --project personal
+  --with-whom "Alex" --area personal
 ```
 
 Paste under `# Raw Transcript`, then *"Summarize this transcript"*.
@@ -199,7 +199,7 @@ Paste under `# Raw Transcript`, then *"Summarize this transcript"*.
 
 Same for all sources:
 
-1. **Summarize** → `Meetings/<Project>/YYYY-MM-DD Title.md`
+1. **Summarize** → `Meetings/<Area>/YYYY-MM-DD Title.md`
 2. **Review** the note (especially HiDock speaker labels)
 3. **Distill** → append evidence to People / Memory (`<Area>.evidence.md` on area layout)
 4. **Triage** (later) → update `# Current model`, drain evidence debt, in interactive sessions

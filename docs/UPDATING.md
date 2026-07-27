@@ -72,14 +72,14 @@ section.
 
 Don't edit the shipped rules/skills in place — your edits would be overwritten on the next sync. Instead:
 
-- **Project-specific guidance** (your topic slugs, routing conventions, folder quirks): put it in `.cursor/rules/local-<name>.mdc`. Cursor loads it alongside the shipped rules; the sync never touches `local-*` files.
+- **Vault-specific guidance** (your topic slugs, routing conventions, folder quirks): put it in `.cursor/rules/local-<name>.mdc`. Cursor loads it alongside the shipped rules; the sync never touches `local-*` files.
 - **Registries** (`Metadata/*_registry.md`) are content — edit freely; they are never synced.
 
 ## Contributing improvements back
 
 If you improve a shipped rule/skill/script in your vault:
 
-1. **Generalize it** — remove your project names, people, paths, and domain-specific topic lists (those belong in your `local-*.mdc`).
+1. **Generalize it** — remove your area names, people, paths, and domain-specific topic lists (those belong in your `local-*.mdc`).
 2. Open a PR against the template repo.
 
 This keeps one engine everyone shares, with personal knowledge and conventions layered locally.
