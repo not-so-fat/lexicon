@@ -217,3 +217,99 @@ def build_report(root: Path, today: date) -> dict:
         "review_stale": days_since_review is None or days_since_review > REVIEW_STALE_DAYS,
         "areas_without_objectives": [a for a in known_areas(root) if a not in areas_with],
     }
+
+
+def render(report: dict) -> str:
+    lines = [
+        "# Objectives review queue",
+        "",
+        f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M')}",
+        "",
+        "*Signals only — status is proposed in the review session and decided by you.*",
+        "",
+        "## Cap and focus",
+        "",
+    ]
+
+    breach = " ⚠ exceeds cap" if report["cap_breach"] else ""
+    lines.append(f"- Active objectives: **{report['active_count']}** / {report['cap']}{breach}")
+    if report["wig_count"] == 1:
+        lines.append("- WIG: one named")
+    elif report["wig_count"] == 0:
+        lines.append("- WIG: ⚠ no [WIG] named — 4DX discipline needs exactly one")
+    else:
+        lines.append(f"- WIG: ⚠ {report['wig_count']} marked [WIG] — expected exactly one")
+
+    if report["last_review_date"]:
+        stale = " ⚠ stale" if report["review_stale"] else ""
+        lines.append(
+            f"- Last review: {report['last_review_date']} "
+            f"({report['days_since_review']} days ago){stale}"
+        )
+    else:
+        lines.append("- Last review: none recorded — this is the first review")
+    lines.append("")
+
+    lines.extend(["## Objectives", ""])
+    if not report["objectives"]:
+        lines.append("(none active)")
+    for obj in report["objectives"]:
+        marker = "[WIG] " if obj["wig"] else ""
+        lines.append(f"### {marker}{obj['title']}")
+        lines.append(f"- Area: {obj['area'] or '⚠ missing'}")
+        if obj["horizon"]:
+            if obj["past_horizon"]:
+                lines.append(
+                    f"- Horizon: {obj['horizon']} ⚠ passed "
+                    f"{abs(obj['days_to_horizon'])} days ago — retire or reopen"
+                )
+            else:
+                lines.append(f"- Horizon: {obj['horizon']} ({obj['days_to_horizon']} days)")
+        else:
+            lines.append("- Horizon: ⚠ missing")
+        if obj["newest_evidence"]:
+            lines.append(
+                f"- Newest evidence: {obj['newest_evidence']} "
+                f"({obj['days_since_evidence']} days ago)"
+            )
+        else:
+            lines.append("- Newest evidence: none found under its Evidence paths")
+        if obj["missing_fields"]:
+            lines.append(f"- ⚠ Missing fields: {', '.join(obj['missing_fields'])}")
+        lines.append("")
+
+    if report["horizon_soon"]:
+        lines.extend(["## Horizon within 14 days", ""])
+        lines.extend(f"- {title}" for title in report["horizon_soon"])
+        lines.append("")
+
+    if report["past_horizon"]:
+        lines.extend(["## Past horizon — retire or explicitly reopen", ""])
+        lines.extend(f"- {title}" for title in report["past_horizon"])
+        lines.append("")
+
+    if report["areas_without_objectives"]:
+        lines.extend(["## Areas with no active objective", ""])
+        lines.append(
+            "*governed by Standards this cycle — informational, not a gap.*"
+        )
+        lines.append("")
+        lines.extend(f"- {area}" for area in report["areas_without_objectives"])
+        lines.append("")
+
+    return "\n".join(lines)
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(
+        description="Global objectives review queue (all areas)"
+    )
+    parser.add_argument("--json", action="store_true", help="JSON output")
+    args = parser.parse_args()
+
+    report = build_report(REPO_ROOT, date.today())
+    print(json.dumps(report, indent=2) if args.json else render(report))
+
+
+if __name__ == "__main__":
+    main()

@@ -211,3 +211,37 @@ def test_report_flags_stale_review(write_objectives, vault):
 
     assert report["days_since_review"] == 26
     assert report["review_stale"] is True
+
+
+def test_render_labels_zero_objective_areas_as_governed_by_standards(
+    write_objectives, vault
+):
+    (vault / "Direction" / "aaron.md").write_text("# Direction", encoding="utf-8")
+    write_objectives(ONE_WIG)
+
+    text = review_queue.render(review_queue.build_report(vault, date(2026, 7, 27)))
+
+    assert "aaron" in text
+    assert "governed by Standards" in text
+    assert "WARN" not in text
+
+
+def test_render_flags_cap_breach_and_missing_wig(write_objectives, vault, monkeypatch):
+    monkeypatch.setenv("LEXICON_OBJECTIVE_CAP", "1")
+    write_objectives(ONE_WIG.replace("[WIG] ", "") + "\n" + ONE_WIG.replace(
+        "Decide the Circle hinge", "Another objective"
+    ).replace("[WIG] ", ""))
+
+    text = review_queue.render(review_queue.build_report(vault, date(2026, 7, 27)))
+
+    assert "exceeds cap" in text
+    assert "no [WIG]" in text
+
+
+def test_render_never_emits_a_score(write_objectives, vault):
+    write_objectives(ONE_WIG)
+
+    text = review_queue.render(review_queue.build_report(vault, date(2026, 7, 27)))
+
+    for banned in ("score", "%", "moving", "stalled", "drifting"):
+        assert banned not in text.lower()
