@@ -293,8 +293,10 @@ def pending_decisions_snippet(area: str, limit: int = 20) -> list[str]:
         _open_decisions_from_file(validation, "Validation", "## open hypotheses")
     )
 
-    for area in ("Org.md", "Product.md"):
-        pending.extend(_open_decisions_from_file(memory / area, area.replace(".md", "")))
+    for model_file in ("Org.md", "Product.md"):
+        pending.extend(
+            _open_decisions_from_file(memory / model_file, model_file.replace(".md", ""))
+        )
 
     partners_dir = memory / "Partners"
     if partners_dir.is_dir():
