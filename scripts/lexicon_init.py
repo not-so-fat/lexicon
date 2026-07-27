@@ -24,6 +24,56 @@ DIRS = [
     "Metadata",
 ]
 
+DIRECTION_TEMPLATE = """---
+area: {area}
+direction_updated: 
+---
+
+# Direction — {title}
+
+*Normative tier. What is **true** about this area → `Memory/{area}/`.
+Horizon-bound intentions → `Objectives.md`.*
+
+## Purpose
+
+<Why this area exists. Rarely changes.>
+
+## Principles
+
+<Standing constraints. Cannot be failed.>
+
+## Standards
+
+<What "well-maintained" means here. No finish line, but a quality bar.>
+"""
+
+
+def _detect_areas(root):
+    """User areas: subdirectories of Memory/, excluding Lexicon (the tool's own charter, not a user area)."""
+    memory_dir = os.path.join(root, "Memory")
+    if not os.path.isdir(memory_dir):
+        return []
+    return sorted(
+        name
+        for name in os.listdir(memory_dir)
+        if name != "Lexicon" and os.path.isdir(os.path.join(memory_dir, name))
+    )
+
+
+def scaffold_direction(root, areas):
+    """One Direction/<area>.md per detected area. Never overwrites."""
+    direction_dir = os.path.join(root, "Direction")
+    os.makedirs(direction_dir, exist_ok=True)
+    created = []
+    for area in sorted(areas):
+        path = os.path.join(direction_dir, f"{area}.md")
+        if os.path.exists(path):
+            continue
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(DIRECTION_TEMPLATE.format(area=area, title=area.replace("-", " ").title()))
+        created.append(path)
+    return created
+
 
 def _load_env(root):
     env_path = os.path.join(root, ".env")
@@ -48,6 +98,14 @@ def main():
         os.makedirs(path, exist_ok=True)
         print(f"  {path}")
     print("\nFolders OK.")
+
+    areas = _detect_areas(root)
+    created = scaffold_direction(root, areas)
+    if created:
+        print("\nDirection scaffolds created:")
+        for path in created:
+            print(f"  {path}")
+
     print("Next: python scripts/verify_setup.py")
 
     _load_env(root)
