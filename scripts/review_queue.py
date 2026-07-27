@@ -29,6 +29,7 @@ HORIZON_SOON_DAYS = 14
 REVIEW_STALE_DAYS = 14
 
 OBJ_HEADING_RE = re.compile(r"^###\s+(?:(\[WIG\])\s+)?(.+?)\s*$")
+HTML_COMMENT_RE = re.compile(r"<!--.*?-->", re.DOTALL)
 FIELD_RE = re.compile(r"^\s*-\s+\*\*(?P<key>[^:*]+):\*\*\s*(?P<val>.*?)\s*$")
 DATED_BULLET_RE = re.compile(r"^\s*-\s*(\d{4}-\d{2}-\d{2})")
 FILENAME_DATE_RE = re.compile(r"^(\d{4}-\d{2}-\d{2})")
@@ -46,7 +47,13 @@ def objective_cap() -> int:
 
 
 def parse_objectives(text: str) -> list[dict]:
-    """Objectives under `## Active`. Everything after the next `##` is ignored."""
+    """Objectives under `## Active`. Everything after the next `##` is ignored.
+
+    HTML comments (`<!-- ... -->`, single- or multi-line) are stripped first,
+    so a commented-out example — the shipped scaffold's convention for an
+    inert placeholder — is never parsed as a live objective.
+    """
+    text = HTML_COMMENT_RE.sub("", text)
     objectives: list[dict] = []
     current: dict | None = None
     in_active = False

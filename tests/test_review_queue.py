@@ -88,6 +88,48 @@ def test_splits_multiple_evidence_paths(write_objectives):
     ]
 
 
+def test_commented_out_example_is_not_parsed_as_an_objective(write_objectives):
+    path = write_objectives(
+        "<!--\n"
+        "### [WIG] <outcome, not activity>\n"
+        "- **Area:** <area — must match a Direction/<area>.md>\n"
+        "- **Horizon:** YYYY-MM-DD\n"
+        "- **Done when:** <observable recognition condition — not a metric>\n"
+        "- **Obstacle:** <the thing most likely to prevent it>\n"
+        "- **Evidence:** <comma-separated vault paths the review reads>\n"
+        "- **Opened:** YYYY-MM-DD\n"
+        "-->\n"
+    )
+    objectives = review_queue.parse_objectives(path.read_text(encoding="utf-8"))
+
+    assert objectives == []
+
+
+def test_real_objective_after_a_commented_example_is_still_parsed(write_objectives):
+    path = write_objectives(
+        "<!--\n"
+        "### [WIG] <outcome, not activity>\n"
+        "- **Area:** <area — must match a Direction/<area>.md>\n"
+        "-->\n"
+        "\n" + ONE_WIG
+    )
+    objectives = review_queue.parse_objectives(path.read_text(encoding="utf-8"))
+
+    assert len(objectives) == 1
+    assert objectives[0]["title"] == "Decide the Circle hinge"
+    assert objectives[0]["area"] == "kite"
+
+
+def test_shipped_objectives_scaffold_has_no_live_objectives():
+    """Regression: the committed root Objectives.md is a scaffold with a
+    commented-out example only. It must parse as zero active objectives —
+    this is the exact bug a comment-blind parser would miss."""
+    path = review_queue.REPO_ROOT / "Objectives.md"
+    objectives = review_queue.parse_objectives(path.read_text(encoding="utf-8"))
+
+    assert objectives == []
+
+
 def test_newest_evidence_reads_dated_bullets_in_a_file(vault):
     assert (
         review_queue.newest_evidence_date(vault, ["Memory/kite/Product.evidence.md"])
