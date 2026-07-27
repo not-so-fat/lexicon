@@ -37,7 +37,7 @@ MODEL_HEADING_DATE_RE = re.compile(
 STALE_DAYS = 21
 
 SCAN_ROOTS = [
-    ("Ideas", lambda project, rel: rel.parts[1:2] == (project,) if len(rel.parts) > 2 else False),
+    ("Ideas", lambda area, rel: rel.parts[1:2] == (area,) if len(rel.parts) > 2 else False),
 ]
 
 
@@ -117,18 +117,20 @@ def is_triaged(fm: dict) -> bool:
     return bool(str(val).strip())
 
 
-def project_matches(fm: dict, folder_project: str | None, target: str) -> bool:
-    proj = fm.get("project")
-    if isinstance(proj, list):
-        proj = proj[0] if proj else ""
-    proj = str(proj).strip().lower() if proj else ""
+def area_matches(fm: dict, folder_area: str | None, target: str) -> bool:
+    val = fm.get("area")
+    if val is None:
+        val = fm.get("project")  # legacy key — never removed, see docs/superpowers/specs/2026-07-27-terminology-clarity-design.md D6
+    if isinstance(val, list):
+        val = val[0] if val else ""
+    val = str(val).strip().lower() if val else ""
     target_l = target.lower()
-    if proj:
-        return proj == target_l
-    return folder_project == target_l if folder_project else False
+    if val:
+        return val == target_l
+    return folder_area == target_l if folder_area else False
 
 
-def iter_capture_files(project: str):
+def iter_capture_files(area: str):
     """Yield (relpath, fm, capture_date, kind) for candidate capture files."""
     for root_name, path_filter in SCAN_ROOTS:
         base = REPO_ROOT / root_name
@@ -141,10 +143,10 @@ def iter_capture_files(project: str):
                 continue
             rel = fpath.relative_to(REPO_ROOT)
             parts = rel.parts
-            folder_project = parts[1] if len(parts) > 2 else None
+            folder_area = parts[1] if len(parts) > 2 else None
 
-            if root_name == "Ideas" and folder_project != project:
-                if folder_project == project:
+            if root_name == "Ideas" and folder_area != area:
+                if folder_area == area:
                     pass
                 else:
                     try:
@@ -152,13 +154,13 @@ def iter_capture_files(project: str):
                     except OSError:
                         continue
                     fm = parse_frontmatter(content)
-                    if not project_matches(fm, folder_project, project):
+                    if not area_matches(fm, folder_area, area):
                         continue
                     capture_date = file_capture_date(fpath, fm)
                     yield str(rel), fm, capture_date, root_name
                     continue
 
-            if not path_filter(project, rel):
+            if not path_filter(area, rel):
                 continue
 
             try:
@@ -166,7 +168,7 @@ def iter_capture_files(project: str):
             except OSError:
                 continue
             fm = parse_frontmatter(content)
-            if not project_matches(fm, folder_project, project):
+            if not area_matches(fm, folder_area, area):
                 continue
             capture_date = file_capture_date(fpath, fm)
             yield str(rel), fm, capture_date, root_name
@@ -181,7 +183,7 @@ def iter_capture_files(project: str):
             except OSError:
                 continue
             fm = parse_frontmatter(content)
-            if not project_matches(fm, None, project):
+            if not area_matches(fm, None, area):
                 continue
             rel = fpath.relative_to(REPO_ROOT)
             yield str(rel), fm, file_capture_date(fpath, fm), "Clippings"
@@ -199,9 +201,9 @@ def in_date_range(capture_date: str, since: str | None, until: str | None) -> bo
     return True
 
 
-def load_last_recap(project: str) -> tuple[str, str]:
+def load_last_recap(area: str) -> tuple[str, str]:
     """Return (recap_file_relpath, last_section_text) or ('', '')."""
-    recap_dir = REPO_ROOT / "Metadata" / "recap" / project
+    recap_dir = REPO_ROOT / "Metadata" / "recap" / area
     if not recap_dir.is_dir():
         return "", ""
 
@@ -282,8 +284,8 @@ def _pending_from_decisions_log(path: Path) -> list[str]:
     return found
 
 
-def pending_decisions_snippet(project: str, limit: int = 20) -> list[str]:
-    memory = REPO_ROOT / "Memory" / project
+def pending_decisions_snippet(area: str, limit: int = 20) -> list[str]:
+    memory = REPO_ROOT / "Memory" / area
     pending: list[str] = []
 
     validation = memory / "Validation.md"
@@ -359,8 +361,8 @@ def _days_between(older: str, newer: str) -> int:
     ).days
 
 
-def _area_model_files(project: str) -> list[Path]:
-    memory = REPO_ROOT / "Memory" / project
+def _area_model_files(area: str) -> list[Path]:
+    memory = REPO_ROOT / "Memory" / area
     files: list[Path] = []
     skip = {"readme.md", "index.md", "direction.md"}
     if memory.is_dir():
@@ -377,14 +379,14 @@ def _area_model_files(project: str) -> list[Path]:
     return files
 
 
-def evidence_debt(project: str) -> dict:
+def evidence_debt(area: str) -> dict:
     """Per-area un-drained evidence + staleness, plus legacy flags.
 
     Un-drained = evidence bullets dated after `model_updated`. Stale = current
     model lags newest evidence by more than STALE_DAYS (or has no date at all).
     """
     areas: list[dict] = []
-    for model_path in _area_model_files(project):
+    for model_path in _area_model_files(area):
         try:
             model_text = model_path.read_text(encoding="utf-8", errors="replace")
         except OSError:
@@ -409,7 +411,7 @@ def evidence_debt(project: str) -> dict:
         lag_days = _days_between(model_date, newest) if model_date and newest else None
         stale = bool(all_dates) and (not model_date or (lag_days or 0) > STALE_DAYS)
 
-        rel = str(model_path.relative_to(REPO_ROOT / "Memory" / project))
+        rel = str(model_path.relative_to(REPO_ROOT / "Memory" / area))
         areas.append(
             {
                 "area": rel.removesuffix(".md"),
@@ -423,7 +425,7 @@ def evidence_debt(project: str) -> dict:
             }
         )
 
-    legacy_dir = REPO_ROOT / "Memory" / project / "_legacy"
+    legacy_dir = REPO_ROOT / "Memory" / area / "_legacy"
     legacy_files = (
         sum(1 for p in legacy_dir.rglob("*") if p.is_file()) if legacy_dir.is_dir() else 0
     )
@@ -431,10 +433,10 @@ def evidence_debt(project: str) -> dict:
 
 
 def iter_recent_meetings(
-    project: str, since: str | None, until: str | None, limit: int = 25
+    area: str, since: str | None, until: str | None, limit: int = 25
 ) -> list[dict]:
     """Recent meeting notes for triage recap context (not in queue)."""
-    meetings_dir = REPO_ROOT / "Meetings" / project
+    meetings_dir = REPO_ROOT / "Meetings" / area
     if not meetings_dir.is_dir():
         return []
     items: list[dict] = []
@@ -459,9 +461,9 @@ def iter_recent_meetings(
     return items[:limit]
 
 
-def build_queue(project: str, since: str | None, until: str | None) -> list[dict]:
+def build_queue(area: str, since: str | None, until: str | None) -> list[dict]:
     queue = []
-    for relpath, fm, capture_date, kind in iter_capture_files(project):
+    for relpath, fm, capture_date, kind in iter_capture_files(area):
         if is_triaged(fm):
             continue
         if not in_date_range(capture_date, since, until):
@@ -481,7 +483,7 @@ def build_queue(project: str, since: str | None, until: str | None) -> list[dict
 
 def main():
     parser = argparse.ArgumentParser(description="Lexicon triage queue for a project")
-    parser.add_argument("--project", required=True, help="Project slug (e.g. personal, acme)")
+    parser.add_argument("--project", dest="area", required=True, help="Project slug (e.g. personal, acme)")
     parser.add_argument("--since", help="Include capture on/after YYYY-MM-DD")
     parser.add_argument("--until", help="Include capture on/before YYYY-MM-DD")
     parser.add_argument("--json", action="store_true", help="JSON output")
@@ -497,17 +499,17 @@ def main():
     since = normalize_date(args.since) if args.since else None
     until = normalize_date(args.until) if args.until else None
 
-    queue = build_queue(args.project, since, until)
-    recent_meetings = iter_recent_meetings(args.project, since, until)
-    recap_path, last_section = load_last_recap(args.project)
-    pending = pending_decisions_snippet(args.project)
-    debt = evidence_debt(args.project)
+    queue = build_queue(args.area, since, until)
+    recent_meetings = iter_recent_meetings(args.area, since, until)
+    recap_path, last_section = load_last_recap(args.area)
+    pending = pending_decisions_snippet(args.area)
+    debt = evidence_debt(args.area)
 
     if args.json:
         print(
             json.dumps(
                 {
-                    "project": args.project,
+                    "area": args.area,
                     "since": since,
                     "until": until,
                     "queue_count": len(queue),
@@ -524,7 +526,7 @@ def main():
         return
 
     lines = [
-        f"# Triage queue — {args.project}",
+        f"# Triage queue — {args.area}",
         "",
         f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M')}",
     ]
