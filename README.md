@@ -78,7 +78,7 @@ Philosophy: prefer recall over compression; notes are evidence. Early-stage sign
 | Objectives (all areas) | `Objectives.md`, `Objectives.evidence.md` |
 | Direction (per area) | `Direction/<area>.md` |
 | Review logs | `Metadata/review/YYYY-Www.md` |
-| Process charter | `Direction/Lexicon.md` |
+| Lexicon direction file | `Direction/Lexicon.md` |
 | Scratch / logs | **`.tmp/`** only |
 
 ---
@@ -115,7 +115,7 @@ python3 scripts/verify_setup.py
 | [docs/MEMORY_MODEL.md](docs/MEMORY_MODEL.md) | How knowledge is organized: evidence vs current model, layouts, triage |
 | [docs/OBJECTIVES.md](docs/OBJECTIVES.md) | The normative tier: horizons, the cap and the WIG, the weekly review, why there is no score |
 | [docs/UPDATING.md](docs/UPDATING.md) | Pulling engine updates without touching your content; `local-*.mdc` customization |
-| `Direction/Lexicon.md` | Process charter: the two loops, the stages and the write boundaries |
+| `Direction/Lexicon.md` | Direction file: the two loops, the stages and the write boundaries |
 
 ---
 

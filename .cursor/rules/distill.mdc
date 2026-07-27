@@ -44,7 +44,7 @@ Signals are primary input.
 
 ## Step 1 — Determine routing category (deterministic)
 
-**Route by subject, not by source.** Evidence goes to the Memory project it is *about*, regardless of which account or venue captured the meeting or where the meeting note lives. A personal-account conference chat containing market intel for project X appends to `Memory/X/` (e.g. `Validation.evidence.md`), not to the personal project. List every cross-project destination in `# Distilled`.
+**Route by subject, not by source.** Evidence goes to the Memory area it is *about*, regardless of which account or venue captured the meeting or where the meeting note lives. A personal-account conference chat containing market intel for area X appends to `Memory/X/` (e.g. `Validation.evidence.md`), not to the personal area. List every cross-area destination in `# Distilled`.
 
 Use meeting_type + context (not signal taxonomy) to route most outputs:
 
@@ -55,12 +55,12 @@ A) People-focused routing
 B) Product routing
 - If context in [external] OR meeting_type in [customer, interview]
   → append Memory evidence (Product or Partners)
-  → **area layout:** `Memory/<Project>/Product.evidence.md` or `Partners/<Co>.evidence.md`
+  → **area layout:** `Memory/<Area>/Product.evidence.md` or `Partners/<Co>.evidence.md`
 
 C) Org routing
 - If meeting_type in [leadership, team] AND context in [internal]
   → append Memory evidence on Org
-  → **area layout:** `Memory/<Project>/Org.evidence.md`
+  → **area layout:** `Memory/<Area>/Org.evidence.md`
 
 D) Decisions routing (always)
 - If Decisions section contains entries (not “(None)”)
@@ -68,7 +68,7 @@ D) Decisions routing (always)
   → area layout: append to area `## Open decisions` or `## Open hypotheses` when meeting records **pending** (factual capture)
 
 E) Personal routing
-- Meaningful **# AI Evaluation** → append `Memory/<Project>/Me.evidence.md` when `Me.md` exists (area layout); else `Personal/ai_evaluation.md` (classic layout)
+- Meaningful **# AI Evaluation** → append `Memory/<Area>/Me.evidence.md` when `Me.md` exists (area layout); else `Personal/ai_evaluation.md` (classic layout)
 - One compact evidence line per meeting (growth signal); full Did well / Could improve / Experiment stays in the meeting note
 - Promote recurring patterns to `Me.md` `# Current model` in **triage**, not distill
 
@@ -79,28 +79,28 @@ If uncertain between Product vs Org:
 ## Step 2 — Output destinations (default)
 
 People pages:
-- People/<Project>/<PersonName>.md — **`# Evidence Log` only**
+- People/<Area>/<PersonName>.md — **`# Evidence Log` only**
 
 Topic memory pages (classic layout):
-- Memory/<Project>/Product/<topic>.md — **`# Evidence`**
-- Memory/<Project>/Org/<topic>.md — **`# Evidence`** or `# Signals` append section
+- Memory/<Area>/Product/<topic>.md — **`# Evidence`**
+- Memory/<Area>/Org/<topic>.md — **`# Evidence`** or `# Signals` append section
 
 Decisions:
-- Memory/<Project>/Decisions/decisions.md
+- Memory/<Area>/Decisions/decisions.md
 
 Personal (self-improvement):
-- Memory/<Project>/Me.evidence.md (area layout — create in triage when patterns recur)
-- Memory/<Project>/Personal/ai_evaluation.md (classic layout only, when no `Me.md`)
+- Memory/<Area>/Me.evidence.md (area layout — create in triage when patterns recur)
+- Memory/<Area>/Personal/ai_evaluation.md (classic layout only, when no `Me.md`)
 
 Topic naming — match-before-create:
-1. **List existing files** under `Memory/<Project>/Product/` and `Memory/<Project>/Org/`.
+1. **List existing files** under `Memory/<Area>/Product/` and `Memory/<Area>/Org/`.
 2. **Check registry:** Look up the proposed topic slug in `Metadata/topic_registry.md`.
 3. **Fuzzy match** existing slugs before creating new topic files.
 4. **New topic:** add to topic registry first, then create the file.
 
 ### Area files layout
 
-Detect: area files (`Product.md`, `Me.md`, etc.) exist at `Memory/<Project>/` root → use them. Otherwise use classic topic slugs.
+Detect: area files (`Product.md`, `Me.md`, etc.) exist at `Memory/<Area>/` root → use them. Otherwise use classic topic slugs.
 
 **Do not** create or append to `Product/<topic>.md`, `Org/<topic>.md`, `Personal/ai_evaluation.md`, legacy decision logs, or `_legacy/` files when area files exist.
 

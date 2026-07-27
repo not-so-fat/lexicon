@@ -38,8 +38,8 @@ Selection is **not date-based** — use transcripts that have no meeting note ye
 
 4. **Summarize** — For each pending file:
    - Read transcript under `Transcripts/HiDock/`.
-   - **Project:** infer from content + `Metadata/area_registry.md` (HiDock transcripts have no `project` field). Ask if unclear.
-   - Create `Meetings/<Project>/YYYY-MM-DD [Title].md` per `.cursor/rules/summarize.mdc`.
+   - **Area:** infer from content + `Metadata/area_registry.md` (HiDock transcripts have no `area` field). Ask if unclear.
+   - Create `Meetings/<Area>/YYYY-MM-DD [Title].md` per `.cursor/rules/summarize.mdc`.
    - Set meeting note `source: HiDock` and `hidock_signature: <signature>` from transcript frontmatter.
    - **Transcript Link:** wikilink to source file (basename without `.md` is enough).
    - **Speaker labels** — After attributions are clear (from dialogue: names spoken, roles, meeting note participants), **write back to the source transcript** per summarize rule (replace `Speaker N:` with `Full Name:`, add `participants:` to frontmatter). Skip write-back only if still uncertain — then leave a Context note on the meeting note.
@@ -58,7 +58,7 @@ Selection is **not date-based** — use transcripts that have no meeting note ye
 - **USB sync reports 0 new but device has files** — Re-run with device plugged in, HiNotes closed; if still stuck, run organizer `pipeline.py list` directly with full USB access.
 - **Transcript in wrong language** — Check organizer `config.yaml` has `language_detection_options` + `language_confidence_threshold` (see Prerequisites); re-transcribe via hinotes_organizer if audio is still cached.
 - **No pending after fetch** — Normal. Say "No new HiDock transcripts to summarize."
-- **Multiple projects on one device** — Expected; assign project per transcript at summarize time.
+- **Multiple areas on one device** — Expected; assign area per transcript at summarize time.
 
 ## Related
 

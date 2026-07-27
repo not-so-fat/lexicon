@@ -21,24 +21,24 @@ Appends **evidence only** from a meeting note. **Triage** later updates `# Curre
 - Memory evidence files — area layout: `<Area>.evidence.md` siblings (Product, Org, Validation, Partners, **Me**); create if missing, never write evidence into the model file
 - People `# Evidence Log`
 - `## Open decisions` / `## Open hypotheses` when meeting records pending items (the only model-file write)
-- Classic topic slugs: `Product/<topic>.md`, `Decisions/decisions.md` — only when the project has no area files
+- Classic topic slugs: `Product/<topic>.md`, `Decisions/decisions.md` — only when the area has no area files
 - AI Evaluation → `Me.evidence.md` when `Me.md` exists; `Personal/ai_evaluation.md` only in classic layout
 
 **Bullet cap:** one line, ~30 words max, dated, with meeting-note source link. Detail stays in the meeting note — never re-summarize the meeting into the evidence line.
 
-**Route by subject:** evidence about another project goes to that project's Memory files, wherever the meeting note lives. List cross-project destinations in `# Distilled`.
+**Route by subject:** evidence about another area goes to that area's Memory files, wherever the meeting note lives. List cross-area destinations in `# Distilled`.
 
 **Not triage.** Distill appends **evidence** only. Synthesis (`# Current model`, `# Current read`) happens in **lexicon-triage** after user approval; the normative tier (`Direction/<area>.md`, `Objectives.md`) belongs to **lexicon-review**. See `Direction/Lexicon.md`.
 
 ## Prerequisites
 
-Meeting note under `Meetings/<Project>/`.
+Meeting note under `Meetings/<Area>/`.
 
 ## Steps
 
 1. **Read the meeting note** — Signals, Decisions, Action Items, Summary, Context.
-2. **Detect memory layout** — Area files if `Memory/<Project>/Product.md` (or `Me.md`) exists at root; else topic slugs. See distill rule.
-3. **Read registries** — Read `Metadata/topic_registry.md` (for topic matching); classic layout: list existing files under `Memory/<Project>/Product/` and `Org/` (match-before-create). If registries or folders are missing, proceed with best-effort matching.
+2. **Detect memory layout** — Area files if `Memory/<Area>/Product.md` (or `Me.md`) exists at root; else topic slugs. See distill rule.
+3. **Read registries** — Read `Metadata/topic_registry.md` (for topic matching); classic layout: list existing files under `Memory/<Area>/Product/` and `Org/` (match-before-create). If registries or folders are missing, proceed with best-effort matching.
 4. **Apply distill rule** — Follow `.cursor/rules/distill.mdc` in full. Key additions:
    - **Topic matching**: before creating a new Memory topic file, check the topic registry for canonical slugs and aliases. Use existing topics when possible. Add genuinely new topics to the registry.
    - **Inline `#topic`**: when writing a bullet to a Memory or People page, append `#topic_slug` if the fact also relates to another registered topic.
@@ -49,6 +49,6 @@ Meeting note under `Meetings/<Project>/`.
 ## Error handling
 
 - **No meeting note** — Ask user which note to distill.
-- **Note has no project** — Ask user which project (check `Metadata/area_registry.md` when available).
+- **Note has no area** — Ask user which area (check `Metadata/area_registry.md` when available).
 - **Append-only** — Never overwrite past entries in People or Memory; always append.
 - **No synthesis** — Do not edit `# Current model`, `# Current read`, or `Direction.md`. Do not set `triaged` on meeting notes.

@@ -18,11 +18,11 @@ alwaysApply: false
    - `Product.evidence.md` for product/tech signals
    - Legacy by-source archive under `_legacy/` only when explicitly archiving
 
-   Route by **subject**: evidence about another project goes to that project's `Memory/` files, even when the meeting note lives elsewhere.
+   Route by **subject**: evidence about another area goes to that area's `Memory/` files, even when the meeting note lives elsewhere.
 
    **Do not** update `# Current model` during distill — triage synthesizes later.
 
-2. **Topics:** External meetings often need **more and more specific** topics. Always check `Metadata/topic_registry.md` and use canonical slugs. Expect a mature project's registry to grow two families of slugs:
+2. **Topics:** External meetings often need **more and more specific** topics. Always check `Metadata/topic_registry.md` and use canonical slugs. Expect a mature area's registry to grow two families of slugs:
    - **Tech:** specific technologies and product surfaces (e.g. architecture, api, integration, onboarding)
    - **External:** customer_feedback, competitor, hiring, interview, partnership, roadmap
 

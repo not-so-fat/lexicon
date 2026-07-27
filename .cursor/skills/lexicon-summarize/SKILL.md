@@ -5,7 +5,7 @@ description: Create a meeting note from an existing transcript file. Use when us
 
 # Summarize transcript into meeting note
 
-Turns one transcript file into a structured meeting note under `Meetings/<Project>/`.
+Turns one transcript file into a structured meeting note under `Meetings/<Area>/`.
 
 ## Prerequisites
 
@@ -13,10 +13,10 @@ An existing transcript file under `Transcripts/Fireflies/<account>/`, `Transcrip
 
 ## Steps
 
-1. **Read transcript** — Identify the file. Read frontmatter (`title`, `date`, `signature` for HiDock; `project`, `participants` or `with_whom` when present).
+1. **Read transcript** — Identify the file. Read frontmatter (`title`, `date`, `signature` for HiDock; `area`, `participants` or `with_whom` when present).
 2. **Read registries** — Read `Metadata/area_registry.md`, `Metadata/topic_registry.md`, and `Metadata/tag_registry.md`. These are needed for Step 3. If a registry file is missing, fall back to best-effort choices and note that the registry is absent.
-3. **Create meeting note** — Path: `Meetings/<Project>/YYYY-MM-DD [Title].md`. Apply `.cursor/rules/summarize.mdc` (all steps). Key points from registries:
-   - **Project**: Fireflies/Manual — transcript's `project` is the default. HiDock — no `project` in transcript; infer from content + registry. Override if clearly mismatched.
+3. **Create meeting note** — Path: `Meetings/<Area>/YYYY-MM-DD [Title].md`. Apply `.cursor/rules/summarize.mdc` (all steps). Key points from registries:
+   - **Area**: Fireflies/Manual — transcript's `area` is the default. HiDock — no `area` in transcript; infer from content + registry. Override if clearly mismatched.
    - **HiDock**: set `source: HiDock`, `hidock_signature: <signature>` on the meeting note; link `Transcripts/HiDock/...`.
    - **HiDock speakers**: infer `Speaker N` → person from dialogue; then **write back** to the transcript file (`participants:` frontmatter + replace `Speaker N:` lines with `Full Name:`). If uncertain, leave `Speaker N:` and note in meeting Context only.
    - **Topics**: use canonical slugs from the topic registry. Add new topics to the registry before using them.
@@ -27,4 +27,4 @@ An existing transcript file under `Transcripts/Fireflies/<account>/`, `Transcrip
 ## Error handling
 
 - **No transcript file** — Don't create one here. Tell user to use the manual-template skill.
-- **Missing project** — Ask user which project (check `Metadata/area_registry.md`). Required for HiDock and any transcript without `project` in frontmatter.
+- **Missing area** — Ask user which area (check `Metadata/area_registry.md`). Required for HiDock and any transcript without `area` in frontmatter.

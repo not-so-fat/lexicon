@@ -5,7 +5,7 @@ direction_updated: 2026-07-26
 
 # Direction — Lexicon
 
-*Normative tier: the charter for the Lexicon pipeline itself. What is **true** about
+*Normative tier: the direction file for the Lexicon area. What is **true** about
 this area → `Memory/Lexicon/`. Horizon-bound intentions → `Objectives.md`.*
 
 Generic — use this in any vault clone; no project-specific content here.
@@ -82,10 +82,10 @@ recent meetings for recap; it does **not** edit them.
 The user kicks triage; confirm the **period** if unclear (suggest since last triage
 or ~2 weeks; never all-time by default).
 
-> **"Triage `<project>` — last two weeks."**
+> **"Triage `<area>` — last two weeks."**
 
 ```bash
-python3 scripts/triage_queue.py --project <project> [--since YYYY-MM-DD] [--until YYYY-MM-DD]
+python3 scripts/triage_queue.py --area <area> [--since YYYY-MM-DD] [--until YYYY-MM-DD]
 ```
 
 The script returns: **previous triage**, **pending decisions**, **evidence debt**
@@ -97,7 +97,7 @@ Session flow, in order:
 2. **Discuss** — direction shifts, resolve or carry forward open decisions.
 3. **Update Memory** — `# Current model` / durable sections, `# Current read` (you approve writes). **Drain evidence debt:** fold un-drained bullets into `# Current model` and stamp `model_updated:` — or explicitly defer. A **⚠ STALE** flag (model lagging newest evidence > 21 days) must not survive the session unaddressed.
 4. **Clean Ideas** — Promote → memory, Retire stale drafts, Keep / Skip exploring notes.
-5. **Recap log** — append `Metadata/recap/<project>/YYYY-MM.md`.
+5. **Recap log** — append `Metadata/recap/<area>/YYYY-MM.md`.
 
 Principle-level commits are **not** triage's to make: they belong to review.
 
@@ -137,7 +137,7 @@ What a well-maintained vault looks like. No finish line — a bar to hold.
 **Area files** — recommended for mature areas:
 
 ```
-Memory/<project>/
+Memory/<area>/
   Validation.md              # market learnings + ## Open hypotheses
   Validation.evidence.md     # append-only evidence log (distill)
   Org.md                     # + ## Open decisions
@@ -149,27 +149,27 @@ Memory/<project>/
   Partners/<Company>.md      # + ## Open decisions
   Partners/<Company>.evidence.md
 
-People/<project>/<Person>.md   # # Current read (triage) + # Evidence Log (distill)
+People/<area>/<Person>.md   # # Current read (triage) + # Evidence Log (distill)
 ```
 
 **Topic slugs** — default for new / small areas:
 
 ```
-Memory/<project>/
+Memory/<area>/
   Product/<topic>.md    # # What we learned + # Evidence
   Org/<topic>.md
   Decisions/decisions.md
   Personal/self_evaluation.md
 
-People/<project>/<Person>.md
+People/<area>/<Person>.md
 ```
 
-Detect layout: if `Memory/<project>/Product.md` exists, use area files; else use
+Detect layout: if `Memory/<area>/Product.md` exists, use area files; else use
 topic slugs. Triage on topic-slug areas refreshes durable sections
 (`# What we learned`, `# Signals`) and the decisions log — not `# Current model`
 unless you adopt area files.
 
-`Memory/<project>/` holds no `Direction.md`: the normative tier lives at
+`Memory/<area>/` holds no `Direction.md`: the normative tier lives at
 `Direction/<area>.md`, one level up and outside `Memory/`.
 
 ### File shape
@@ -200,12 +200,12 @@ stays in the linked meeting note. Legacy inline `# Evidence` sections in model f
 are read-only: new bullets go to the sibling file, and triage migrates the old
 section over.
 
-Capture files (Ideas / Clippings) carry only `project` + `created` at capture;
+Capture files (Ideas / Clippings) carry only `area` + `created` at capture;
 triage completes the rest:
 
 ```yaml
 ---
-project: <project>
+area: <area>
 created: YYYY-MM-DD
 tags: [idea]
 status:                    # set at triage
@@ -243,5 +243,5 @@ Templates: `.cursor/templates/ideas_template.md`, `.cursor/templates/clipping_te
 | Lint | `scripts/lint_vault.py` |
 | Agent skills | `.cursor/skills/lexicon-triage/SKILL.md`, `.cursor/skills/lexicon-review/SKILL.md` |
 | Rules | `.cursor/rules/triage.mdc`, `.cursor/rules/review.mdc` |
-| Recap logs | `Metadata/recap/<project>/YYYY-MM.md` |
+| Recap logs | `Metadata/recap/<area>/YYYY-MM.md` |
 | Review logs | `Metadata/review/YYYY-Www.md` |
