@@ -29,14 +29,14 @@ An **interactive thinking session** with the user — not a meeting inbox proces
 
 ## Layout detection
 
-- **Area files:** `Memory/<project>/Product.md` exists → update `# Current model`, `## Open decisions`, `Direction.md`, `Validation.md`, `Partners/*.md`, `Me.md`. Evidence lives in sibling `<Area>.evidence.md` files (read-only input for synthesis).
+- **Area files:** `Memory/<project>/Product.md` exists → update `# Current model`, `## Open decisions`, `Validation.md`, `Partners/*.md`, `Me.md`. Evidence lives in sibling `<Area>.evidence.md` files (read-only input for synthesis).
 - **Topic slugs (default):** update `# What we learned` / `# Signals` on topic pages; refresh `Decisions/decisions.md` narrative; People `# Current read` if present.
 
 ## Principles
 
 - **User-kicked** — no automatic schedule; always confirm **period** if unclear.
 - **Conversation first** — narrative recap before file actions.
-- **Synthesis only here** — `# Current model`, `# Current read`, **Direction** edits happen in triage after user approval.
+- **Synthesis only here** — `# Current model`, `# Current read` edits happen in triage after user approval. **Direction** and **Objectives** edits happen only in **lexicon-review** — triage never writes `Direction/**`, `Objectives.md` or `Objectives.evidence.md`.
 - **Ideas queue only** — `triage_queue.py` scans Ideas + Clippings, not Meetings.
 - **Skip stays in queue** — do not set `triaged` on Skip.
 - **Retire = delete** — git preserves history.
@@ -77,8 +77,9 @@ After recap discussion, propose **Memory** changes:
 | **Update current truth** | `# Current model` on Validation, Product, Org, Partners, Me + stamp `model_updated:` | `# What we learned` / `# Signals` on topic pages |
 | **Resolve decision** | Move from `## Open decisions` / `## Open hypotheses` into `# Current model` | Update decisions log + durable sections |
 | **Migrate legacy evidence** | Move inline `# Evidence` section from model file into sibling `<Area>.evidence.md` (verbatim, append-only) | — |
-| **Canon** | Rare edit to `Direction.md` (principles only; explicit approval) | — |
 | **People read** | Refresh `# Current read` (~5 bullets) | Same if section exists |
+
+Triage does not edit `Direction.md`, `Objectives.md` or `Objectives.evidence.md` — that belongs to **lexicon-review**.
 
 Every `# Current model` refresh stamps `model_updated:` — that is what resets the evidence-debt counter and the staleness alarm.
 
@@ -116,7 +117,6 @@ Append to `Metadata/recap/<project>/YYYY-MM.md`:
 ### Memory updates
 - Current model: [[Memory/.../Product]] — …
 - Resolved: …
-- Canon: …
 
 ### Ideas
 - Promote: [[...]] → [[Memory/...]]
@@ -129,4 +129,4 @@ Append to `Metadata/recap/<project>/YYYY-MM.md`:
 
 ## Step 5 — Reply
 
-Confirm: recap log path, Memory files updated, ideas processed, ideas still in queue, suggested next kick.
+Confirm: recap log path, Memory files updated, ideas processed, ideas still in queue, suggested next kick. Also list any evidence written this session that falls under an active objective's `Evidence:` paths in `Objectives.md`, so the next review does not have to rediscover it. Read `Objectives.md`; do not write it.

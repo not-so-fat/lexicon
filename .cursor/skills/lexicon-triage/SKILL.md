@@ -15,7 +15,7 @@ Interactive session: **recap → discuss → update Memory → clean Ideas**. Me
 | Yes | No |
 |-----|-----|
 | Conversation: what happened, how you're doing, open problems | Processing or editing meeting notes |
-| Update `# Current model` (area layout) or durable sections (topic layout), resolve open decisions | Distilling meetings (use **lexicon-distill**) |
+| Update `# Current model` (area layout) or durable sections (topic layout), resolve open decisions | Distilling meetings (use **lexicon-distill**); Editing `Direction/` or `Objectives.md` (use **lexicon-review**) |
 | Refresh People `# Current read` | Appending `# Evidence` from meetings |
 | Promote / Retire / Keep **Ideas** and **Clippings** | Setting `triaged` on `Meetings/` |
 
@@ -52,13 +52,13 @@ Switch to **Agent mode** to execute approved writes. Small sessions can stay in 
 
 2. **Recap (conversation)** — Narrative from recent meetings + Memory + Me.md (if present). Discuss open problems. Wait for user input before writes.
 
-3. **Memory updates** — Propose changes, resolve open decisions, rare Direction edits, People `# Current read`. **Drain evidence debt:** every area listed in the script's Evidence debt section gets its un-drained bullets folded into `# Current model` (stamp `model_updated: YYYY-MM-DD` in frontmatter) or an explicit user-approved deferral. Migrate legacy inline `# Evidence` sections to the sibling `.evidence.md` when flagged. User approves first.
+3. **Memory updates** — Propose changes, resolve open decisions, People `# Current read`. **Drain evidence debt:** every area listed in the script's Evidence debt section gets its un-drained bullets folded into `# Current model` (stamp `model_updated: YYYY-MM-DD` in frontmatter) or an explicit user-approved deferral. Migrate legacy inline `# Evidence` sections to the sibling `.evidence.md` when flagged. User approves first.
 
 4. **Ideas queue** — Propose Promote / Keep / Skip / Retire per idea (cluster when possible). User approves first.
 
 5. **Log** — Append to `Metadata/recap/<project>/YYYY-MM.md`.
 
-6. **Report** — What changed in Memory, ideas processed, what remains in queue.
+6. **Report** — What changed in Memory, ideas processed, what remains in queue. Also list any evidence written this session that falls under an active objective's `Evidence:` paths in `Objectives.md`, so the next review does not have to rediscover it. Read `Objectives.md`; do not write it.
 
 ## Error handling
 
@@ -72,3 +72,4 @@ Switch to **Agent mode** to execute approved writes. Small sessions can stay in 
 - Update `# Current model` or durable synthesis sections without user approval.
 - Append meeting evidence during triage (that's distill).
 - Process hundreds of ideas in one session without clustering.
+- Edit `Direction/**`, `Objectives.md` or `Objectives.evidence.md` — those belong to **lexicon-review**.
