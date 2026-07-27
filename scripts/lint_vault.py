@@ -25,6 +25,9 @@ import json
 import re
 import sys
 from pathlib import Path
+from datetime import date
+
+from review_queue import objective_cap, parse_objectives
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_DIR.parent
@@ -42,6 +45,16 @@ MAX_BULLET_CHARS = 240  # ~30 words; detail belongs in the linked meeting note
 CAPTURE_ROOTS = ("Meetings", "Ideas", "Clippings")
 SKIP_NAMES = {"readme.md", "index.md"}
 MODEL_SKIP = {"readme.md", "index.md", "direction.md"}
+
+DIRECTION_ALLOWED_SECTIONS = ("purpose", "principles", "standards")
+OBJECTIVE_FIELD_LABELS = {
+    "area": "Area",
+    "horizon": "Horizon",
+    "done when": "Done when",
+    "obstacle": "Obstacle",
+    "evidence": "Evidence",
+    "opened": "Opened",
+}
 
 
 def read(path: Path) -> str:
@@ -193,13 +206,155 @@ def lint_memory(project: str | None) -> list[dict]:
     return issues
 
 
+def lint_objectives() -> list[dict]:
+    """Cap, WIG, required fields and horizon hygiene for the global objectives file."""
+    issues: list[dict] = []
+    path = REPO_ROOT / "Objectives.md"
+    if not path.is_file():
+        return issues
+
+    objectives = parse_objectives(read(path))
+    if not objectives:
+        return issues
+    cap = objective_cap()
+    rel = "Objectives.md"
+
+    if len(objectives) > cap:
+        issues.append(
+            {
+                "level": "error",
+                "path": rel,
+                "issue": (
+                    f"{len(objectives)} active objectives exceeds cap of {cap} — "
+                    "retire one before opening another"
+                ),
+            }
+        )
+
+    wigs = sum(1 for obj in objectives if obj["wig"])
+    if wigs != 1:
+        issues.append(
+            {
+                "level": "error",
+                "path": rel,
+                "issue": f"expected exactly one [WIG], found {wigs}",
+            }
+        )
+
+    areas = set(known_direction_areas())
+    today = date.today().isoformat()
+
+    for obj in objectives:
+        title = obj["title"]
+        for key in obj["missing_fields"]:
+            issues.append(
+                {
+                    "level": "error",
+                    "path": rel,
+                    "issue": f"`{title}`: missing **{OBJECTIVE_FIELD_LABELS[key]}:**",
+                }
+            )
+        if obj["area"] and areas and obj["area"] not in areas:
+            issues.append(
+                {
+                    "level": "error",
+                    "path": rel,
+                    "issue": f"`{title}`: area `{obj['area']}` has no Direction/{obj['area']}.md",
+                }
+            )
+        if obj["horizon"] and obj["horizon"] < today:
+            issues.append(
+                {
+                    "level": "warning",
+                    "path": rel,
+                    "issue": (
+                        f"`{title}`: past its Horizon ({obj['horizon']}) and still active — "
+                        "retire it or reopen with a new horizon in review"
+                    ),
+                }
+            )
+
+    return issues
+
+
+def known_direction_areas() -> list[str]:
+    direction = REPO_ROOT / "Direction"
+    if not direction.is_dir():
+        return []
+    return sorted(
+        p.stem for p in direction.glob("*.md") if p.stem.lower() not in ("readme", "index")
+    )
+
+
+def lint_direction() -> list[dict]:
+    """Section whitelist, plus migration warnings for the normative tier."""
+    issues: list[dict] = []
+
+    direction = REPO_ROOT / "Direction"
+    if direction.is_dir():
+        for path in sorted(direction.glob("*.md")):
+            if path.stem.lower() in ("readme", "index"):
+                continue
+            rel = str(path.relative_to(REPO_ROOT))
+            for line in read(path).splitlines():
+                if not line.startswith("## "):
+                    continue
+                name = line[3:].strip()
+                if name.lower() not in DIRECTION_ALLOWED_SECTIONS:
+                    issues.append(
+                        {
+                            "level": "error",
+                            "path": rel,
+                            "issue": (
+                                f"section `## {name}` not allowed — only Purpose, "
+                                "Principles and Standards. Horizon-bound intent "
+                                "belongs in Objectives.md"
+                            ),
+                        }
+                    )
+
+    memory = REPO_ROOT / "Memory"
+    if not memory.is_dir():
+        return issues
+
+    areas = set(known_direction_areas())
+    for area_dir in sorted(p for p in memory.iterdir() if p.is_dir() and p.name != "Lexicon"):
+        legacy = area_dir / "Direction.md"
+        if legacy.is_file():
+            issues.append(
+                {
+                    "level": "warning",
+                    "path": str(legacy.relative_to(REPO_ROOT)),
+                    "issue": (
+                        f"un-migrated — move to Direction/{area_dir.name}.md "
+                        "and sort into Purpose / Principles / Standards"
+                    ),
+                }
+            )
+        elif area_dir.name not in areas:
+            issues.append(
+                {
+                    "level": "warning",
+                    "path": str(area_dir.relative_to(REPO_ROOT)),
+                    "issue": f"area has no Direction/{area_dir.name}.md",
+                }
+            )
+
+    return issues
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Lint Lexicon vault hygiene")
     parser.add_argument("--project", help="Limit to one project slug")
     parser.add_argument("--json", action="store_true", help="JSON output")
     args = parser.parse_args()
 
-    issues = lint_capture_files(args.project) + lint_memory(args.project)
+    issues = (
+        lint_capture_files(args.project)
+        + lint_memory(args.project)
+        + lint_objectives()
+        + lint_direction()
+    )
     errors = [i for i in issues if i["level"] == "error"]
     warnings = [i for i in issues if i["level"] == "warning"]
 
