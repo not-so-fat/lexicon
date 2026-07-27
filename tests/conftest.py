@@ -39,11 +39,11 @@ def write_objectives(vault: Path):
         path = vault / "Objectives.md"
         path.write_text(
             "---\n"
-            "horizon: 2026-Q3\n"
+            "cycle: 2026-Q3\n"
             "objectives_updated: 2026-07-20\n"
             f"reviewed: {reviewed}\n"
             "---\n\n"
-            "# Objectives — horizon 2026-Q3\n\n"
+            "# Objectives — cycle 2026-Q3\n\n"
             "## Active\n\n"
             f"{body}\n",
             encoding="utf-8",

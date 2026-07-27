@@ -31,6 +31,14 @@ git diff --stat                          # review what changed
 
 **Deletions are not propagated.** `git checkout <tree-ish> -- <path>` copies files that exist in `<tree-ish>`; it has no file to copy for one the template *removed*, so it silently leaves your stale copy in place. This is a general trap, not a one-off — any future template reorg that deletes a file needs an explicit `git rm -f <path>` on your side, because the sync command alone cannot know to remove it. Watch template release notes for removals, or a `lint_vault.py` warning that names the replacement.
 
+## Terminology renames (2026-07)
+
+Two renames shipped after the objectives tier:
+
+1. **`project:` → `area:`** (frontmatter). Readers accept both forever; writers emit only `area:`. Run `python3 scripts/migrate_area_key.py` to rewrite remaining keys. `lint_vault.py` warns on any file still carrying `project:`. CLI flags: prefer `--area`; `--project` still works as a hidden alias. Env: prefer `AREA_<account>`; `PROJECT_<account>` still works.
+
+2. **`**Horizon:**` / `horizon:` → `**By:**` / `cycle:`** (objectives fields). Hard rename — no fallback. Update `Objectives.md` by hand when you pull this engine: frontmatter `horizon:` becomes `cycle:`, and each objective's `**Horizon:**` date becomes `**By:**`.
+
 ## Migrating to the normative tier
 
 The normative tier moved out of `Memory/`. Per area that has a `Direction.md`:
