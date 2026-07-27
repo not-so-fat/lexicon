@@ -153,3 +153,33 @@ def test_fenced_section_ignored_but_real_disallowed_section_caught(vault, monkey
     offenders = [i["issue"] for i in issues if i["level"] == "error"]
     assert not any("section `## Objectives`" in msg for msg in offenders)
     assert any("section `## Roadmap`" in msg for msg in offenders)
+
+
+def test_inner_fence_marker_with_info_string_does_not_close_outer_fence(vault, monkeypatch):
+    """A fence-shaped line with trailing text (an info string) inside an
+    already-open fence must not be treated as the close — CommonMark requires
+    a closing fence line to contain nothing but the marker and whitespace.
+    Without that check, a worked example nested inside a worked example
+    (outer fence containing text that itself shows a fenced snippet) would
+    prematurely "close" on the inner opening marker, re-enabling the section
+    whitelist partway through content that is still fenced.
+    """
+    (vault / "Direction" / "kite.md").write_text(
+        "---\narea: kite\n---\n\n# Direction — Kite\n\n"
+        "## Purpose\n\nx\n\n"
+        "## Standards\n\n"
+        "Example of an example inside an example:\n\n"
+        "```markdown\n"
+        "Some text\n\n"
+        "```python\n"
+        "## Objectives\n\n"
+        "nope\n"
+        "```\n"
+        "```\n",
+        encoding="utf-8",
+    )
+
+    issues = _issues(vault, monkeypatch, "lint_direction")
+
+    offenders = [i["issue"] for i in issues if i["level"] == "error"]
+    assert not any("section `## Objectives`" in msg for msg in offenders)

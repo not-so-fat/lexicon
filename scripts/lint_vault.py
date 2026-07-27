@@ -47,7 +47,7 @@ SKIP_NAMES = {"readme.md", "index.md"}
 MODEL_SKIP = {"readme.md", "index.md", "direction.md"}
 
 DIRECTION_ALLOWED_SECTIONS = ("purpose", "principles", "standards")
-FENCE_RE = re.compile(r"^\s{0,3}(`{3,}|~{3,})")
+FENCE_RE = re.compile(r"^\s{0,3}(`{3,}|~{3,})(.*)$")
 OBJECTIVE_FIELD_LABELS = {
     "area": "Area",
     "horizon": "Horizon",
@@ -302,12 +302,19 @@ def lint_direction() -> list[dict]:
             for line in read(path).splitlines():
                 m = FENCE_RE.match(line)
                 if m:
-                    marker = m.group(1)
+                    marker, trailing = m.group(1), m.group(2)
                     if fence_char is None:
-                        # Opening a fence.
+                        # Opening a fence — an info string (e.g. ```python) is allowed.
                         fence_char, fence_len = marker[0], len(marker)
-                    elif marker[0] == fence_char and len(marker) >= fence_len:
-                        # Matching close (CommonMark: same char, >= opening length).
+                    elif (
+                        marker[0] == fence_char
+                        and len(marker) >= fence_len
+                        and trailing.strip() == ""
+                    ):
+                        # Matching close (CommonMark: same char, >= opening length,
+                        # and nothing but whitespace after the marker — a marker
+                        # line carrying an info string, e.g. a nested worked
+                        # example's own opening fence, does not close us).
                         fence_char, fence_len = None, 0
                     continue
                 if fence_char is not None:
