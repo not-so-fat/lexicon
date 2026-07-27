@@ -1,3 +1,5 @@
+from datetime import date
+
 import review_queue
 
 ONE_WIG = """### [WIG] Decide the Circle hinge
@@ -84,3 +86,128 @@ def test_splits_multiple_evidence_paths(write_objectives):
         "Memory/kite/Product.evidence.md",
         "Meetings/kite",
     ]
+
+
+def test_newest_evidence_reads_dated_bullets_in_a_file(vault):
+    assert (
+        review_queue.newest_evidence_date(vault, ["Memory/kite/Product.evidence.md"])
+        == "2026-07-10"
+    )
+
+
+def test_newest_evidence_reads_dated_filenames_in_a_directory(vault):
+    meetings = vault / "Meetings" / "kite"
+    meetings.mkdir(parents=True)
+    (meetings / "2026-07-15 Some Meeting.md").write_text("x", encoding="utf-8")
+    (meetings / "2026-06-01 Older Meeting.md").write_text("x", encoding="utf-8")
+
+    assert review_queue.newest_evidence_date(vault, ["Meetings/kite"]) == "2026-07-15"
+
+
+def test_newest_evidence_takes_the_max_across_paths(vault):
+    meetings = vault / "Meetings" / "kite"
+    meetings.mkdir(parents=True)
+    (meetings / "2026-07-22 Later.md").write_text("x", encoding="utf-8")
+
+    assert (
+        review_queue.newest_evidence_date(
+            vault, ["Memory/kite/Product.evidence.md", "Meetings/kite"]
+        )
+        == "2026-07-22"
+    )
+
+
+def test_newest_evidence_ignores_missing_paths(vault):
+    assert review_queue.newest_evidence_date(vault, ["Nope/does-not-exist.md"]) == ""
+
+
+def test_last_review_picks_the_newest_iso_week_file(vault):
+    review_dir = vault / "Metadata" / "review"
+    review_dir.mkdir(parents=True)
+    (review_dir / "2026-W28.md").write_text("x", encoding="utf-8")
+    (review_dir / "2026-W30.md").write_text("x", encoding="utf-8")
+
+    iso_date, relpath = review_queue.last_review(vault)
+
+    assert iso_date == "2026-07-20"  # Monday of ISO week 2026-W30
+    assert relpath == "Metadata/review/2026-W30.md"
+
+
+def test_last_review_empty_when_no_review_dir(vault):
+    assert review_queue.last_review(vault) == ("", "")
+
+
+def test_known_areas_from_direction_files(vault):
+    (vault / "Direction" / "personal.md").write_text("# Direction", encoding="utf-8")
+    (vault / "Direction" / "README.md").write_text("# Readme", encoding="utf-8")
+
+    assert review_queue.known_areas(vault) == ["kite", "personal"]
+
+
+def test_known_areas_excludes_the_lexicon_charter(vault):
+    """Direction/Lexicon.md is the tool's own charter, not a user area."""
+    (vault / "Direction" / "Lexicon.md").write_text("# Direction", encoding="utf-8")
+
+    assert review_queue.known_areas(vault) == ["kite"]
+
+
+def test_report_flags_cap_breach_and_wig_count(write_objectives, vault, monkeypatch):
+    monkeypatch.setenv("LEXICON_OBJECTIVE_CAP", "2")
+    body = ""
+    for i in range(3):
+        body += (
+            f"### Objective {i}\n"
+            "- **Area:** kite\n"
+            "- **Horizon:** 2026-12-31\n"
+            "- **Done when:** something observable\n"
+            "- **Obstacle:** something likely\n"
+            "- **Evidence:** Memory/kite/Product.evidence.md\n"
+            "- **Opened:** 2026-07-01\n\n"
+        )
+    write_objectives(body)
+
+    report = review_queue.build_report(vault, date(2026, 7, 27))
+
+    assert report["active_count"] == 3
+    assert report["cap"] == 2
+    assert report["cap_breach"] is True
+    assert report["wig_count"] == 0
+
+
+def test_report_computes_horizon_and_evidence_staleness(write_objectives, vault):
+    write_objectives(ONE_WIG)
+
+    report = review_queue.build_report(vault, date(2026, 7, 27))
+    obj = report["objectives"][0]
+
+    assert obj["days_to_horizon"] == 34
+    assert obj["past_horizon"] is False
+    assert obj["newest_evidence"] == "2026-07-10"
+    assert obj["days_since_evidence"] == 17
+
+
+def test_report_flags_past_horizon_and_soon(write_objectives, vault):
+    write_objectives(ONE_WIG.replace("2026-08-30", "2026-07-01"))
+
+    report = review_queue.build_report(vault, date(2026, 7, 27))
+
+    assert report["past_horizon"] == ["Decide the Circle hinge"]
+    assert report["objectives"][0]["days_to_horizon"] == -26
+
+
+def test_report_lists_areas_governed_only_by_standards(write_objectives, vault):
+    (vault / "Direction" / "aaron.md").write_text("# Direction", encoding="utf-8")
+    write_objectives(ONE_WIG)
+
+    report = review_queue.build_report(vault, date(2026, 7, 27))
+
+    assert report["areas_without_objectives"] == ["aaron"]
+
+
+def test_report_flags_stale_review(write_objectives, vault):
+    write_objectives(ONE_WIG, reviewed="2026-07-01")
+
+    report = review_queue.build_report(vault, date(2026, 7, 27))
+
+    assert report["days_since_review"] == 26
+    assert report["review_stale"] is True

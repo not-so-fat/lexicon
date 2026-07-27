@@ -85,3 +85,135 @@ def parse_objectives(text: str) -> list[dict]:
         obj["evidence"] = [p.strip() for p in fields.get("evidence", "").split(",") if p.strip()]
         obj["missing_fields"] = [k for k in REQUIRED_FIELDS if not fields.get(k)]
     return objectives
+
+
+def _newest_dated_bullet(path: Path) -> str:
+    newest = ""
+    try:
+        for line in path.read_text(encoding="utf-8", errors="replace").splitlines():
+            match = DATED_BULLET_RE.match(line)
+            if match and match.group(1) > newest:
+                newest = match.group(1)
+    except OSError:
+        pass
+    return newest
+
+
+def _newest_dated_filename(directory: Path) -> str:
+    newest = ""
+    for path in directory.rglob("*.md"):
+        match = FILENAME_DATE_RE.match(path.name)
+        if match and match.group(1) > newest:
+            newest = match.group(1)
+    return newest
+
+
+def newest_evidence_date(root: Path, rel_paths: list[str]) -> str:
+    """Newest evidence under the objective's `Evidence:` paths.
+
+    Paths resolve literally — a file yields its newest dated bullet, a
+    directory its newest dated filename. Never assumes a naming convention:
+    vaults differ on where evidence logs live.
+    """
+    newest = ""
+    for rel in rel_paths:
+        target = root / rel
+        if target.is_file():
+            found = _newest_dated_bullet(target)
+        elif target.is_dir():
+            found = _newest_dated_filename(target)
+        else:
+            continue
+        if found > newest:
+            newest = found
+    return newest
+
+
+def last_review(root: Path) -> tuple[str, str]:
+    """(ISO date of the Monday of the newest review week, relpath)."""
+    review_dir = root / "Metadata" / "review"
+    if not review_dir.is_dir():
+        return "", ""
+    best_date = ""
+    best_path = ""
+    for path in sorted(review_dir.glob("*.md")):
+        match = REVIEW_FILE_RE.match(path.name)
+        if not match:
+            continue
+        try:
+            monday = datetime.strptime(
+                f"{match.group(1)}-W{match.group(2)}-1", "%G-W%V-%u"
+            ).strftime("%Y-%m-%d")
+        except ValueError:
+            continue
+        if monday > best_date:
+            best_date = monday
+            best_path = str(path.relative_to(root))
+    return best_date, best_path
+
+
+def known_areas(root: Path) -> list[str]:
+    """User areas. `Lexicon` is the tool's own charter, not an area to review."""
+    direction = root / "Direction"
+    if not direction.is_dir():
+        return []
+    return sorted(
+        path.stem
+        for path in direction.glob("*.md")
+        if path.stem.lower() not in ("readme", "index", "lexicon")
+    )
+
+
+def _days_between(earlier: str, later: date) -> int | None:
+    if not earlier:
+        return None
+    return (later - date.fromisoformat(earlier)).days
+
+
+def build_report(root: Path, today: date) -> dict:
+    objectives_file = root / "Objectives.md"
+    text = (
+        objectives_file.read_text(encoding="utf-8", errors="replace")
+        if objectives_file.is_file()
+        else ""
+    )
+    frontmatter = parse_frontmatter(text)
+    objectives = parse_objectives(text)
+    cap = objective_cap()
+
+    for obj in objectives:
+        obj["newest_evidence"] = newest_evidence_date(root, obj["evidence"])
+        obj["days_since_evidence"] = _days_between(obj["newest_evidence"], today)
+        if obj["horizon"]:
+            obj["days_to_horizon"] = (date.fromisoformat(obj["horizon"]) - today).days
+            obj["past_horizon"] = obj["days_to_horizon"] < 0
+        else:
+            obj["days_to_horizon"] = None
+            obj["past_horizon"] = False
+        obj.pop("fields", None)
+
+    areas_with = {obj["area"] for obj in objectives if obj["area"]}
+    review_date, review_path = last_review(root)
+    reviewed_frontmatter = normalize_date(frontmatter.get("reviewed", ""))
+    effective_review = max(review_date, reviewed_frontmatter)
+    days_since_review = _days_between(effective_review, today)
+
+    return {
+        "cap": cap,
+        "active_count": len(objectives),
+        "cap_breach": len(objectives) > cap,
+        "wig_count": sum(1 for obj in objectives if obj["wig"]),
+        "objectives": objectives,
+        "horizon_soon": [
+            obj["title"]
+            for obj in objectives
+            if obj["days_to_horizon"] is not None
+            and 0 <= obj["days_to_horizon"] <= HORIZON_SOON_DAYS
+        ],
+        "past_horizon": [obj["title"] for obj in objectives if obj["past_horizon"]],
+        "last_review_date": effective_review,
+        "last_review_path": review_path,
+        "days_since_review": days_since_review,
+        "review_stale": days_since_review is None or days_since_review > REVIEW_STALE_DAYS,
+        "areas_without_objectives": [a for a in known_areas(root) if a not in areas_with],
+    }
