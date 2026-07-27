@@ -7,7 +7,7 @@ Your vault starts as a clone of this repo. After that, **your content is yours**
 | Engine (synced from template) | Content (never synced — yours) |
 |---|---|
 | `.cursor/rules/`, `.cursor/skills/`, `.cursor/templates/` | `Meetings/`, `Memory/` (except `Memory/Lexicon/`), `People/`, `Ideas/`, `Transcripts/` |
-| `scripts/`, `Memory/Lexicon/`, `Direction/Lexicon.md`, `Direction/README.md` (process charter) | `Metadata/` (registries, recap logs, review logs, `User.md`) |
+| `scripts/`, `Memory/Lexicon/`, `Direction/README.md`, `Direction/Lexicon.md` (process charter) | `Metadata/` (registries, recap logs, review logs, `User.md`) |
 | `docs/`, `README.md`, `requirements.txt`, `.env.example` | `.env`, `.cursor/rules/local-*.mdc`, `Objectives.md`, `Objectives.evidence.md`, `Direction/<area>.md` |
 
 ## Recommended setup (private vault + template upstream)

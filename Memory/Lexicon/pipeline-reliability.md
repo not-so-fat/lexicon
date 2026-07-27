@@ -184,7 +184,7 @@ Ingest → Summarize → Distill → Triage → Query
 
 - **Meetings:** handled by summarize + distill (evidence append-only). Triage reads meetings for recap only — never edits them.
 - **Ideas/Clippings:** handled only in triage — Promote / Keep / Skip / Retire / Move.
-- **Synthesis:** `# Current model`, `# Current read`, Direction — triage only, with user approval.
+- **Synthesis:** `# Current model`, `# Current read` — triage only, with user approval. The normative tier (`Direction/<area>.md`, `Objectives.md`) belongs to **review**.
 
 Tooling (already in repo):
 

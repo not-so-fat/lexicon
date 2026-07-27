@@ -1,6 +1,9 @@
 from pathlib import Path
 
 import lexicon_init
+import review_queue
+
+REPO_ROOT = Path(__file__).resolve().parent.parent
 
 
 def test_detect_areas_excludes_lexicon_charter_and_stray_files(vault: Path):
@@ -35,3 +38,39 @@ def test_scaffold_direction_creates_missing_area_and_is_idempotent(vault: Path):
 
     created_again = lexicon_init.scaffold_direction(vault, ["kite", "health"])
     assert created_again == []
+
+
+def test_scaffold_objectives_creates_both_files_and_is_idempotent(tmp_path: Path):
+    created = lexicon_init.scaffold_objectives(tmp_path)
+
+    assert sorted(Path(p).name for p in created) == [
+        "Objectives.evidence.md",
+        "Objectives.md",
+    ]
+    before = {
+        name: (tmp_path / name).read_text(encoding="utf-8")
+        for name in ("Objectives.md", "Objectives.evidence.md")
+    }
+
+    created_again = lexicon_init.scaffold_objectives(tmp_path)
+
+    assert created_again == []
+    for name, text in before.items():
+        assert (tmp_path / name).read_text(encoding="utf-8") == text
+
+
+def test_scaffolded_objectives_parse_to_zero_objectives(tmp_path: Path):
+    """The commented example is an example, not an objective."""
+    lexicon_init.scaffold_objectives(tmp_path)
+
+    text = (tmp_path / "Objectives.md").read_text(encoding="utf-8")
+
+    assert review_queue.parse_objectives(text) == []
+
+
+def test_objectives_templates_match_the_shipped_files(tmp_path: Path):
+    """The shipped root files are the spec — a scaffolded vault must be identical."""
+    lexicon_init.scaffold_objectives(tmp_path)
+
+    for name in ("Objectives.md", "Objectives.evidence.md"):
+        assert (tmp_path / name).read_bytes() == (REPO_ROOT / name).read_bytes()

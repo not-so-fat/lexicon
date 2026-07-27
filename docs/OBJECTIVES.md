@@ -175,6 +175,7 @@ Skill: `.cursor/skills/lexicon-review/SKILL.md`. Rule: `.cursor/rules/review.mdc
 | 5. Retire | Achieved or past-horizon objectives leave `## Active` with an outcome line | `Objectives.md`, `Objectives.evidence.md` |
 | 6. Route | What turned out to be a standard or a project leaves for its real home | `Direction/<area>.md` |
 | 7. Log | Append the session | `Metadata/review/YYYY-Www.md` |
+| 8. Report | What changed, what was retired, what remains, and the named WIG | none |
 
 Two orderings are load-bearing:
 

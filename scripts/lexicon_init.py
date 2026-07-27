@@ -47,6 +47,53 @@ Horizon-bound intentions → `Objectives.md`.*
 <What "well-maintained" means here. No finish line, but a quality bar.>
 """
 
+OBJECTIVES_TEMPLATE = """\
+---
+horizon: 
+objectives_updated: 
+reviewed: 
+---
+
+# Objectives
+
+*Intentions only. Max 5 active across **all** areas; exactly one marked `[WIG]`.
+Human-approved — no agent writes here outside a review session.
+What is **true** → `Memory/`. Standing constraints → `Direction/<area>.md`.*
+
+**Membership test**
+
+> No finish line, can't be failed → **Principle** (`Direction/<area>.md`)
+> No finish line, but has a quality bar → **Standard** (`Direction/<area>.md`)
+> Has a date and can be missed → **Objective** (here)
+> Has a deliverable → it's a **Project** — it does not live in this vault
+
+Retiring an objective removes it from `## Active` and appends one dated line to
+`Objectives.evidence.md`. There is deliberately no `## Retired` section here:
+this file's whole value is staying small enough to read every session.
+
+## Active
+
+<!--
+### [WIG] <outcome, not activity>
+- **Area:** <area — must match a Direction/<area>.md>
+- **Horizon:** YYYY-MM-DD
+- **Done when:** <observable recognition condition — not a metric>
+- **Obstacle:** <the thing most likely to prevent it>
+- **Evidence:** <comma-separated vault paths the review reads>
+- **Opened:** YYYY-MM-DD
+-->
+"""
+
+OBJECTIVES_EVIDENCE_TEMPLATE = """\
+# Retired objectives (append-only)
+
+*One line per retirement. Written only in a review session.*
+
+<!--
+- YYYY-MM-DD — <objective title> — **Outcome:** achieved | missed | withdrawn — <one line: what actually happened> — Area: <area>, opened YYYY-MM-DD
+-->
+"""
+
 
 def _detect_areas(root):
     """User areas: subdirectories of Memory/, excluding Lexicon (the tool's own charter, not a user area)."""
@@ -71,6 +118,22 @@ def scaffold_direction(root, areas):
             continue
         with open(path, "w", encoding="utf-8") as f:
             f.write(DIRECTION_TEMPLATE.format(area=area, title=area.replace("-", " ").title()))
+        created.append(path)
+    return created
+
+
+def scaffold_objectives(root):
+    """Root Objectives.md + Objectives.evidence.md — the intent tier. Never overwrites."""
+    created = []
+    for name, template in (
+        ("Objectives.md", OBJECTIVES_TEMPLATE),
+        ("Objectives.evidence.md", OBJECTIVES_EVIDENCE_TEMPLATE),
+    ):
+        path = os.path.join(root, name)
+        if os.path.exists(path):
+            continue
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(template)
         created.append(path)
     return created
 
@@ -103,6 +166,12 @@ def main():
     created = scaffold_direction(root, areas)
     if created:
         print("\nDirection scaffolds created:")
+        for path in created:
+            print(f"  {path}")
+
+    created = scaffold_objectives(root)
+    if created:
+        print("\nObjectives scaffolds created:")
         for path in created:
             print(f"  {path}")
 

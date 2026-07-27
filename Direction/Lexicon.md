@@ -40,7 +40,7 @@ what you are trying to make true. They share evidence and nothing else.
 **Hard boundaries:**
 
 - Distill never edits `# Current model`.
-- Triage never edits meeting notes, and never writes `Objectives.md` or `Direction/**`.
+- Triage never edits meeting notes and never appends meeting evidence, and never writes `Objectives.md` or `Direction/**`.
 - Review never writes `Memory/`, `People/` or meeting notes.
 
 There is **no separate reconcile stage**. Synthesis happens only in **triage** (with
@@ -222,7 +222,7 @@ Templates: `.cursor/templates/ideas_template.md`, `.cursor/templates/clipping_te
 - **Registries stay trustworthy** — `Metadata/*_registry.md` is the index; new topics and tags are registered before use.
 - **No hand-maintained maps** — folder structure and registries are the index. Never hand-write `Index.md`-style files.
 - **Evidence debt gets drained** — no area carries a `# Current model` that lags its newest evidence by more than 21 days without an explicit deferral.
-- **Objectives stay under the cap** — at most 5 active across all areas, exactly one `[WIG]`, retire before opening a sixth.
+- **Objectives stay under the cap** — no more active objectives across all areas than the cap allows (5 by default; `LEXICON_OBJECTIVE_CAP` overrides), exactly one `[WIG]`, retire before opening one more.
 - **The vault lints clean** — `python3 scripts/lint_vault.py` exits 0.
 
 ### Who writes what
