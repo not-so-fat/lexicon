@@ -1,5 +1,5 @@
 ---
-horizon: 
+cycle: 
 objectives_updated: 
 reviewed: 
 ---
@@ -26,7 +26,7 @@ this file's whole value is staying small enough to read every session.
 <!--
 ### [WIG] <outcome, not activity>
 - **Area:** <area — must match a Direction/<area>.md>
-- **Horizon:** YYYY-MM-DD
+- **By:** YYYY-MM-DD
 - **Done when:** <observable recognition condition — not a metric>
 - **Obstacle:** <the thing most likely to prevent it>
 - **Evidence:** <comma-separated vault paths the review reads>

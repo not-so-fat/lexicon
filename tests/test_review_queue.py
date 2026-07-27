@@ -4,7 +4,7 @@ import review_queue
 
 ONE_WIG = """### [WIG] Decide the platform migration
 - **Area:** acme
-- **Horizon:** 2026-08-30
+- **By:** 2026-08-30
 - **Done when:** a written go/no-go call exists
 - **Obstacle:** the deadline passes and nobody decides
 - **Evidence:** Memory/acme/Product.evidence.md
@@ -14,7 +14,7 @@ ONE_WIG = """### [WIG] Decide the platform migration
 TWO_OBJECTIVES = ONE_WIG + """
 ### Resolve the vendor evaluation
 - **Area:** personal
-- **Horizon:** 2026-09-30
+- **By:** 2026-09-30
 - **Done when:** an offer exists to weigh, or both tracks are closed in writing
 - **Obstacle:** the sprint absorbs every week
 - **Evidence:** Memory/personal
@@ -31,7 +31,7 @@ def test_parses_wig_flag_and_fields(write_objectives):
     assert obj["wig"] is True
     assert obj["title"] == "Decide the platform migration"
     assert obj["area"] == "acme"
-    assert obj["horizon"] == "2026-08-30"
+    assert obj["by"] == "2026-08-30"
     assert obj["opened"] == "2026-07-26"
     assert obj["evidence"] == ["Memory/acme/Product.evidence.md"]
     assert obj["missing_fields"] == []
@@ -57,7 +57,7 @@ def test_reports_missing_required_fields(write_objectives):
     objectives = review_queue.parse_objectives(path.read_text(encoding="utf-8"))
 
     assert objectives[0]["missing_fields"] == [
-        "horizon",
+        "by",
         "done when",
         "obstacle",
         "evidence",
@@ -93,7 +93,7 @@ def test_commented_out_example_is_not_parsed_as_an_objective(write_objectives):
         "<!--\n"
         "### [WIG] <outcome, not activity>\n"
         "- **Area:** <area — must match a Direction/<area>.md>\n"
-        "- **Horizon:** YYYY-MM-DD\n"
+        "- **By:** YYYY-MM-DD\n"
         "- **Done when:** <observable recognition condition — not a metric>\n"
         "- **Obstacle:** <the thing most likely to prevent it>\n"
         "- **Evidence:** <comma-separated vault paths the review reads>\n"
@@ -131,7 +131,7 @@ def test_fenced_wig_example_is_not_parsed_as_a_live_objective(write_objectives):
         "```markdown\n"
         "### [WIG] <outcome, not activity>\n"
         "- **Area:** <area>\n"
-        "- **Horizon:** YYYY-MM-DD\n"
+        "- **By:** YYYY-MM-DD\n"
         "- **Done when:** <condition>\n"
         "- **Obstacle:** <thing>\n"
         "- **Evidence:** <paths>\n"
@@ -157,7 +157,7 @@ def test_fenced_heading_does_not_terminate_the_scan(write_objectives):
         "```\n\n"
         "### Resolve the vendor evaluation\n"
         "- **Area:** personal\n"
-        "- **Horizon:** 2026-09-30\n"
+        "- **By:** 2026-09-30\n"
         "- **Done when:** an offer exists to weigh, or both tracks are closed in writing\n"
         "- **Obstacle:** the sprint absorbs every week\n"
         "- **Evidence:** Memory/personal\n"
@@ -251,7 +251,7 @@ def test_report_flags_cap_breach_and_wig_count(write_objectives, vault, monkeypa
         body += (
             f"### Objective {i}\n"
             "- **Area:** acme\n"
-            "- **Horizon:** 2026-12-31\n"
+            "- **By:** 2026-12-31\n"
             "- **Done when:** something observable\n"
             "- **Obstacle:** something likely\n"
             "- **Evidence:** Memory/acme/Product.evidence.md\n"
@@ -296,8 +296,8 @@ def test_report_computes_horizon_and_evidence_staleness(write_objectives, vault)
     report = review_queue.build_report(vault, date(2026, 7, 27))
     obj = report["objectives"][0]
 
-    assert obj["days_to_horizon"] == 34
-    assert obj["past_horizon"] is False
+    assert obj["days_until_due"] == 34
+    assert obj["overdue"] is False
     assert obj["newest_evidence"] == "2026-07-10"
     assert obj["days_since_evidence"] == 17
 
@@ -307,8 +307,8 @@ def test_report_flags_past_horizon_and_soon(write_objectives, vault):
 
     report = review_queue.build_report(vault, date(2026, 7, 27))
 
-    assert report["past_horizon"] == ["Decide the platform migration"]
-    assert report["objectives"][0]["days_to_horizon"] == -26
+    assert report["overdue"] == ["Decide the platform migration"]
+    assert report["objectives"][0]["days_until_due"] == -26
 
 
 def test_report_lists_areas_governed_only_by_standards(write_objectives, vault):

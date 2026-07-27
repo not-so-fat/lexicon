@@ -4,7 +4,7 @@ import lint_vault
 
 GOOD = """### [WIG] Decide the platform migration
 - **Area:** acme
-- **Horizon:** 2026-08-30
+- **By:** 2026-08-30
 - **Done when:** a written go/no-go call exists
 - **Obstacle:** the deadline passes and nobody decides
 - **Evidence:** Memory/acme/Product.evidence.md
@@ -62,7 +62,7 @@ def test_past_horizon_is_a_warning(vault, write_objectives, monkeypatch):
 
     issues = _issues(vault, monkeypatch, "lint_objectives")
 
-    assert any(i["level"] == "warning" and "past its Horizon" in i["issue"] for i in issues)
+    assert any(i["level"] == "warning" and "past its due date" in i["issue"] for i in issues)
 
 
 def test_missing_objectives_file_produces_no_issues(vault, monkeypatch):

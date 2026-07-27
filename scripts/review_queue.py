@@ -25,7 +25,7 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPT_DIR.parent
 
 DEFAULT_CAP = 5
-HORIZON_SOON_DAYS = 14
+DUE_SOON_DAYS = 14
 REVIEW_STALE_DAYS = 14
 
 OBJ_HEADING_RE = re.compile(r"^###\s+(?:(\[WIG\])\s+)?(.+?)\s*$")
@@ -36,7 +36,7 @@ FILENAME_DATE_RE = re.compile(r"^(\d{4}-\d{2}-\d{2})")
 REVIEW_FILE_RE = re.compile(r"^(\d{4})-W(\d{2})\.md$")
 FENCE_RE = re.compile(r"^\s{0,3}(`{3,}|~{3,})(.*)$")
 
-REQUIRED_FIELDS = ("area", "horizon", "done when", "obstacle", "evidence", "opened")
+REQUIRED_FIELDS = ("area", "by", "done when", "obstacle", "evidence", "opened")
 
 
 def unfenced_lines(text: str) -> list[str]:
@@ -134,7 +134,7 @@ def parse_objectives(text: str) -> list[dict]:
     for obj in objectives:
         fields = obj["fields"]
         obj["area"] = fields.get("area", "")
-        obj["horizon"] = normalize_date(fields.get("horizon", ""))
+        obj["by"] = normalize_date(fields.get("by", ""))
         obj["opened"] = normalize_date(fields.get("opened", ""))
         obj["evidence"] = [p.strip() for p in fields.get("evidence", "").split(",") if p.strip()]
         obj["missing_fields"] = [k for k in REQUIRED_FIELDS if not fields.get(k)]
@@ -244,12 +244,12 @@ def build_report(root: Path, today: date) -> dict:
     for obj in objectives:
         obj["newest_evidence"] = newest_evidence_date(root, obj["evidence"])
         obj["days_since_evidence"] = _days_between(obj["newest_evidence"], today)
-        if obj["horizon"]:
-            obj["days_to_horizon"] = (date.fromisoformat(obj["horizon"]) - today).days
-            obj["past_horizon"] = obj["days_to_horizon"] < 0
+        if obj["by"]:
+            obj["days_until_due"] = (date.fromisoformat(obj["by"]) - today).days
+            obj["overdue"] = obj["days_until_due"] < 0
         else:
-            obj["days_to_horizon"] = None
-            obj["past_horizon"] = False
+            obj["days_until_due"] = None
+            obj["overdue"] = False
         obj.pop("fields", None)
 
     areas_with = {obj["area"] for obj in objectives if obj["area"]}
@@ -264,13 +264,13 @@ def build_report(root: Path, today: date) -> dict:
         "cap_breach": len(objectives) > cap,
         "wig_count": sum(1 for obj in objectives if obj["wig"]),
         "objectives": objectives,
-        "horizon_soon": [
+        "due_soon": [
             obj["title"]
             for obj in objectives
-            if obj["days_to_horizon"] is not None
-            and 0 <= obj["days_to_horizon"] <= HORIZON_SOON_DAYS
+            if obj["days_until_due"] is not None
+            and 0 <= obj["days_until_due"] <= DUE_SOON_DAYS
         ],
-        "past_horizon": [obj["title"] for obj in objectives if obj["past_horizon"]],
+        "overdue": [obj["title"] for obj in objectives if obj["overdue"]],
         "last_review_date": effective_review,
         "last_review_path": review_path,
         "days_since_review": days_since_review,
@@ -317,16 +317,16 @@ def render(report: dict) -> str:
         marker = "[WIG] " if obj["wig"] else ""
         lines.append(f"### {marker}{obj['title']}")
         lines.append(f"- Area: {obj['area'] or '⚠ missing'}")
-        if obj["horizon"]:
-            if obj["past_horizon"]:
+        if obj["by"]:
+            if obj["overdue"]:
                 lines.append(
-                    f"- Horizon: {obj['horizon']} ⚠ passed "
-                    f"{abs(obj['days_to_horizon'])} days ago — retire or reopen"
+                    f"- By: {obj['by']} ⚠ passed "
+                    f"{abs(obj['days_until_due'])} days ago — retire or reopen"
                 )
             else:
-                lines.append(f"- Horizon: {obj['horizon']} ({obj['days_to_horizon']} days)")
+                lines.append(f"- By: {obj['by']} ({obj['days_until_due']} days)")
         else:
-            lines.append("- Horizon: ⚠ missing")
+            lines.append("- By: ⚠ missing")
         if obj["newest_evidence"]:
             lines.append(
                 f"- Newest evidence: {obj['newest_evidence']} "
@@ -338,14 +338,14 @@ def render(report: dict) -> str:
             lines.append(f"- ⚠ Missing fields: {', '.join(obj['missing_fields'])}")
         lines.append("")
 
-    if report["horizon_soon"]:
-        lines.extend(["## Horizon within 14 days", ""])
-        lines.extend(f"- {title}" for title in report["horizon_soon"])
+    if report["due_soon"]:
+        lines.extend(["## Due within 14 days", ""])
+        lines.extend(f"- {title}" for title in report["due_soon"])
         lines.append("")
 
-    if report["past_horizon"]:
-        lines.extend(["## Past horizon — retire or explicitly reopen", ""])
-        lines.extend(f"- {title}" for title in report["past_horizon"])
+    if report["overdue"]:
+        lines.extend(["## Overdue — retire or explicitly reopen", ""])
+        lines.extend(f"- {title}" for title in report["overdue"])
         lines.append("")
 
     if report["areas_without_objectives"]:

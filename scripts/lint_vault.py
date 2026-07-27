@@ -50,7 +50,7 @@ DIRECTION_ALLOWED_SECTIONS = ("purpose", "principles", "standards")
 LEGACY_LEXICON_CHARTER = "Memory/Lexicon/processing-strategy.md"
 OBJECTIVE_FIELD_LABELS = {
     "area": "Area",
-    "horizon": "Horizon",
+    "by": "By",
     "done when": "Done when",
     "obstacle": "Obstacle",
     "evidence": "Evidence",
@@ -273,14 +273,14 @@ def lint_objectives() -> list[dict]:
                     "issue": f"`{title}`: area `{obj['area']}` has no Direction/{obj['area']}.md",
                 }
             )
-        if obj["horizon"] and obj["horizon"] < today:
+        if obj["by"] and obj["by"] < today:
             issues.append(
                 {
                     "level": "warning",
                     "path": rel,
                     "issue": (
-                        f"`{title}`: past its Horizon ({obj['horizon']}) and still active — "
-                        "retire it or reopen with a new horizon in review"
+                        f"`{title}`: past its due date ({obj['by']}) and still active — "
+                        "retire it or reopen with a new date in review"
                     ),
                 }
             )
