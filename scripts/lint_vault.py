@@ -96,6 +96,16 @@ def lint_capture_files(project: str | None) -> list[dict]:
                 issues.append(
                     {"level": "error", "path": str(rel), "issue": "missing YAML frontmatter"}
                 )
+            if fm and re.search(r"^project:\s*\S", fm, re.MULTILINE) and not re.search(
+                r"^area:\s*\S", fm, re.MULTILINE
+            ):
+                issues.append(
+                    {
+                        "level": "warning",
+                        "path": str(rel),
+                        "issue": "legacy `project:` key — run scripts/migrate_area_key.py to rewrite as `area:`",
+                    }
+                )
             if not has_date(fm, path.name):
                 issues.append(
                     {
