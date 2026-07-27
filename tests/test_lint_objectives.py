@@ -1,6 +1,11 @@
+import subprocess
+import sys
 from datetime import date
+from pathlib import Path
 
 import lint_vault
+
+SCRIPTS_DIR = Path(__file__).resolve().parent.parent / "scripts"
 
 GOOD = """### [WIG] Decide the platform migration
 - **Area:** acme
@@ -236,3 +241,27 @@ def test_area_key_produces_no_warning(vault, monkeypatch):
     issues = lint_vault.lint_capture_files(None)
 
     assert not any("legacy `project:`" in i["issue"] for i in issues)
+
+
+def test_area_flag_works(tmp_path):
+    result = subprocess.run(
+        [sys.executable, str(SCRIPTS_DIR / "lint_vault.py"), "--area", "nosuchvault"],
+        cwd=tmp_path, capture_output=True, text=True,
+    )
+    assert result.returncode == 0
+
+
+def test_deprecated_project_flag_still_works(tmp_path):
+    result = subprocess.run(
+        [sys.executable, str(SCRIPTS_DIR / "lint_vault.py"), "--project", "nosuchvault"],
+        cwd=tmp_path, capture_output=True, text=True,
+    )
+    assert result.returncode == 0
+
+
+def test_missing_area_and_project_succeeds(tmp_path):
+    result = subprocess.run(
+        [sys.executable, str(SCRIPTS_DIR / "lint_vault.py")],
+        cwd=tmp_path, capture_output=True, text=True,
+    )
+    assert result.returncode == 0

@@ -6,9 +6,9 @@ Triage is interactive — Ideas queue only. Meetings are recap context, not queu
 Use --since / --until when the user specifies a period during triage.
 
 Usage:
-  python3 scripts/triage_queue.py --project personal
-  python3 scripts/triage_queue.py --project acme --since 2026-04-01 --until 2026-05-24
-  python3 scripts/triage_queue.py --project acme --json
+  python3 scripts/triage_queue.py --area personal
+  python3 scripts/triage_queue.py --area acme --since 2026-04-01 --until 2026-05-24
+  python3 scripts/triage_queue.py --area acme --json
 
 Exit 0. Writes human-readable report to stdout.
 """
@@ -484,12 +484,16 @@ def build_queue(area: str, since: str | None, until: str | None) -> list[dict]:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Lexicon triage queue for a project")
-    parser.add_argument("--project", dest="area", required=True, help="Project slug (e.g. personal, acme)")
+    parser = argparse.ArgumentParser(description="Lexicon triage queue for an area")
+    parser.add_argument("--area", dest="area", help="Area slug (e.g. personal, acme)")
+    parser.add_argument("--project", dest="area", help=argparse.SUPPRESS)  # deprecated alias for --area
     parser.add_argument("--since", help="Include capture on/after YYYY-MM-DD")
     parser.add_argument("--until", help="Include capture on/before YYYY-MM-DD")
     parser.add_argument("--json", action="store_true", help="JSON output")
     args = parser.parse_args()
+
+    if not args.area:
+        parser.error("--area is required (or its deprecated alias --project)")
 
     os.chdir(REPO_ROOT)
 

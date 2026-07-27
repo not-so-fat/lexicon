@@ -16,7 +16,7 @@ Checks (agents and humans both drift — this keeps the maps trustworthy):
 Errors exit 1 (missing frontmatter/dates, oversized bullets); warnings exit 0.
 
 Usage:
-  python3 scripts/lint_vault.py [--project <project>] [--json]
+  python3 scripts/lint_vault.py [--area <area>] [--json]
 """
 from __future__ import annotations
 
@@ -370,13 +370,14 @@ def lint_direction() -> list[dict]:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Lint Lexicon vault hygiene")
-    parser.add_argument("--project", help="Limit to one project slug")
+    parser.add_argument("--area", dest="area", help="Limit to one area slug")
+    parser.add_argument("--project", dest="area", help=argparse.SUPPRESS)  # deprecated alias for --area
     parser.add_argument("--json", action="store_true", help="JSON output")
     args = parser.parse_args()
 
     issues = (
-        lint_capture_files(args.project)
-        + lint_memory(args.project)
+        lint_capture_files(args.area)
+        + lint_memory(args.area)
         + lint_objectives()
         + lint_direction()
     )

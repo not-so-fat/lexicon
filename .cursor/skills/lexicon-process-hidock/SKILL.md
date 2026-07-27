@@ -38,7 +38,7 @@ Selection is **not date-based** — use transcripts that have no meeting note ye
 
 4. **Summarize** — For each pending file:
    - Read transcript under `Transcripts/HiDock/`.
-   - **Project:** infer from content + `Metadata/project_registry.md` (HiDock transcripts have no `project` field). Ask if unclear.
+   - **Project:** infer from content + `Metadata/area_registry.md` (HiDock transcripts have no `project` field). Ask if unclear.
    - Create `Meetings/<Project>/YYYY-MM-DD [Title].md` per `.cursor/rules/summarize.mdc`.
    - Set meeting note `source: HiDock` and `hidock_signature: <signature>` from transcript frontmatter.
    - **Transcript Link:** wikilink to source file (basename without `.md` is enough).

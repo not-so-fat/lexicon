@@ -1,12 +1,12 @@
-# Project Registry
+# Area Registry
 
-Projects organize knowledge by context. Each project gets its own
+Areas organize knowledge by context. Each area gets its own
 subdirectories under Meetings/, People/, and Memory/.
 
-**Maintained by:** user only. Cursor must never add new projects — only use what is
-listed here. If a meeting doesn't fit any project, use `general` and flag it for the user.
+**Maintained by:** user only. Cursor must never add new areas — only use what is
+listed here. If a meeting doesn't fit any area, use `general` and flag it for the user.
 
-| Project slug | Description | Default for account |
+| Area slug | Description | Default for account |
 |-------------|-------------|-------------------|
 | personal | Personal product work, side projects | personal |
 | friendship | Non-work personal relationships | — |

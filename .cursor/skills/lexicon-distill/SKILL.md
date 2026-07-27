@@ -49,6 +49,6 @@ Meeting note under `Meetings/<Project>/`.
 ## Error handling
 
 - **No meeting note** — Ask user which note to distill.
-- **Note has no project** — Ask user which project (check `Metadata/project_registry.md` when available).
+- **Note has no project** — Ask user which project (check `Metadata/area_registry.md` when available).
 - **Append-only** — Never overwrite past entries in People or Memory; always append.
 - **No synthesis** — Do not edit `# Current model`, `# Current read`, or `Direction.md`. Do not set `triaged` on meeting notes.

@@ -41,7 +41,7 @@ Fill only what is clear.
 **Project assignment — subject over source:**
 The project is decided by what the meeting is **about**, not by which account or venue captured it. The capture source only supplies a default hint:
 - Fireflies / Manual — the transcript's `project` frontmatter (from the account's `PROJECT_<account>` default) is a **hint**, not a verdict.
-- HiDock — transcripts have **no** `project` field; infer from content and `Metadata/project_registry.md`. Ask the user if unclear.
+- HiDock — transcripts have **no** `project` field; infer from content and `Metadata/area_registry.md`. Ask the user if unclear.
 
 Always check whether the content belongs elsewhere before accepting the hint.
 Reassign if clearly mismatched; when uncertain, keep the hint. Common overrides:

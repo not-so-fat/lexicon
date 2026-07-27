@@ -86,7 +86,7 @@ Always start from the most distilled layer and drill down only if needed.
 
 ## Tips
 
-- **Registries first**: read `Metadata/topic_registry.md`, `Metadata/project_registry.md` before grepping.
+- **Registries first**: read `Metadata/topic_registry.md`, `Metadata/area_registry.md` before grepping.
 - **Cross-project**: if the user doesn't specify a project, search across all projects.
 - **Combine layers**: Memory/People first, then meeting notes for quotes or dates.
 - **Don't read transcripts** unless the user explicitly asks for raw source.
