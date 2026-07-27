@@ -107,3 +107,49 @@ def test_empty_objectives_file_produces_no_issues(vault, write_objectives, monke
     issues = _issues(vault, monkeypatch, "lint_objectives")
 
     assert issues == []
+
+
+def test_disallowed_section_inside_fence_is_not_an_error(vault, monkeypatch):
+    (vault / "Direction" / "kite.md").write_text(
+        "---\narea: kite\n---\n\n# Direction — Kite\n\n"
+        "## Purpose\n\nx\n\n"
+        "## Standards\n\n"
+        "Example of what not to write:\n\n"
+        "```markdown\n## Objectives\n\nnope\n```\n",
+        encoding="utf-8",
+    )
+
+    issues = _issues(vault, monkeypatch, "lint_direction")
+
+    assert issues == []
+
+
+def test_disallowed_section_outside_fence_still_errors(vault, monkeypatch):
+    (vault / "Direction" / "kite.md").write_text(
+        "---\narea: kite\n---\n\n# Direction — Kite\n\n"
+        "## Purpose\n\nx\n\n## Objectives\n\nnope\n",
+        encoding="utf-8",
+    )
+
+    issues = _issues(vault, monkeypatch, "lint_direction")
+
+    assert any(
+        i["level"] == "error" and "Objectives" in i["issue"] for i in issues
+    )
+
+
+def test_fenced_section_ignored_but_real_disallowed_section_caught(vault, monkeypatch):
+    (vault / "Direction" / "kite.md").write_text(
+        "---\narea: kite\n---\n\n# Direction — Kite\n\n"
+        "## Purpose\n\nx\n\n"
+        "Example of what not to write:\n\n"
+        "```markdown\n## Objectives\n\nnope\n```\n\n"
+        "## Roadmap\n\nreal offender\n",
+        encoding="utf-8",
+    )
+
+    issues = _issues(vault, monkeypatch, "lint_direction")
+
+    offenders = [i["issue"] for i in issues if i["level"] == "error"]
+    assert not any("section `## Objectives`" in msg for msg in offenders)
+    assert any("section `## Roadmap`" in msg for msg in offenders)

@@ -28,6 +28,7 @@ REQUIRED_DIRS = [
     "Memory",
     "Ideas",
     "Metadata",
+    "Direction",
 ]
 
 OUTPUT_DIR_RE = re.compile(r"^\s*dir:\s*(.+?)\s*(?:#.*)?$")

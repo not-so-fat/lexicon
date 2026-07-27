@@ -183,10 +183,10 @@ model_updated: YYYY-MM-DD    # stamped by triage on every # Current model refres
 
 # Current model
 <what a stranger needs now>
-```
 
-…followed by an `## Open decisions` section — a dated pending list, one line each:
-`- YYYY-MM-DD — Pending: … — Source: [[…]]`.
+## Open decisions
+- YYYY-MM-DD — Pending: … — Source: [[…]]
+```
 
 The sibling **evidence file** (`<Area>.evidence.md`) is an append-only log:
 

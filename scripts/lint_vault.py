@@ -47,6 +47,7 @@ SKIP_NAMES = {"readme.md", "index.md"}
 MODEL_SKIP = {"readme.md", "index.md", "direction.md"}
 
 DIRECTION_ALLOWED_SECTIONS = ("purpose", "principles", "standards")
+FENCE_RE = re.compile(r"^\s{0,3}(`{3,}|~{3,})")
 OBJECTIVE_FIELD_LABELS = {
     "area": "Area",
     "horizon": "Horizon",
@@ -296,7 +297,24 @@ def lint_direction() -> list[dict]:
             if path.stem.lower() in ("readme", "index"):
                 continue
             rel = str(path.relative_to(REPO_ROOT))
+            fence_char: str | None = None
+            fence_len = 0
             for line in read(path).splitlines():
+                m = FENCE_RE.match(line)
+                if m:
+                    marker = m.group(1)
+                    if fence_char is None:
+                        # Opening a fence.
+                        fence_char, fence_len = marker[0], len(marker)
+                    elif marker[0] == fence_char and len(marker) >= fence_len:
+                        # Matching close (CommonMark: same char, >= opening length).
+                        fence_char, fence_len = None, 0
+                    continue
+                if fence_char is not None:
+                    # Inside a fence — an unterminated fence runs to EOF, which
+                    # matches how Markdown itself renders it (everything after
+                    # an unclosed ``` is code, not headings).
+                    continue
                 if not line.startswith("## "):
                     continue
                 name = line[3:].strip()
