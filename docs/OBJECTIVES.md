@@ -201,10 +201,10 @@ Skill: `.cursor/skills/lexicon-review/SKILL.md`. Rule: `.cursor/rules/review.mdc
 | 2. Re-anchor | Agent restates each objective **and its obstacle**, before reading any evidence | none |
 | 3. Evidence | Per objective: what happened since the last review, from its `Evidence:` paths only | none |
 | 4. Status | Agent proposes `moving` / `stalled` / `drifting`; you accept or edit | none |
-| 5. Retire | Achieved or past-horizon objectives leave `## Active` with an outcome line; frontmatter `reviewed:` (and `objectives_updated:` if `## Active` changed) gets stamped | `Objectives.md`, `Objectives.evidence.md` |
-| 6. Route | What turned out to be a standard or a project leaves for its real home | `Direction/<area>.md` |
+| 5. Retire | Achieved, past-horizon, or reclassified objectives leave `## Active` with an outcome line; frontmatter `reviewed:` (and `objectives_updated:` if `## Active` changed) gets stamped | `Objectives.md`, `Objectives.evidence.md` |
+| 6. Route | What turned out to be a standard or a project leaves for its real home | `Direction/<area>.md`, `Objectives.evidence.md` |
 | 7. Log | Append the session | `Metadata/review/YYYY-Www.md` |
-| 8. Verify | `python3 scripts/lint_vault.py` must exit 0 before the session ends | none |
+| 8. Verify | `python3 scripts/lint_vault.py --json`, scoped to errors/warnings under `Objectives.md`, `Objectives.evidence.md`, or `Direction/**` — pre-existing debt elsewhere does not block the session | none |
 | 9. Report | What changed, what was retired, what remains, the named WIG, and the lint result | none |
 
 Two orderings are load-bearing:
@@ -253,11 +253,19 @@ something:
 
 - The objective leaves `## Active` in `Objectives.md`.
 - One dated line is appended to `Objectives.evidence.md`: outcome `achieved` /
-  `missed` / `withdrawn`, one line on what actually happened, the area, and the
-  date it was opened.
+  `missed` / `withdrawn` / `reclassified`, one line on what actually happened,
+  the area, and the date it was opened.
 
-`missed` and `withdrawn` are first-class outcomes. An objective missed and recorded
-honestly is worth more to the next cycle than one quietly deleted.
+`missed`, `withdrawn`, and `reclassified` are first-class outcomes, not a euphemism
+for "deleted." `withdrawn` is for a genuine objective the decision is to stop
+pursuing. `reclassified` is for an item that was never an objective at all — the
+membership test says it has no finish line (a Principle or a Standard) or has a
+deliverable (a project) — and Route (step 6 of the ritual) sends it to where it
+belongs while this step logs the line. On a first review, expect most retirements
+to be `reclassified`: sorting a previously unsorted list into the membership
+test's four buckets is the normal outcome of running the test for the first time,
+not a sign the prior list was wrong. An objective missed and recorded honestly is
+worth more to the next cycle than one quietly deleted.
 
 There is deliberately **no `## Retired` section** in `Objectives.md`. A retained
 section grows without bound inside the one file whose whole value is staying small

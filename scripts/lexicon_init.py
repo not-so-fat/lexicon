@@ -92,7 +92,7 @@ OBJECTIVES_EVIDENCE_TEMPLATE = """\
 *One line per retirement. Written only in a review session.*
 
 <!--
-- YYYY-MM-DD — <objective title> — **Outcome:** achieved | missed | withdrawn — <one line: what actually happened> — Area: <area>, opened YYYY-MM-DD
+- YYYY-MM-DD — <objective title> — **Outcome:** achieved | missed | withdrawn | reclassified — <one line: what actually happened> — Area: <area>, opened YYYY-MM-DD
 -->
 """
 
