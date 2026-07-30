@@ -1,26 +1,27 @@
 ---
 name: lexicon-summarize
-description: Create a meeting note from an existing transcript file. Use when user says "summarize this transcript", "create a meeting note", or points at a file under Transcripts/.
+description: Use when the user says "summarize this transcript", "create a meeting note", or points at a raw transcript under Sources/Transcripts/ (Fireflies, HiDock, or manual). Output contract: one structured meeting note under Sources/Meetings/<area>/ with entity names normalized against the registry.
 ---
 
 # Summarize transcript into meeting note
 
-Turns one transcript file into a structured meeting note under `Meetings/<Area>/`.
+Turns one transcript file into a structured meeting note under `Sources/Meetings/<Area>/`.
 
 ## Prerequisites
 
-An existing transcript file under `Transcripts/Fireflies/<account>/`, `Transcripts/HiDock/`, or `Transcripts/Manual/`. If the user has no file yet, direct them to the **lexicon-manual-template** skill first.
+An existing transcript file under `Sources/Transcripts/Fireflies/<account>/`, `Sources/Transcripts/HiDock/`, or `Sources/Transcripts/Manual/`. If the user has no file yet, direct them to the **lexicon-manual-template** skill first.
 
 ## Steps
 
 1. **Read transcript** — Identify the file. Read frontmatter (`title`, `date`, `signature` for HiDock; `area`, `participants` or `with_whom` when present).
-2. **Read registries** — Read `Metadata/area_registry.md`, `Metadata/topic_registry.md`, and `Metadata/tag_registry.md`. These are needed for Step 3. If a registry file is missing, fall back to best-effort choices and note that the registry is absent.
-3. **Create meeting note** — Path: `Meetings/<Area>/YYYY-MM-DD [Title].md`. Apply `.cursor/rules/summarize.mdc` (all steps). Key points from registries:
+2. **Read registries** — Read `Metadata/area_registry.md`, `Metadata/topic_registry.md`, `Metadata/tag_registry.md`, and `Metadata/entity_registry.md` (canonical entity spellings + aliases). These are needed for Step 3. If a registry file is missing, fall back to best-effort choices and note that the registry is absent.
+3. **Create meeting note** — Path: `Sources/Meetings/<Area>/YYYY-MM-DD [Title].md`. Apply `.cursor/rules/summarize.mdc` (all steps). Key points from registries:
    - **Area**: Fireflies/Manual — transcript's `area` is the default. HiDock — no `area` in transcript; infer from content + registry. Override if clearly mismatched.
-   - **HiDock**: set `source: HiDock`, `hidock_signature: <signature>` on the meeting note; link `Transcripts/HiDock/...`.
+   - **HiDock**: set `source: HiDock`, `hidock_signature: <signature>` on the meeting note; link `Sources/Transcripts/HiDock/...`.
    - **HiDock speakers**: infer `Speaker N` → person from dialogue; then **write back** to the transcript file (`participants:` frontmatter + replace `Speaker N:` lines with `Full Name:`). If uncertain, leave `Speaker N:` and note in meeting Context only.
    - **Topics**: use canonical slugs from the topic registry. Add new topics to the registry before using them.
    - **Tags**: use only property tags from the tag registry (max 3). No subject-like tags.
+   - **Entity names**: write canonical spellings from the entity registry; unrecognized names stay as heard **plus** a dated line appended to the registry's `## Proposed` section — never edit `## Canonical` (triage approves with the user).
 4. **Link** — Include a Transcript Link section pointing to the source file.
 5. **Reply** — Tell user the note path. For HiDock, confirm speaker labels were written back (or flag what still needs review). For manual transcripts, suggest reviewing speaker attribution before distilling.
 

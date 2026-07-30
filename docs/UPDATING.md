@@ -6,9 +6,9 @@ Your vault starts as a clone of this repo. After that, **your content is yours**
 
 | Engine (synced from template) | Content (never synced — yours) |
 |---|---|
-| `.cursor/rules/`, `.cursor/skills/`, `.cursor/templates/` | `Meetings/`, `Memory/` (except `Memory/Lexicon/`), `People/`, `Ideas/`, `Transcripts/` |
-| `scripts/`, `Memory/Lexicon/`, `Direction/README.md`, `Direction/Lexicon.md` (direction file) | `Metadata/` (registries, recap logs, review logs, `User.md`) |
-| `docs/`, `README.md`, `requirements.txt`, `.env.example` | `.env`, `.cursor/rules/local-*.mdc`, `Objectives.md`, `Objectives.evidence.md`, `Direction/<area>.md` |
+| `.cursor/rules/`, `.cursor/skills/`, `.cursor/templates/` | `Sources/`, `Evidence/`, `Synthesis/` |
+| `scripts/`, `Direction/README.md`, `Direction/Lexicon.md` (direction file) | `Metadata/` (registries, recap logs, review logs, usage telemetry, `User.md`) |
+| `docs/`, `README.md`, `requirements.txt`, `.env.example` | `.env`, `.cursor/rules/local-*.mdc`, `Objectives.md`, `Objectives.evidence.md`, `Direction/<area>.md`, `Direction/Lenses/` |
 
 ## Recommended setup (private vault + template upstream)
 
@@ -22,7 +22,7 @@ git push -u origin main
 
 # whenever you want updates
 git fetch template
-git checkout template/main -- .cursor/rules .cursor/skills .cursor/templates scripts docs Memory/Lexicon Direction/Lexicon.md Direction/README.md README.md requirements.txt .env.example
+git checkout template/main -- .cursor/rules .cursor/skills .cursor/templates scripts docs Direction/Lexicon.md Direction/README.md README.md requirements.txt .env.example
 git diff --stat                          # review what changed
 # commit to your private repo as usual
 ```
@@ -39,7 +39,41 @@ Two renames shipped after the objectives tier:
 
 2. **`**Horizon:**` / `horizon:` → `**By:**` / `cycle:`** (objectives fields). Hard rename — no fallback. Update `Objectives.md` by hand when you pull this engine: frontmatter `horizon:` becomes `cycle:`, and each objective's `**Horizon:**` date becomes `**By:**`.
 
-## Migrating to the normative tier
+## Migrating to the tier directories (2026-07)
+
+The tree was restructured so the top-level directory **is** the tier (see
+[MEMORY_MODEL.md](MEMORY_MODEL.md)). To migrate a vault:
+
+```bash
+mkdir -p Sources Evidence Synthesis Direction/Lenses
+git mv Meetings Sources/Meetings
+git mv Transcripts Sources/Transcripts
+git mv Ideas Sources/Ideas
+git mv Clippings Sources/Clippings
+```
+
+Then, per area:
+
+1. **Evidence logs** → `Evidence/<area>/<Domain>.md` (Product, Org, Me,
+   Validation), `Evidence/<area>/Partners/<Co>.md`. Whatever their old names
+   (`*.evidence.md` siblings, central log files, or legacy inline `# Evidence`
+   sections), the bullets move **verbatim** — append-only history is preserved.
+2. **People pages** — the `# Evidence Log` moves verbatim to
+   `Evidence/<area>/People/<Name>.md`; the rest of the page (current read,
+   relationships, working style) moves to `Synthesis/<area>/people/<Name>.md`.
+   Partner model files likewise → `Synthesis/<area>/partners/<Co>.md`. Then the
+   old top-level `People/` is gone.
+3. **Model files** (`# Current model` on Product/Org/Me/Validation/Partners) —
+   fold their still-true content into one `Synthesis/<area>.md` in a triage
+   session, stamp `synthesized:`, then delete the model files. Pending
+   `## Open decisions` move to the synthesis (or to
+   `Synthesis/<area>/decisions/<slug>.md` files when consequential).
+4. Old `Memory/<area>/_legacy/` archives → your `Archive/` (outside the tiers).
+
+Obsidian wikilinks are filename-based, so `git mv` does not break them.
+Migration is complete when `python3 scripts/lint_vault.py` exits 0.
+
+## Migrating to the normative tier (older vaults)
 
 The normative tier moved out of `Memory/`. Per area that has a `Direction.md`:
 

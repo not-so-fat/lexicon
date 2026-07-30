@@ -1,36 +1,42 @@
 ---
-description: Weekly cross-area objectives review — re-anchor, evidence, status, retire. Global, not per-project. User-kicked.
-globs: Objectives.md, Objectives.evidence.md, Direction/**/*.md, Metadata/review/**/*.md, Memory/**/*.md, People/**/*.md, Meetings/**/*.md
+description: Apply when the user asks to review objectives, run the weekly review, or asks about goal alignment — and whenever routing intent-vs-truth questions.
+globs: Objectives.md, Objectives.evidence.md, Direction/**/*.md, Metadata/review/**/*.md, Synthesis/**/*.md, Evidence/**/*.md
 alwaysApply: true
 ---
 
-# Normative tier — routing and boundaries
+# Constant-input tier — routing and boundaries
 
 **Trigger:** User says "review objectives", "weekly review", "how am I doing against my goals", or similar.
 
-Lexicon has two tiers. **Descriptive** (`Memory/`, `People/`, `Meetings/`) records
-what is true. **Normative** (`Direction/<area>.md`, `Objectives.md`) records what
-the user intends to make true.
+Lexicon's descriptive tiers (`Sources/`, `Evidence/`, `Synthesis/`) record what
+happened, what was said, and what it adds up to. The **constant-input** tier
+(`Direction/<area>.md`, `Direction/Lenses/`, `Objectives.md`) records what the
+user intends — it is loaded every session and written **only in review**.
 
 ## Routing
 
 | Question | Read |
 |---|---|
-| "What is true about X?" | `Memory/<area>/` |
-| "What are we trying to do / how am I doing against it?" | `Objectives.md`, then `Direction/<area>.md` |
+| "What is true about X?" | `Synthesis/<area>.md`, then `Evidence/<area>/` |
+| "What are we trying to do / how am I doing?" | `Objectives.md`, then `Direction/<area>.md` |
 | "Is this work still aligned?" | `Objectives.md` — the `Done when` and `Obstacle` lines |
 | "What can't we compromise on here?" | `## Principles` in `Direction/<area>.md` |
+| "How do we run this kind of decision?" | the lens a Standard points at (`Direction/Lenses/`) |
 
-Answering an intent question from `Memory/` alone yields a confident, plausible,
-wrong answer — synthesized memory records what is true and structurally cannot
-say what someone is trying to make true.
+Answering an intent question from descriptive tiers alone yields a confident,
+plausible, wrong answer.
 
 ## Write boundaries
 
 - `Objectives.md`, `Objectives.evidence.md` and `Direction/**` are written **only**
   in a review session (`lexicon-review`), with the user's approval per change.
+- Every addition needs **provenance**: promoted from a `## Direction candidates`
+  line in `Synthesis/<area>.md`, or (for lenses) from an iterated draft in
+  `Sources/Ideas/` — items carry `(adopted YYYY-MM-DD — [[source]])`.
 - Triage never writes them. Distill never writes them.
-- Review never writes `Memory/`, `People/` or meeting notes.
+- Review never writes `Sources/`, `Evidence/` or `Synthesis/`.
 - Max 5 active objectives across all areas; exactly one `[WIG]`. At cap, a new
   objective requires a retirement first.
+- Direction files keep their caps (`LEXICON_DIRECTION_CAP`, default 60 lines):
+  promoting an item at cap means retiring another — same discipline as objectives.
 - Never produce a numeric alignment score.

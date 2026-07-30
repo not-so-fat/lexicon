@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-List HiDock transcripts in Transcripts/HiDock/ that have no meeting note yet.
+List HiDock transcripts in Sources/Transcripts/HiDock/ that have no meeting note yet.
 
-Pending = no Meetings/**/*.md references the transcript (by signature, basename, or wikilink).
+Pending = no Sources/Meetings/**/*.md references the transcript (by signature, basename, or wikilink).
 
 Usage:
   python scripts/hidock_pending.py list
@@ -18,15 +18,15 @@ import sys
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_ROOT = os.path.join(SCRIPT_DIR, "..")
-HIDOCK_DIR = os.path.join(REPO_ROOT, "Transcripts", "HiDock")
-MEETINGS_DIR = os.path.join(REPO_ROOT, "Meetings")
+HIDOCK_DIR = os.path.join(REPO_ROOT, "Sources", "Transcripts", "HiDock")
+MEETINGS_DIR = os.path.join(REPO_ROOT, "Sources", "Meetings")
 
 FRONTMATTER_RE = re.compile(r"^---\r?\n(.*?)\r?\n---", re.DOTALL)
 SIGNATURE_RE = re.compile(r"^signature:\s*['\"]?(\S+?)['\"]?\s*$", re.MULTILINE)
 TITLE_RE = re.compile(r"^title:\s*(.+)$", re.MULTILINE)
 DATE_RE = re.compile(r"^date:\s*['\"]?(\S+?)['\"]?\s*$", re.MULTILINE)
 HIDOCK_SIG_FM_RE = re.compile(r"^hidock_signature:\s*['\"]?(\S+?)['\"]?\s*$", re.MULTILINE)
-HIDOCK_PATH_RE = re.compile(r"Transcripts/HiDock/([^\]\s\)\|\"']+)", re.IGNORECASE)
+HIDOCK_PATH_RE = re.compile(r"(?:Sources/)?Transcripts/HiDock/([^\]\s\)\|\"']+)", re.IGNORECASE)
 
 
 def _read_frontmatter(path: str) -> str:

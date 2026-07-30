@@ -76,7 +76,7 @@ def test_missing_objectives_file_produces_no_issues(vault, monkeypatch):
 
 def test_disallowed_direction_section_is_an_error(vault, monkeypatch):
     (vault / "Direction" / "acme.md").write_text(
-        "---\narea: acme\n---\n\n# Direction — Acme\n\n"
+        "---\narea: acme\ndirection_updated: 2026-07-01\n---\n\n# Direction — Acme\n\n"
         "## Purpose\n\nx\n\n## Objectives\n\nnope\n",
         encoding="utf-8",
     )
@@ -88,47 +88,26 @@ def test_disallowed_direction_section_is_an_error(vault, monkeypatch):
     )
 
 
-def test_leftover_memory_direction_file_is_a_warning(vault, monkeypatch):
-    (vault / "Memory" / "acme" / "Direction.md").write_text("# old", encoding="utf-8")
+def test_legacy_memory_root_is_a_warning(vault, monkeypatch):
+    """The conftest vault still carries a Memory/ tree — pre-migration state."""
+    issues = _issues(vault, monkeypatch, "lint_structure")
 
-    issues = _issues(vault, monkeypatch, "lint_direction")
-
-    assert any(i["level"] == "warning" and "un-migrated" in i["issue"] for i in issues)
+    assert any(
+        i["level"] == "warning" and "legacy top-level `Memory/`" in i["issue"]
+        for i in issues
+    )
 
 
 def test_area_without_direction_file_is_a_warning(vault, monkeypatch):
-    (vault / "Memory" / "personal").mkdir(parents=True)
+    (vault / "Evidence" / "personal").mkdir(parents=True)
+    (vault / "Evidence" / "personal" / "Product.md").write_text(
+        "# Evidence (append-only)\n", encoding="utf-8"
+    )
 
-    issues = _issues(vault, monkeypatch, "lint_direction")
+    issues = _issues(vault, monkeypatch, "lint_structure")
 
     assert any(
         i["level"] == "warning" and "Direction/personal.md" in i["issue"] for i in issues
-    )
-
-
-def test_leftover_lexicon_processing_strategy_is_a_warning(vault, monkeypatch):
-    """git checkout does not delete files the template removed — this leftover
-    is the deleted `Memory/Lexicon/processing-strategy.md`, which contradicts
-    `Direction/Lexicon.md` and sits under a path lint never otherwise scans."""
-    (vault / "Memory" / "Lexicon").mkdir(parents=True)
-    (vault / "Memory" / "Lexicon" / "processing-strategy.md").write_text(
-        "# old charter", encoding="utf-8"
-    )
-
-    issues = _issues(vault, monkeypatch, "lint_direction")
-
-    assert any(
-        i["level"] == "warning" and "Direction/Lexicon.md" in i["issue"]
-        for i in issues
-        if i["path"] == "Memory/Lexicon/processing-strategy.md"
-    )
-
-
-def test_no_leftover_lexicon_charter_warning_when_file_absent(vault, monkeypatch):
-    issues = _issues(vault, monkeypatch, "lint_direction")
-
-    assert not any(
-        i["path"] == "Memory/Lexicon/processing-strategy.md" for i in issues
     )
 
 
@@ -142,7 +121,7 @@ def test_empty_objectives_file_produces_no_issues(vault, write_objectives, monke
 
 def test_disallowed_section_inside_fence_is_not_an_error(vault, monkeypatch):
     (vault / "Direction" / "acme.md").write_text(
-        "---\narea: acme\n---\n\n# Direction — Acme\n\n"
+        "---\narea: acme\ndirection_updated: 2026-07-01\n---\n\n# Direction — Acme\n\n"
         "## Purpose\n\nx\n\n"
         "## Standards\n\n"
         "Example of what not to write:\n\n"
@@ -157,7 +136,7 @@ def test_disallowed_section_inside_fence_is_not_an_error(vault, monkeypatch):
 
 def test_disallowed_section_outside_fence_still_errors(vault, monkeypatch):
     (vault / "Direction" / "acme.md").write_text(
-        "---\narea: acme\n---\n\n# Direction — Acme\n\n"
+        "---\narea: acme\ndirection_updated: 2026-07-01\n---\n\n# Direction — Acme\n\n"
         "## Purpose\n\nx\n\n## Objectives\n\nnope\n",
         encoding="utf-8",
     )
@@ -171,7 +150,7 @@ def test_disallowed_section_outside_fence_still_errors(vault, monkeypatch):
 
 def test_fenced_section_ignored_but_real_disallowed_section_caught(vault, monkeypatch):
     (vault / "Direction" / "acme.md").write_text(
-        "---\narea: acme\n---\n\n# Direction — Acme\n\n"
+        "---\narea: acme\ndirection_updated: 2026-07-01\n---\n\n# Direction — Acme\n\n"
         "## Purpose\n\nx\n\n"
         "Example of what not to write:\n\n"
         "```markdown\n## Objectives\n\nnope\n```\n\n"
@@ -196,7 +175,7 @@ def test_inner_fence_marker_with_info_string_does_not_close_outer_fence(vault, m
     whitelist partway through content that is still fenced.
     """
     (vault / "Direction" / "acme.md").write_text(
-        "---\narea: acme\n---\n\n# Direction — Acme\n\n"
+        "---\narea: acme\ndirection_updated: 2026-07-01\n---\n\n# Direction — Acme\n\n"
         "## Purpose\n\nx\n\n"
         "## Standards\n\n"
         "Example of an example inside an example:\n\n"
@@ -217,8 +196,8 @@ def test_inner_fence_marker_with_info_string_does_not_close_outer_fence(vault, m
 
 
 def test_legacy_project_key_is_a_warning(vault, monkeypatch):
-    (vault / "Ideas").mkdir()
-    (vault / "Ideas" / "2026-07-01 Old.md").write_text(
+    (vault / "Sources" / "Ideas").mkdir(parents=True)
+    (vault / "Sources" / "Ideas" / "2026-07-01 Old.md").write_text(
         "---\nproject: acme\ncreated: 2026-07-01\n---\n\n# Old\n", encoding="utf-8"
     )
     monkeypatch.setattr(lint_vault, "REPO_ROOT", vault)
@@ -232,8 +211,8 @@ def test_legacy_project_key_is_a_warning(vault, monkeypatch):
 
 
 def test_area_key_produces_no_warning(vault, monkeypatch):
-    (vault / "Ideas").mkdir()
-    (vault / "Ideas" / "2026-07-01 New.md").write_text(
+    (vault / "Sources" / "Ideas").mkdir(parents=True)
+    (vault / "Sources" / "Ideas" / "2026-07-01 New.md").write_text(
         "---\narea: acme\ncreated: 2026-07-01\n---\n\n# New\n", encoding="utf-8"
     )
     monkeypatch.setattr(lint_vault, "REPO_ROOT", vault)

@@ -20,7 +20,7 @@ def test_area_flag_writes_area_key(tmp_path, monkeypatch):
         cwd=tmp_path,
     )
     assert result.returncode == 0
-    stub = next(tmp_path.glob("Transcripts/Manual/*.md"))
+    stub = next(tmp_path.glob("Sources/Transcripts/Manual/*.md"))
     text = stub.read_text(encoding="utf-8")
     assert "area: acme" in text
     assert "project:" not in text
@@ -32,7 +32,7 @@ def test_deprecated_project_flag_still_works(tmp_path):
         cwd=tmp_path,
     )
     assert result.returncode == 0
-    stub = next(tmp_path.glob("Transcripts/Manual/*.md"))
+    stub = next(tmp_path.glob("Sources/Transcripts/Manual/*.md"))
     assert "area: acme" in stub.read_text(encoding="utf-8")
 
 

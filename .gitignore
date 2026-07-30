@@ -19,3 +19,6 @@ __pycache__/
 
 # Internal development docs (not for distribution)
 dev/
+
+# Usage telemetry (local only — see docs/MEMORY_MODEL.md QA section)
+Metadata/usage/

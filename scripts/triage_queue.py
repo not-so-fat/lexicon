@@ -1,9 +1,16 @@
 #!/usr/bin/env python3
 """
-List untriaged Ideas/Clippings for triage (optional date filter).
+Triage queue for an area — deterministic inputs for the interactive session.
 
-Triage is interactive — Ideas queue only. Meetings are recap context, not queued.
-Use --since / --until when the user specifies a period during triage.
+Reports (counts and dates only; judgment happens in the session):
+  - previous triage recap
+  - synthesis staleness (`synthesized:` stamp vs newest evidence bullet)
+  - new evidence since the stamp, incl. `Pending decision:` bullets to promote
+  - open decision files and overdue `decide-by` dates
+  - pending entity-correction proposals (Metadata/entity_registry.md)
+  - recent meetings (recap context — never queued)
+  - untriaged Ideas/Clippings
+  - usage summary (if Metadata/usage/access.jsonl exists)
 
 Usage:
   python3 scripts/triage_queue.py --area personal
@@ -19,7 +26,7 @@ import json
 import os
 import re
 import sys
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 
 SCRIPT_DIR = Path(__file__).resolve().parent
@@ -27,18 +34,15 @@ REPO_ROOT = SCRIPT_DIR.parent
 
 FRONTMATTER_RE = re.compile(r"^---\s*\n(.*?)\n---", re.DOTALL)
 FILENAME_DATE_RE = re.compile(r"^(\d{4}-\d{2}-\d{2})")
-RECAP_SECTION_RE = re.compile(
-    r"^## (\d{4}-\d{2}-\d{2}) triage\s*$", re.MULTILINE
-)
+RECAP_SECTION_RE = re.compile(r"^## (\d{4}-\d{2}-\d{2}) triage\s*$", re.MULTILINE)
 EVIDENCE_BULLET_DATE_RE = re.compile(r"^\s*-\s*(\d{4}-\d{2}-\d{2})")
-MODEL_HEADING_DATE_RE = re.compile(
-    r"^#\s*Current model\s*\(last updated:\s*(\d{4}-\d{2}-\d{2})\)", re.IGNORECASE | re.MULTILINE
-)
+PENDING_DECISION_RE = re.compile(r"^\s*-\s*(\d{4}-\d{2}-\d{2})\s*[—-]\s*Pending decision:", re.IGNORECASE)
 STALE_DAYS = 21
+USAGE_WINDOW_DAYS = 30
 
-SCAN_ROOTS = [
-    ("Ideas", lambda area, rel: rel.parts[1:2] == (area,) if len(rel.parts) > 2 else False),
-]
+IDEAS_ROOT = ("Sources", "Ideas")
+CLIPPINGS_ROOT = ("Sources", "Clippings")
+MEETINGS_ROOT = ("Sources", "Meetings")
 
 
 def parse_frontmatter(content: str) -> dict:
@@ -120,7 +124,7 @@ def is_triaged(fm: dict) -> bool:
 def area_matches(fm: dict, folder_area: str | None, target: str) -> bool:
     val = fm.get("area")
     if val is None:
-        val = fm.get("project")  # legacy key — never removed, see docs/superpowers/specs/2026-07-27-terminology-clarity-design.md D6
+        val = fm.get("project")  # legacy key — readers accept it forever
     if isinstance(val, list):
         val = val[0] if val else ""
     val = str(val).strip().lower() if val else ""
@@ -130,57 +134,37 @@ def area_matches(fm: dict, folder_area: str | None, target: str) -> bool:
     return folder_area == target_l if folder_area else False
 
 
+def _read_head(fpath: Path, limit: int = 8192) -> str | None:
+    try:
+        return fpath.read_text(encoding="utf-8", errors="replace")[:limit]
+    except OSError:
+        return None
+
+
 def iter_capture_files(area: str):
-    """Yield (relpath, fm, capture_date, kind) for candidate capture files."""
-    for root_name, path_filter in SCAN_ROOTS:
-        base = REPO_ROOT / root_name
-        if not base.is_dir():
-            continue
-        for fpath in base.rglob("*.md"):
-            if fpath.name.startswith("."):
-                continue
-            if fpath.name.lower() == "readme.md":
+    """Yield (relpath, fm, capture_date, kind) for untriaged-candidate files."""
+    ideas = REPO_ROOT.joinpath(*IDEAS_ROOT)
+    if ideas.is_dir():
+        for fpath in ideas.rglob("*.md"):
+            if fpath.name.startswith(".") or fpath.name.lower() == "readme.md":
                 continue
             rel = fpath.relative_to(REPO_ROOT)
-            parts = rel.parts
-            folder_area = parts[1] if len(parts) > 2 else None
-
-            if root_name == "Ideas" and folder_area != area:
-                if folder_area == area:
-                    pass
-                else:
-                    try:
-                        content = fpath.read_text(encoding="utf-8", errors="replace")[:8192]
-                    except OSError:
-                        continue
-                    fm = parse_frontmatter(content)
-                    if not area_matches(fm, folder_area, area):
-                        continue
-                    capture_date = file_capture_date(fpath, fm)
-                    yield str(rel), fm, capture_date, root_name
-                    continue
-
-            if not path_filter(area, rel):
-                continue
-
-            try:
-                content = fpath.read_text(encoding="utf-8", errors="replace")[:8192]
-            except OSError:
+            folder_area = rel.parts[2] if len(rel.parts) > 3 else None
+            content = _read_head(fpath)
+            if content is None:
                 continue
             fm = parse_frontmatter(content)
             if not area_matches(fm, folder_area, area):
                 continue
-            capture_date = file_capture_date(fpath, fm)
-            yield str(rel), fm, capture_date, root_name
+            yield str(rel), fm, file_capture_date(fpath, fm), "Ideas"
 
-    clippings = REPO_ROOT / "Clippings"
+    clippings = REPO_ROOT.joinpath(*CLIPPINGS_ROOT)
     if clippings.is_dir():
         for fpath in clippings.rglob("*.md"):
             if fpath.name.lower() == "readme.md":
                 continue
-            try:
-                content = fpath.read_text(encoding="utf-8", errors="replace")[:8192]
-            except OSError:
+            content = _read_head(fpath)
+            if content is None:
                 continue
             fm = parse_frontmatter(content)
             if not area_matches(fm, None, area):
@@ -223,138 +207,8 @@ def load_last_recap(area: str) -> tuple[str, str]:
         return str(latest.relative_to(REPO_ROOT)), text.strip()[-2000:]
 
     last = matches[-1]
-    section = text[last.start() :].strip()
+    section = text[last.start():].strip()
     return str(latest.relative_to(REPO_ROOT)), section
-
-
-OPEN_DECISION_LINE_RE = re.compile(
-    r"^\s*-\s*(\d{4}-\d{2}-\d{2})\s*—\s*(?:Pending(?: decision)?(?:\s*\([^)]*\))?:?\s*)?",
-    re.IGNORECASE,
-)
-
-
-def _open_decisions_from_file(
-    path: Path, source_label: str, section_header: str = "## open decisions"
-) -> list[str]:
-    if not path.is_file():
-        return []
-    try:
-        lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
-    except OSError:
-        return []
-    in_open = False
-    found: list[str] = []
-    target = section_header.strip().lower()
-    for ln in lines:
-        if ln.strip().lower() == target:
-            in_open = True
-            continue
-        if in_open and ln.startswith("#"):
-            break
-        if not in_open:
-            continue
-        stripped = ln.strip()
-        if not stripped.startswith("-"):
-            continue
-        if (
-            "pending" in stripped.lower()
-            or "testing:" in stripped.lower()
-            or OPEN_DECISION_LINE_RE.match(stripped)
-        ):
-            found.append(f"[{source_label}] {stripped.lstrip('-').strip()}")
-    return found
-
-
-def _pending_from_decisions_log(path: Path) -> list[str]:
-    """Classic layout: Memory/<project>/Decisions/decisions.md."""
-    if not path.is_file():
-        return []
-    try:
-        lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
-    except OSError:
-        return []
-    found: list[str] = []
-    for ln in lines:
-        stripped = ln.strip()
-        if not stripped.startswith("-"):
-            continue
-        lower = stripped.lower()
-        if "pending decision" in lower or "decision (pending)" in lower:
-            found.append(f"[Decisions] {stripped.lstrip('-').strip()}")
-    return found
-
-
-def pending_decisions_snippet(area: str, limit: int = 20) -> list[str]:
-    memory = REPO_ROOT / "Memory" / area
-    pending: list[str] = []
-
-    validation = memory / "Validation.md"
-    pending.extend(
-        _open_decisions_from_file(validation, "Validation", "## open hypotheses")
-    )
-
-    for model_file in ("Org.md", "Product.md"):
-        pending.extend(
-            _open_decisions_from_file(memory / model_file, model_file.replace(".md", ""))
-        )
-
-    partners_dir = memory / "Partners"
-    if partners_dir.is_dir():
-        for partner_file in sorted(partners_dir.glob("*.md")):
-            if partner_file.name.lower() in ("index.md", "readme.md"):
-                continue
-            label = f"Partners/{partner_file.stem}"
-            pending.extend(_open_decisions_from_file(partner_file, label))
-
-    legacy = memory / "_legacy" / "decisions.md"
-    if legacy.is_file():
-        try:
-            lines = legacy.read_text(encoding="utf-8", errors="replace").splitlines()
-        except OSError:
-            lines = []
-        for ln in lines:
-            if "pending decision" in ln.lower():
-                pending.append(f"[legacy decisions] {ln.strip().lstrip('-').strip()}")
-
-    pending.extend(_pending_from_decisions_log(memory / "Decisions" / "decisions.md"))
-
-    return pending[-limit:]
-
-
-def _all_bullet_dates(text: str) -> list[str]:
-    return sorted(
-        m.group(1) for ln in text.splitlines() if (m := EVIDENCE_BULLET_DATE_RE.match(ln))
-    )
-
-
-def _inline_evidence(text: str) -> tuple[bool, list[str]]:
-    """Legacy inline `# Evidence` section in a model file: (present, bullet dates)."""
-    in_section = False
-    present = False
-    dates: list[str] = []
-    for ln in text.splitlines():
-        stripped = ln.strip().lower()
-        if stripped.startswith("# evidence"):
-            in_section = True
-            present = True
-            continue
-        if in_section and ln.startswith("# "):
-            in_section = False
-            continue
-        if in_section:
-            m = EVIDENCE_BULLET_DATE_RE.match(ln)
-            if m:
-                dates.append(m.group(1))
-    return present, sorted(dates)
-
-
-def _model_updated(text: str) -> str:
-    fm = parse_frontmatter(text)
-    d = normalize_date(fm.get("model_updated"))
-    if d:
-        return d
-    m = MODEL_HEADING_DATE_RE.search(text)
-    return m.group(1) if m else ""
 
 
 def _days_between(older: str, newer: str) -> int:
@@ -363,89 +217,156 @@ def _days_between(older: str, newer: str) -> int:
     ).days
 
 
-def _area_model_files(area: str) -> list[Path]:
-    memory = REPO_ROOT / "Memory" / area
-    files: list[Path] = []
-    skip = {"readme.md", "index.md", "direction.md"}
-    if memory.is_dir():
-        for p in sorted(memory.glob("*.md")):
-            if p.name.lower() in skip or p.name.endswith(".evidence.md"):
+def synthesis_status(area: str) -> dict:
+    """Stamp vs evidence: what has accumulated since the last rewrite."""
+    synth_path = REPO_ROOT / "Synthesis" / f"{area}.md"
+    stamp = ""
+    if synth_path.is_file():
+        fm = parse_frontmatter(synth_path.read_text(encoding="utf-8", errors="replace"))
+        stamp = normalize_date(fm.get("synthesized"))
+
+    evidence_dir = REPO_ROOT / "Evidence" / area
+    per_file: list[dict] = []
+    newest = ""
+    pending: list[str] = []
+    if evidence_dir.is_dir():
+        for fpath in sorted(evidence_dir.rglob("*.md")):
+            if fpath.name.lower() == "readme.md":
                 continue
-            files.append(p)
-        partners = memory / "Partners"
-        if partners.is_dir():
-            for p in sorted(partners.glob("*.md")):
-                if p.name.lower() in skip or p.name.endswith(".evidence.md"):
+            try:
+                lines = fpath.read_text(encoding="utf-8", errors="replace").splitlines()
+            except OSError:
+                continue
+            new_count = 0
+            file_newest = ""
+            for ln in lines:
+                m = EVIDENCE_BULLET_DATE_RE.match(ln)
+                if not m:
                     continue
-                files.append(p)
-    return files
+                d = m.group(1)
+                file_newest = max(file_newest, d)
+                if not stamp or d > stamp:
+                    new_count += 1
+                    if PENDING_DECISION_RE.match(ln):
+                        pending.append(ln.strip().lstrip("-").strip())
+            newest = max(newest, file_newest)
+            if new_count:
+                per_file.append(
+                    {
+                        "path": str(fpath.relative_to(REPO_ROOT)),
+                        "new_bullets": new_count,
+                        "newest": file_newest,
+                    }
+                )
+
+    lag = _days_between(stamp, newest) if stamp and newest else None
+    stale = bool(newest) and (not stamp or (lag or 0) > STALE_DAYS)
+    return {
+        "synthesis_file": str(synth_path.relative_to(REPO_ROOT)) if synth_path.is_file() else "",
+        "synthesized": stamp,
+        "newest_evidence": newest,
+        "lag_days": lag,
+        "stale": stale,
+        "new_evidence": per_file,
+        "pending_decision_bullets": pending,
+    }
 
 
-def evidence_debt(area: str) -> dict:
-    """Per-area un-drained evidence + staleness, plus legacy flags.
-
-    Un-drained = evidence bullets dated after `model_updated`. Stale = current
-    model lags newest evidence by more than STALE_DAYS (or has no date at all).
-    """
-    areas: list[dict] = []
-    for model_path in _area_model_files(area):
+def open_decisions(area: str, today: str) -> list[dict]:
+    """Decision-state files that are open or held, with overdue flags."""
+    ddir = REPO_ROOT / "Synthesis" / area / "decisions"
+    out: list[dict] = []
+    if not ddir.is_dir():
+        return out
+    for fpath in sorted(ddir.glob("*.md")):
+        if fpath.name.lower() == "readme.md":
+            continue
         try:
-            model_text = model_path.read_text(encoding="utf-8", errors="replace")
+            fm = parse_frontmatter(fpath.read_text(encoding="utf-8", errors="replace"))
         except OSError:
             continue
-        sibling = model_path.with_name(model_path.stem + ".evidence.md")
-        sibling_dates: list[str] = []
-        if sibling.is_file():
-            try:
-                sibling_dates = _all_bullet_dates(
-                    sibling.read_text(encoding="utf-8", errors="replace")
-                )
-            except OSError:
-                pass
-        inline_present, inline_dates = _inline_evidence(model_text)
-        all_dates = sorted(sibling_dates + inline_dates)
-        if not all_dates and not inline_present:
+        status = str(fm.get("status", "")).strip().lower()
+        if status in ("committed", "killed"):
             continue
-
-        model_date = _model_updated(model_text)
-        undrained = [d for d in all_dates if not model_date or d > model_date]
-        newest = all_dates[-1] if all_dates else ""
-        lag_days = _days_between(model_date, newest) if model_date and newest else None
-        stale = bool(all_dates) and (not model_date or (lag_days or 0) > STALE_DAYS)
-
-        rel = str(model_path.relative_to(REPO_ROOT / "Memory" / area))
-        areas.append(
+        decide_by = normalize_date(fm.get("decide-by") or fm.get("decide_by"))
+        out.append(
             {
-                "area": rel.removesuffix(".md"),
-                "model_updated": model_date,
-                "newest_evidence": newest,
-                "undrained_count": len(undrained),
-                "oldest_undrained": undrained[0] if undrained else "",
-                "lag_days": lag_days,
-                "stale": stale,
-                "inline_legacy": inline_present,
+                "path": str(fpath.relative_to(REPO_ROOT)),
+                "status": status or "(no status)",
+                "decide_by": decide_by,
+                "overdue": bool(decide_by) and decide_by < today,
             }
         )
+    return out
 
-    legacy_dir = REPO_ROOT / "Memory" / area / "_legacy"
-    legacy_files = (
-        sum(1 for p in legacy_dir.rglob("*") if p.is_file()) if legacy_dir.is_dir() else 0
-    )
-    return {"areas": areas, "legacy_files": legacy_files}
+
+def usage_summary(area: str, today: datetime) -> dict:
+    """Reads-per-tier for this area from the usage log, last USAGE_WINDOW_DAYS."""
+    log = REPO_ROOT / "Metadata" / "usage" / "access.jsonl"
+    if not log.is_file():
+        return {}
+    cutoff = (today - timedelta(days=USAGE_WINDOW_DAYS)).strftime("%Y-%m-%d")
+    tiers: dict[str, int] = {}
+    files: dict[str, int] = {}
+    try:
+        for raw in log.read_text(encoding="utf-8", errors="replace").splitlines():
+            try:
+                entry = json.loads(raw)
+            except json.JSONDecodeError:
+                continue
+            ts = str(entry.get("ts", ""))[:10]
+            path = str(entry.get("path", ""))
+            if ts < cutoff or not path:
+                continue
+            tier = path.split("/", 1)[0]
+            if area.lower() not in path.lower() and tier not in ("Direction", "Objectives.md"):
+                continue
+            tiers[tier] = tiers.get(tier, 0) + 1
+            files[path] = files.get(path, 0) + 1
+    except OSError:
+        return {}
+    top = sorted(files.items(), key=lambda kv: -kv[1])[:5]
+    return {"window_days": USAGE_WINDOW_DAYS, "reads_by_tier": tiers, "top_files": top}
+
+
+def pending_entity_proposals() -> list[str]:
+    """Dated bullets under `## Proposed` in Metadata/entity_registry.md."""
+    path = REPO_ROOT / "Metadata" / "entity_registry.md"
+    if not path.is_file():
+        return []
+    out: list[str] = []
+    in_section = False
+    in_comment = False
+    for ln in path.read_text(encoding="utf-8", errors="replace").splitlines():
+        s = ln.strip()
+        if in_comment:
+            if "-->" in s:
+                in_comment = False
+            continue
+        if s.startswith("<!--"):
+            in_comment = "-->" not in s
+            continue
+        if s.lower().startswith("## proposed"):
+            in_section = True
+            continue
+        if in_section and s.startswith("#"):
+            break
+        if in_section and s.startswith("-"):
+            out.append(s.lstrip("-").strip())
+    return out
 
 
 def iter_recent_meetings(
     area: str, since: str | None, until: str | None, limit: int = 25
 ) -> list[dict]:
     """Recent meeting notes for triage recap context (not in queue)."""
-    meetings_dir = REPO_ROOT / "Meetings" / area
+    meetings_dir = REPO_ROOT.joinpath(*MEETINGS_ROOT) / area
     if not meetings_dir.is_dir():
         return []
     items: list[dict] = []
     for fpath in meetings_dir.glob("*.md"):
-        try:
-            content = fpath.read_text(encoding="utf-8", errors="replace")[:8192]
-        except OSError:
+        content = _read_head(fpath)
+        if content is None:
             continue
         fm = parse_frontmatter(content)
         capture_date = file_capture_date(fpath, fm)
@@ -486,7 +407,7 @@ def build_queue(area: str, since: str | None, until: str | None) -> list[dict]:
 def main():
     parser = argparse.ArgumentParser(description="Lexicon triage queue for an area")
     parser.add_argument("--area", dest="area", help="Area slug (e.g. personal, acme)")
-    parser.add_argument("--project", dest="area", help=argparse.SUPPRESS)  # deprecated alias for --area
+    parser.add_argument("--project", dest="area", help=argparse.SUPPRESS)  # deprecated alias
     parser.add_argument("--since", help="Include capture on/after YYYY-MM-DD")
     parser.add_argument("--until", help="Include capture on/before YYYY-MM-DD")
     parser.add_argument("--json", action="store_true", help="JSON output")
@@ -505,11 +426,15 @@ def main():
     since = normalize_date(args.since) if args.since else None
     until = normalize_date(args.until) if args.until else None
 
+    now = datetime.now()
+    today = now.strftime("%Y-%m-%d")
     queue = build_queue(args.area, since, until)
     recent_meetings = iter_recent_meetings(args.area, since, until)
     recap_path, last_section = load_last_recap(args.area)
-    pending = pending_decisions_snippet(args.area)
-    debt = evidence_debt(args.area)
+    synth = synthesis_status(args.area)
+    decisions = open_decisions(args.area, today)
+    entity_proposals = pending_entity_proposals()
+    usage = usage_summary(args.area, now)
 
     if args.json:
         print(
@@ -523,8 +448,10 @@ def main():
                     "recent_meetings": recent_meetings,
                     "last_recap_file": recap_path,
                     "last_recap_section": last_section,
-                    "pending_decisions": pending,
-                    "evidence_debt": debt,
+                    "synthesis": synth,
+                    "open_decisions": decisions,
+                    "entity_proposals": entity_proposals,
+                    "usage": usage,
                 },
                 indent=2,
             )
@@ -534,12 +461,12 @@ def main():
     lines = [
         f"# Triage queue — {args.area}",
         "",
-        f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M')}",
+        f"Generated: {now.strftime('%Y-%m-%d %H:%M')}",
     ]
     if since or until:
         lines.append(f"Period filter: {since or '…'} → {until or '…'}")
     else:
-        lines.append("Period filter: none (all untriaged ideas/clippings for project)")
+        lines.append("Period filter: none (all untriaged ideas/clippings for area)")
     lines.append(f"Untriaged ideas queue: **{len(queue)}**")
     lines.append("")
     lines.append(
@@ -548,51 +475,45 @@ def main():
 
     if recap_path and last_section:
         lines.extend(
-            [
-                "## Previous triage (remind user)",
-                f"From: `{recap_path}`",
-                "",
-                last_section,
-                "",
-            ]
+            ["## Previous triage (remind user)", f"From: `{recap_path}`", "", last_section, ""]
         )
     else:
-        lines.extend(["## Previous triage", "(none yet — first triage for this project)", ""])
+        lines.extend(["## Previous triage", "(none yet — first triage for this area)", ""])
 
-    if pending:
-        lines.extend(["## Pending decisions (carry forward)", ""])
-        for p in pending:
+    lines.extend(["## Synthesis status", ""])
+    if synth["synthesis_file"]:
+        stamp = synth["synthesized"] or "⚠ no `synthesized:` stamp"
+        lines.append(f"- `{synth['synthesis_file']}` — synthesized {stamp}")
+    else:
+        lines.append(f"- ⚠ no `Synthesis/{args.area}.md` yet — first triage creates it")
+    if synth["newest_evidence"]:
+        lines.append(f"- Newest evidence: {synth['newest_evidence']}")
+    if synth["stale"]:
+        lag = f" ({synth['lag_days']} days behind)" if synth["lag_days"] is not None else ""
+        lines.append(f"- ⚠ STALE{lag} — rewrite the synthesis this session or defer explicitly")
+    for f in synth["new_evidence"]:
+        plural = "s" if f["new_bullets"] != 1 else ""
+        lines.append(f"- {f['path']} — {f['new_bullets']} new bullet{plural} (newest {f['newest']})")
+    lines.append("")
+
+    if synth["pending_decision_bullets"]:
+        lines.extend(["## Pending decisions to promote (from evidence)", ""])
+        for p in synth["pending_decision_bullets"]:
             lines.append(f"- {p}")
         lines.append("")
 
-    if debt["areas"] or debt["legacy_files"]:
-        lines.extend(["## Evidence debt (drain in Memory step — or defer explicitly)", ""])
-        for a in debt["areas"]:
-            parts = [f"- **{a['area']}**"]
-            if a["undrained_count"]:
-                oldest = f" (oldest {a['oldest_undrained']})" if a["oldest_undrained"] else ""
-                plural = "s" if a["undrained_count"] != 1 else ""
-                parts.append(f" — {a['undrained_count']} un-drained bullet{plural}{oldest}")
-            else:
-                parts.append(" — drained")
-            if a["model_updated"]:
-                parts.append(f"; model updated {a['model_updated']}")
-            else:
-                parts.append("; model has no `model_updated:` date")
-            if a["newest_evidence"]:
-                parts.append(f", newest evidence {a['newest_evidence']}")
-            if a["stale"]:
-                lag = f" ({a['lag_days']} days behind)" if a["lag_days"] is not None else ""
-                parts.append(f" ⚠ STALE{lag}")
-            if a["inline_legacy"]:
-                parts.append(
-                    f" — inline `# Evidence` (legacy): migrate to {a['area']}.evidence.md"
-                )
-            lines.append("".join(parts))
-        if debt["legacy_files"]:
-            lines.append(
-                f"- **_legacy/** contains {debt['legacy_files']} file(s) — migrate or archive"
-            )
+    if decisions:
+        lines.extend(["## Open decisions", ""])
+        for d in decisions:
+            overdue = " ⚠ OVERDUE — decide, extend with reason, or kill" if d["overdue"] else ""
+            by = d["decide_by"] or "⚠ no decide-by"
+            lines.append(f"- `{d['path']}` — {d['status']}, decide-by {by}{overdue}")
+        lines.append("")
+
+    if entity_proposals:
+        lines.extend(["## Entity corrections (approve into Canonical or reject)", ""])
+        for e in entity_proposals:
+            lines.append(f"- {e}")
         lines.append("")
 
     if recent_meetings:
@@ -613,6 +534,14 @@ def main():
             for item in by_kind[kind]:
                 lines.append(f"- {item['date']} | [{item['title']}]({item['path']})")
             lines.append("")
+
+    if usage:
+        lines.extend([f"## Usage (last {usage['window_days']} days)", ""])
+        for tier, n in sorted(usage["reads_by_tier"].items(), key=lambda kv: -kv[1]):
+            lines.append(f"- {tier}: {n} reads")
+        if usage["top_files"]:
+            lines.append("- Top files: " + ", ".join(f"`{p}` ({n})" for p, n in usage["top_files"]))
+        lines.append("")
 
     print("\n".join(lines))
 

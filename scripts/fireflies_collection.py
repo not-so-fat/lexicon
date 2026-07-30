@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Fetch Fireflies transcripts for a date and account. Saves to Transcripts/Fireflies/<account>/.
+Fetch Fireflies transcripts for a date and account. Saves to Sources/Transcripts/Fireflies/<account>/.
 
 Usage:
   python scripts/fireflies_collection.py process-date YYYY-MM-DD <account> [--force]
@@ -45,7 +45,7 @@ def get_config(account):
     key = account.lower()
     output_dir = os.getenv(f"OUTPUT_DIR_{key}")
     if not output_dir:
-        output_dir = os.path.join(REPO_ROOT, "Transcripts", "Fireflies", key)
+        output_dir = os.path.join(REPO_ROOT, "Sources", "Transcripts", "Fireflies", key)
     area = (os.getenv(f"AREA_{key}") or os.getenv(f"PROJECT_{key}") or "").strip()
     return {
         "api_key": (os.getenv(f"FIREFLIES_API_KEY_{key}") or "").strip(),

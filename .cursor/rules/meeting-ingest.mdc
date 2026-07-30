@@ -1,6 +1,6 @@
 ---
-description: Summarize raw transcripts (Fireflies, HiNotes, other) into structured meeting notes. Paths: Meetings/<Area>/.
-globs: Transcripts/**/*.md, Meetings/**/*.md
+description: Summarize raw transcripts (Fireflies, HiNotes, other) into structured meeting notes. Paths: Sources/Meetings/<area>/.
+globs: Sources/Transcripts/**/*.md, Sources/Meetings/**/*.md
 alwaysApply: false
 ---
 
@@ -32,7 +32,7 @@ Capture these in **Analysis** and/or **Key Learnings & Decisions**.
 
 ## 2. Structure
 
-**File path:** `Meetings/<Area>/YYYY-MM-DD [Title].md`  
+**File path:** `Sources/Meetings/<Area>/YYYY-MM-DD [Title].md`  
 Use the transcript's `area` (or frontmatter) to choose `<Area>` (e.g. work, personal, career).
 
 ```markdown
@@ -73,7 +73,7 @@ Who, context, main points, decisions. For 1:1s, include a short **Sentiment chec
 - Bullets. Use "(None explicit)" if no clear action items.
 
 # Transcript Link
-Raw transcript → path under `Transcripts/Fireflies/<account>/`, `Transcripts/HiDock/`, or `Transcripts/Manual/`.
+Raw transcript → path under `Sources/Transcripts/Fireflies/<account>/`, `Sources/Transcripts/HiDock/`, or `Sources/Transcripts/Manual/`.
 
 # Distilled
 (Initially empty or "(Run **distill** after reviewing this summary.)" After distillation, list every destination updated.)
