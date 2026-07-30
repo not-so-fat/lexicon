@@ -27,6 +27,7 @@ REPO_ROOT = SCRIPT_DIR.parent
 DEFAULT_CAP = 5
 DUE_SOON_DAYS = 14
 REVIEW_STALE_DAYS = 14
+DIRECTION_STALE_DAYS = 60
 
 OBJ_HEADING_RE = re.compile(r"^###\s+(?:(\[WIG\])\s+)?(.+?)\s*$")
 HTML_COMMENT_RE = re.compile(r"<!--.*?-->", re.DOTALL)
@@ -206,6 +207,30 @@ def last_review(root: Path) -> tuple[str, str]:
     return best_date, best_path
 
 
+def direction_health(root: Path, today: date) -> list[dict]:
+    """Age of each Direction file — flags ones due a reaffirm pass in review."""
+    out: list[dict] = []
+    direction = root / "Direction"
+    if not direction.is_dir():
+        return out
+    for path in sorted(direction.glob("*.md")):
+        if path.stem.lower() in ("readme", "index"):
+            continue
+        fm_text = path.read_text(encoding="utf-8", errors="replace")
+        from triage_queue import parse_frontmatter  # local import avoids cycle at module load
+        updated = normalize_date(parse_frontmatter(fm_text).get("direction_updated"))
+        days = _days_between(updated, today)
+        out.append(
+            {
+                "file": str(path.relative_to(root)),
+                "direction_updated": updated,
+                "days_since_update": days,
+                "stale": days is None or days > DIRECTION_STALE_DAYS,
+            }
+        )
+    return out
+
+
 def known_areas(root: Path) -> list[str]:
     """User areas. `Lexicon` is the tool's own charter, not an area to review."""
     direction = root / "Direction"
@@ -276,6 +301,7 @@ def build_report(root: Path, today: date) -> dict:
         "days_since_review": days_since_review,
         "review_stale": days_since_review is None or days_since_review > REVIEW_STALE_DAYS,
         "areas_without_objectives": [a for a in known_areas(root) if a not in areas_with],
+        "direction_health": direction_health(root, today),
     }
 
 
@@ -346,6 +372,22 @@ def render(report: dict) -> str:
     if report["overdue"]:
         lines.extend(["## Overdue — retire or explicitly reopen", ""])
         lines.extend(f"- {title}" for title in report["overdue"])
+        lines.append("")
+
+    if report["direction_health"]:
+        lines.extend(["## Direction health", ""])
+        lines.append(
+            "*Stale files get a reaffirm pass this session: re-read Principles/Standards"
+            " with the user — reaffirm (restamp `direction_updated:`), amend, or retire items.*"
+        )
+        lines.append("")
+        for d in report["direction_health"]:
+            if d["direction_updated"]:
+                age = f"updated {d['direction_updated']} ({d['days_since_update']} days ago)"
+            else:
+                age = "no `direction_updated:` stamp"
+            flag = " ⚠ reaffirm" if d["stale"] else ""
+            lines.append(f"- `{d['file']}` — {age}{flag}")
         lines.append("")
 
     if report["areas_without_objectives"]:

@@ -65,15 +65,17 @@ Global across all areas. Memory and meeting notes are read-only here.
      - Has a deliverable → it's a project; it leaves the vault (Linear, repo, task list)
    - **Into tier 3:** read `## Direction candidates` in each `Synthesis/<area>.md`; promote accepted items as one-line ID'd entries `(adopted YYYY-MM-DD — [[source]])`, reject the rest (tell triage via the review log). Direction files stay under their cap — promoting at cap means retiring another item.
 
-7. **Log** — append to `Metadata/review/YYYY-Www.md` (ISO week). Record: status per objective, retirements with outcomes, what was routed out, and the WIG for the coming week.
+7. **Direction health** — for each file the queue flags **⚠ reaffirm** (`direction_updated` older than 60 days): re-read its Principles/Standards with the user; each item is reaffirmed, amended, or retired; restamp `direction_updated:`. Only flagged files — unflagged files cost nothing this session.
 
-8. **Verify** — run:
+8. **Log** — append to `Metadata/review/YYYY-Www.md` (ISO week). Record: status per objective, retirements with outcomes, what was routed out, and the WIG for the coming week.
+
+9. **Verify** — run:
    ```bash
    python3 scripts/lint_vault.py --json
    ```
    Scope the gate to what this session could have written: fail the session only on an error or warning whose `path` is `Objectives.md`, `Objectives.evidence.md`, or starts with `Direction/`. A vault can carry pre-existing lint debt — evidence-log or frontmatter hygiene issues that predate this session and have nothing to do with it — and a gate that blocks on that debt would block every review forever, which in practice means the gate gets ignored, which is worse than not having it. Fix what the scoped filter flags (a sixth objective, two WIGs, a missing `Obstacle:`, or a disallowed `Direction/<area>.md` section — exactly what this ritual exists to prevent) before reporting; leave unrelated pre-existing errors for whatever process owns general vault hygiene.
 
-9. **Report** — if `scripts/build_index.py` exists, run it now: files this session wrote are invisible to vault search until the index rebuilds. Not every vault has this script (this engine repo does not) — its absence is a no-op, not an error. Then report: what changed, what was retired, what remains, the named WIG, and the lint result from step 8.
+10. **Report** — if `scripts/build_index.py` exists, run it now: files this session wrote are invisible to vault search until the index rebuilds. Not every vault has this script (this engine repo does not) — its absence is a no-op, not an error. Then report: what changed, what was retired, what remains, the named WIG, and the lint result from step 9.
 
 ## Error handling
 

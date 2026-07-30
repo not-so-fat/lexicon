@@ -207,9 +207,10 @@ Skill: `.cursor/skills/lexicon-review/SKILL.md`. Rule: `.cursor/rules/review.mdc
 | 4. Status | Agent proposes `moving` / `stalled` / `drifting`; you accept or edit | none |
 | 5. Retire | Achieved, past-horizon, or reclassified objectives leave `## Active` with an outcome line; frontmatter `reviewed:` (and `objectives_updated:` if `## Active` changed) gets stamped | `Objectives.md`, `Objectives.evidence.md` |
 | 6. Route | What turned out to be a standard, a lens, or a project leaves for its real home; `## Direction candidates` staged by triage are promoted or rejected | `Direction/<area>.md`, `Direction/Lenses/`, `Objectives.evidence.md` |
-| 7. Log | Append the session | `Metadata/review/YYYY-Www.md` |
-| 8. Verify | `python3 scripts/lint_vault.py --json`, scoped to errors/warnings under `Objectives.md`, `Objectives.evidence.md`, or `Direction/**` — pre-existing debt elsewhere does not block the session | none |
-| 9. Report | What changed, what was retired, what remains, the named WIG, and the lint result | none |
+| 7. Direction health | Files flagged stale by the queue (`direction_updated` > 60 days) get re-read; each Principle/Standard reaffirmed, amended, or retired; restamped | `Direction/<area>.md` |
+| 8. Log | Append the session | `Metadata/review/YYYY-Www.md` |
+| 9. Verify | `python3 scripts/lint_vault.py --json`, scoped to errors/warnings under `Objectives.md`, `Objectives.evidence.md`, or `Direction/**` — pre-existing debt elsewhere does not block the session | none |
+| 10. Report | What changed, what was retired, what remains, the named WIG, and the lint result | none |
 
 Two orderings are load-bearing:
 
