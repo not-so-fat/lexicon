@@ -1,6 +1,6 @@
 ---
 name: lexicon-review
-description: Use when the user says "review objectives", "weekly review", or asks how they are doing against goals or whether work is still aligned. Global across all areas. Output contract: Objectives.md/Direction/** edits with per-change approval; descriptive tiers stay read-only. Not the per-area triage.
+description: Use when the user says "review objectives", "weekly review", or asks how they are doing against goals or whether work is still aligned. Global across all areas — not the per-area triage.
 ---
 
 # Review objectives

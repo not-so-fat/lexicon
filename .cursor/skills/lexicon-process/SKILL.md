@@ -1,6 +1,6 @@
 ---
 name: lexicon-process
-description: Use when the user says "process my Fireflies meetings", or names a date and Fireflies account to fetch and process. Covers the full day pipeline; selection is by transcript frontmatter date, not filename.
+description: Use when the user says "process my Fireflies meetings", or names a date and Fireflies account to fetch and process.
 ---
 
 # Process Fireflies meetings

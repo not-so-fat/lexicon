@@ -1,6 +1,6 @@
 ---
 name: lexicon-summarize
-description: Use when the user says "summarize this transcript", "create a meeting note", or points at a raw transcript under Sources/Transcripts/ (Fireflies, HiDock, or manual). Output contract: one structured meeting note under Sources/Meetings/<area>/ with entity names normalized against the registry.
+description: Use when the user says "summarize this transcript", "create a meeting note", or points at a raw transcript under Sources/Transcripts/ (Fireflies, HiDock, or manual).
 ---
 
 # Summarize transcript into meeting note
@@ -15,7 +15,7 @@ An existing transcript file under `Sources/Transcripts/Fireflies/<account>/`, `S
 
 1. **Read transcript** — Identify the file. Read frontmatter (`title`, `date`, `signature` for HiDock; `area`, `participants` or `with_whom` when present).
 2. **Read registries** — Read `Metadata/area_registry.md`, `Metadata/topic_registry.md`, `Metadata/tag_registry.md`, and `Metadata/entity_registry.md` (canonical entity spellings + aliases). These are needed for Step 3. If a registry file is missing, fall back to best-effort choices and note that the registry is absent.
-3. **Create meeting note** — Path: `Sources/Meetings/<Area>/YYYY-MM-DD [Title].md`. Apply `.cursor/rules/summarize.mdc` (all steps). Key points from registries:
+3. **Create meeting note** — Path: `Sources/Meetings/<Area>/YYYY-MM-DD [Title].md`. Sanitize the filename: `/`, `\`, `:` in the title become `-` (verbatim title stays in frontmatter) — a slash creates an unwanted subdirectory. Apply `.cursor/rules/summarize.mdc` (all steps). Key points from registries:
    - **Area**: Fireflies/Manual — transcript's `area` is the default. HiDock — no `area` in transcript; infer from content + registry. Override if clearly mismatched.
    - **HiDock**: set `source: HiDock`, `hidock_signature: <signature>` on the meeting note; link `Sources/Transcripts/HiDock/...`.
    - **HiDock speakers**: infer `Speaker N` → person from dialogue; then **write back** to the transcript file (`participants:` frontmatter + replace `Speaker N:` lines with `Full Name:`). If uncertain, leave `Speaker N:` and note in meeting Context only.

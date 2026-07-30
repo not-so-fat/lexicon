@@ -1,6 +1,6 @@
 ---
 name: lexicon-distill
-description: Use when the user asks to distill a meeting note ("distill this meeting note", or the distill step of a processing pipeline). Output contract: dated one-line bullets appended under Evidence/<area>/ — never synthesis, never Synthesis/ or Direction/ writes. Not for triage sessions or Ideas files.
+description: Use when the user asks to distill a meeting note ("distill this meeting note", or the distill step of a processing pipeline). Not for triage sessions or Ideas files.
 ---
 
 # Distill meeting note into evidence

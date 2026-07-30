@@ -27,6 +27,7 @@ Especially if speaker is respected professional / external customers, let's try 
 ## Output file template
 **File path:** `Sources/Meetings/<Area>/YYYY-MM-DD [Title].md`
 Use the transcript's `area` (or frontmatter) to choose `<Area>` (e.g. personal, company, career).
+**Filename safety:** sanitize the title when building the file path — replace `/` (and `\`, `:`) with `-`; a slash in a filename silently creates a subdirectory and splits the note. Keep the verbatim title (slash included) in the `title:` frontmatter.
 **Template:** Use `.cursor/templates/meeting_note_template.md`
 
 

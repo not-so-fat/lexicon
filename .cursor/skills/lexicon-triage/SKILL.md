@@ -1,6 +1,6 @@
 ---
 name: lexicon-triage
-description: Use when the user says "triage <area>", "recap <area>", or wants to review how an area is going and update its memory. Output contract: Synthesis/<area> rewritten with user approval; evidence and meetings stay read-only. Not for processing meetings or transcripts.
+description: Use when the user says "triage <area>", "recap <area>", or wants to review how an area is going and update its memory. Not for processing meetings or transcripts.
 ---
 
 # Triage an area
