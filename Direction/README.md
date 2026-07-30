@@ -6,16 +6,14 @@ review**, always with provenance.
 
 ## `Direction/<area>.md`
 
-*"Horizon" = altitude of intent, from GTD's Horizons of Focus (see
-docs/OBJECTIVES.md): H5 = purpose & principles (why this exists — most
-stable), H3 = dated goals (`Objectives.md`), H2 = ongoing responsibilities
-held to a quality bar, H1 = projects (deliberately not in this vault).*
+| Section | Test |
+|---|---|
+| `## Purpose` | Why this area exists. One paragraph, ≤5 lines. Rarely changes. |
+| `## Principles` | Standing constraints — cannot be failed; they are not targets. |
+| `## Standards` | What "well-maintained" means — no finish line, but a quality bar. |
 
-| Section | Horizon | Test |
-|---|---|---|
-| `## Purpose` | H5 | Why this area exists. One paragraph, ≤5 lines. Rarely changes. |
-| `## Principles` | H5 | Standing constraints. Cannot be failed — they are not targets. |
-| `## Standards` | H2 | What "well-maintained" means. No finish line, but a quality bar. |
+(The GTD horizons framework behind this split lives in docs/OBJECTIVES.md;
+its jargon stays there.)
 
 No other `##` sections are permitted — `lint_vault.py` enforces this.
 
