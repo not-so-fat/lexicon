@@ -17,16 +17,16 @@ import sys
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_ROOT = os.path.join(SCRIPT_DIR, "..")
 ENV_PATH = os.path.join(REPO_ROOT, ".env")
-HIDOCK_OUT = os.path.join(REPO_ROOT, "Transcripts", "HiDock")
+HIDOCK_OUT = os.path.join(REPO_ROOT, "Sources", "Transcripts", "HiDock")
 
 REQUIRED_DIRS = [
-    "Transcripts/Fireflies",
-    "Transcripts/HiDock",
-    "Transcripts/Manual",
-    "Meetings",
-    "People",
-    "Memory",
-    "Ideas",
+    "Sources/Transcripts/Fireflies",
+    "Sources/Transcripts/HiDock",
+    "Sources/Transcripts/Manual",
+    "Sources/Meetings",
+    "Sources/Ideas",
+    "Evidence",
+    "Synthesis",
     "Metadata",
     "Direction",
 ]
@@ -185,7 +185,7 @@ def check_hidock() -> None:
     if actual_out is None:
         _fail("Could not read output.dir from hinotes_organizer config")
     elif actual_out == expected_out:
-        _ok(f"output.dir → Transcripts/HiDock/")
+        _ok(f"output.dir → Sources/Transcripts/HiDock/")
     else:
         _fail("output.dir mismatch")
         print(f"       expected: {expected_out}", file=sys.stderr)

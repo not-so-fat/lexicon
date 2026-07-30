@@ -13,17 +13,21 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_ROOT = os.path.join(SCRIPT_DIR, "..")
 
 DIRS = [
-    "Transcripts",
-    "Transcripts/Fireflies",
-    "Transcripts/HiDock",
-    "Transcripts/Manual",
-    "Meetings",
-    "People",
-    "Memory",
-    "Ideas",
+    "Sources",
+    "Sources/Transcripts",
+    "Sources/Transcripts/Fireflies",
+    "Sources/Transcripts/HiDock",
+    "Sources/Transcripts/Manual",
+    "Sources/Meetings",
+    "Sources/Ideas",
+    "Sources/Clippings",
+    "Evidence",
+    "Synthesis",
+    "Direction",
+    "Direction/Lenses",
     "Metadata",
     "Metadata/review",
-    "Direction",
+    "Metadata/usage",
 ]
 
 DIRECTION_TEMPLATE = """---
@@ -33,8 +37,8 @@ direction_updated:
 
 # Direction — {title}
 
-*Normative tier. What is **true** about this area → `Memory/{area}/`.
-Horizon-bound intentions → `Objectives.md`.*
+*Constant-input tier. What the evidence says → `Synthesis/{area}.md`; the dated
+facts → `Evidence/{area}/`. Horizon-bound intentions → `Objectives.md`.*
 
 ## Purpose
 
@@ -60,7 +64,7 @@ reviewed:
 
 *Intentions only. Max 5 active across **all** areas; exactly one marked `[WIG]`.
 Human-approved — no agent writes here outside a review session.
-What is **true** → `Memory/`. Standing constraints → `Direction/<area>.md`.*
+What the evidence says → `Synthesis/`. Standing constraints → `Direction/<area>.md`.*
 
 **Membership test**
 
@@ -68,6 +72,7 @@ What is **true** → `Memory/`. Standing constraints → `Direction/<area>.md`.*
 > No finish line, but has a quality bar → **Standard** (`Direction/<area>.md`)
 > Has a date and can be missed → **Objective** (here)
 > Has a deliverable → it's a **Project** — it does not live in this vault
+> Runnable procedure, no finish line, too big for one line → **Lens** (`Direction/Lenses/`), pointed at by a Standard
 
 Retiring an objective removes it from `## Active` and appends one dated line to
 `Objectives.evidence.md`. There is deliberately no `## Retired` section here:
@@ -86,6 +91,28 @@ this file's whole value is staying small enough to read every session.
 -->
 """
 
+ENTITY_REGISTRY_TEMPLATE = """\
+# Entity registry
+
+Canonical names for people, companies, and products — summarize/distill
+normalize transcript mis-hearings against this file.
+
+## Canonical
+
+Human-approved only — agents never add here directly; proposals are approved
+in a triage session.
+
+<!--
+- **Ada Lovelace** (person) — aliases: Ada Loveless, Ada Lovelance
+-->
+
+## Proposed (review at triage)
+
+<!--
+- YYYY-MM-DD — **Heard Name** (person?) — likely <new entity | alias of **Canonical**>; heard in [[Sources/Meetings/<area>/<note>]]
+-->
+"""
+
 OBJECTIVES_EVIDENCE_TEMPLATE = """\
 # Retired objectives (append-only)
 
@@ -98,15 +125,18 @@ OBJECTIVES_EVIDENCE_TEMPLATE = """\
 
 
 def _detect_areas(root):
-    """User areas: subdirectories of Memory/, excluding Lexicon (the tool's own charter, not a user area)."""
-    memory_dir = os.path.join(root, "Memory")
-    if not os.path.isdir(memory_dir):
-        return []
-    return sorted(
-        name
-        for name in os.listdir(memory_dir)
-        if name != "Lexicon" and os.path.isdir(os.path.join(memory_dir, name))
-    )
+    """User areas: subdirectories of Evidence/ (plus legacy Memory/ pre-migration)."""
+    areas = set()
+    for tier in ("Evidence", "Memory"):
+        tier_dir = os.path.join(root, tier)
+        if not os.path.isdir(tier_dir):
+            continue
+        areas.update(
+            name
+            for name in os.listdir(tier_dir)
+            if name != "Lexicon" and os.path.isdir(os.path.join(tier_dir, name))
+        )
+    return sorted(areas)
 
 
 def scaffold_direction(root, areas):
@@ -177,6 +207,12 @@ def main():
         for path in created:
             print(f"  {path}")
 
+    registry = os.path.join(root, "Metadata", "entity_registry.md")
+    if not os.path.exists(registry):
+        with open(registry, "w", encoding="utf-8") as f:
+            f.write(ENTITY_REGISTRY_TEMPLATE)
+        print(f"Entity registry scaffold created: {registry}")
+
     print("Next: python scripts/verify_setup.py")
 
     _load_env(root)
@@ -192,7 +228,7 @@ def main():
     env = os.path.join(root, ".env")
     if not os.path.isfile(env):
         print("Copy .env.example to .env and set FIREFLIES_API_KEY_<account>, EMAIL_<account>, and optionally LEXICON_USER_NAME.")
-        print("HiDock: set HIDOCK_ORGANIZER_ROOT and configure hinotes_organizer output.dir → Transcripts/HiDock/.")
+        print("HiDock: set HIDOCK_ORGANIZER_ROOT and configure hinotes_organizer output.dir → Sources/Transcripts/HiDock/.")
     else:
         print(".env present.")
         print("  Fireflies: python scripts/fireflies_collection.py process-date YYYY-MM-DD <account>")

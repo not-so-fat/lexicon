@@ -73,7 +73,7 @@ Add more accounts with suffix `_work`, `_acme`, etc. See `.env.example`.
 python scripts/fireflies_collection.py process-date 2026-01-15 personal
 ```
 
-Transcripts land in `Transcripts/Fireflies/<account>/`.
+Transcripts land in `Sources/Transcripts/Fireflies/<account>/`.
 
 **Agent:** *"Process my Fireflies meetings for 2026-01-15 on my personal account."*
 
@@ -98,7 +98,7 @@ Edit `config.yaml`:
 
 ```yaml
 output:
-  dir: /absolute/path/to/your/vault/Transcripts/HiDock
+  dir: /absolute/path/to/your/vault/Sources/Transcripts/HiDock
 
 secrets:
   assemblyai_api_key: "your-key-from-assemblyai-dashboard"
@@ -127,7 +127,7 @@ source .venv/bin/activate
 python scripts/pipeline.py run --limit 1
 ```
 
-You should see a new `.md` file under `Transcripts/HiDock/` in your vault.
+You should see a new `.md` file under `Sources/Transcripts/HiDock/` in your vault.
 
 ### 3b. Connect Lexicon
 
@@ -145,7 +145,7 @@ Re-run verification:
 python scripts/verify_setup.py
 ```
 
-HiDock section should show: organizer repo OK, `output.dir` matches `Transcripts/HiDock/`, API key present.
+HiDock section should show: organizer repo OK, `output.dir` matches `Sources/Transcripts/HiDock/`, API key present.
 
 ### 3c. Daily workflow
 
@@ -169,7 +169,7 @@ python scripts/hidock_pending.py list
 | Problem | Fix |
 |---------|-----|
 | `HIDOCK_ORGANIZER_ROOT not set` | Add to Lexicon `.env` |
-| `output.dir mismatch` | Set organizer `output.dir` to vault `Transcripts/HiDock/` (absolute path) |
+| `output.dir mismatch` | Set organizer `output.dir` to vault `Sources/Transcripts/HiDock/` (absolute path) |
 | `LIBUSB_ERROR_ACCESS` | Quit HiNotes / Chrome using the device; replug |
 | No new files after `run` | Device empty or already transcribed (organizer state skips done files) |
 | `assemblyai_api_key` missing | Set under `secrets:` in organizer `config.yaml` |
@@ -199,10 +199,42 @@ Paste under `# Raw Transcript`, then *"Summarize this transcript"*.
 
 Same for all sources:
 
-1. **Summarize** → `Meetings/<Area>/YYYY-MM-DD Title.md`
+1. **Summarize** → `Sources/Meetings/<area>/YYYY-MM-DD Title.md`
 2. **Review** the note (especially HiDock speaker labels)
-3. **Distill** → append evidence to People / Memory (`<Area>.evidence.md` on area layout)
-4. **Triage** (later) → update `# Current model`, drain evidence debt, in interactive sessions
+3. **Distill** → append dated evidence bullets to `Evidence/<area>/` (and lint them)
+4. **Triage** (later) → rewrite `Synthesis/<area>.md` in interactive sessions
+
+---
+
+## 6. Usage monitoring (optional but recommended)
+
+The QA system's usage layer (docs/MEMORY_MODEL.md) logs which vault files agents
+actually read, so structure decisions can be made from data. Capture is
+hook-based — never dependent on the agent remembering.
+
+**Claude Code** — add to the vault's `.claude/settings.json`:
+
+```json
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Read|Grep|Glob",
+        "hooks": [{"type": "command", "command": "python3 scripts/log_usage.py"}]
+      }
+    ]
+  }
+}
+```
+
+**Cursor** — wire `scripts/log_usage.py` on the file-read hook if your Cursor
+version ships hooks (check Cursor's hooks docs); the script accepts arbitrary
+JSON payloads and extracts any vault path. Without hooks, sessions can log
+best-effort at the end: `python3 scripts/log_usage.py --paths <files> --tool cursor`.
+
+Log: `Metadata/usage/access.jsonl` (gitignored, one JSON line per file access).
+Report: `python3 scripts/usage_report.py [--days 30] [--area <area>]` — also
+summarized per-area in `triage_queue.py` output.
 
 ---
 
@@ -213,6 +245,6 @@ Same for all sources:
 - [ ] `python scripts/lexicon_init.py`
 - [ ] `python scripts/verify_setup.py` — core OK
 - [ ] (Fireflies) API key + email in `.env`
-- [ ] (HiDock) hinotes_organizer installed + `output.dir` → `Transcripts/HiDock/`
+- [ ] (HiDock) hinotes_organizer installed + `output.dir` → `Sources/Transcripts/HiDock/`
 - [ ] (HiDock) `HIDOCK_ORGANIZER_ROOT` in `.env`
 - [ ] (HiDock) test `hidock_collection.py run --limit 1`

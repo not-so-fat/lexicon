@@ -8,7 +8,7 @@ reviewed:
 
 *Intentions only. Max 5 active across **all** areas; exactly one marked `[WIG]`.
 Human-approved — no agent writes here outside a review session.
-What is **true** → `Memory/`. Standing constraints → `Direction/<area>.md`.*
+What the evidence says → `Synthesis/`. Standing constraints → `Direction/<area>.md`.*
 
 **Membership test**
 
@@ -16,6 +16,7 @@ What is **true** → `Memory/`. Standing constraints → `Direction/<area>.md`.*
 > No finish line, but has a quality bar → **Standard** (`Direction/<area>.md`)
 > Has a date and can be missed → **Objective** (here)
 > Has a deliverable → it's a **Project** — it does not live in this vault
+> Runnable procedure, no finish line, too big for one line → **Lens** (`Direction/Lenses/`), pointed at by a Standard
 
 Retiring an objective removes it from `## Active` and appends one dated line to
 `Objectives.evidence.md`. There is deliberately no `## Retired` section here:

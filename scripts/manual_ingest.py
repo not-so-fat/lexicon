@@ -2,7 +2,7 @@
 """
 Ingest manual meeting transcript into Lexicon.
 
-Output: Transcripts/Manual/YYYY-MM-DD_<slug>_manual.md (area is in frontmatter only; folder is not area-based).
+Output: Sources/Transcripts/Manual/YYYY-MM-DD_<slug>_manual.md (area is in frontmatter only; folder is not area-based).
 
 No external HiNotes (or other) dependency: stub mode is source-agnostic. Full mode optionally parses
 HiNotes-style input (Unknown Speaker → HH:MM:SS → paragraph); if you use another format, use --stub and paste into the file.
@@ -20,7 +20,7 @@ import os
 import re
 import sys
 
-MANUAL_BASE = os.path.join(os.getcwd(), "Transcripts", "Manual")
+MANUAL_BASE = os.path.join(os.getcwd(), "Sources", "Transcripts", "Manual")
 
 TIMESTAMP_RE = re.compile(r"^\d{1,2}:\d{2}:\d{2}$")
 
@@ -88,7 +88,7 @@ tags: [transcript, manual, meeting]
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Ingest manual transcript into Transcripts/Manual/. Area is stored in frontmatter only."
+        description="Ingest manual transcript into Sources/Transcripts/Manual/. Area is stored in frontmatter only."
     )
     parser.add_argument("--date", default=None, help="Meeting date YYYY-MM-DD (optional with --stub: default today)")
     parser.add_argument("--title", default=None, help="Meeting title (required for --stub)")

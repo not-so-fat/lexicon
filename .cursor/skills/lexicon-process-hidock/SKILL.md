@@ -12,7 +12,7 @@ Selection is **not date-based** — use transcripts that have no meeting note ye
 ## Prerequisites
 
 - **hinotes_organizer** (separate repo) — install per `docs/SETUP.md` § HiDock in your Lexicon vault:
-  - `output.dir` → this vault's `Transcripts/HiDock/` (absolute path)
+  - `output.dir` → this vault's `Sources/Transcripts/HiDock/` (absolute path)
   - `markdown.save_segments_json: false` (skip the `.segments.json` sidecar + `segments_file:` frontmatter)
   - **Multi-language meetings:** constrain language detection rather than hardcoding — e.g. `transcription.language_detection_options.expected_languages: [en, ja]` + `fallback_language: en` + `language_confidence_threshold: 0.7`. Bare auto-detect can mis-detect the language; hardcoding one language breaks meetings held in the other.
   - `secrets.assemblyai_api_key` set
@@ -34,22 +34,22 @@ Selection is **not date-based** — use transcripts that have no meeting note ye
    python scripts/hidock_pending.py list
    python scripts/hidock_pending.py list --json
    ```
-   A transcript is **not** pending once any `Meetings/**/*.md` references it (wikilink to `Transcripts/HiDock/...` or frontmatter `hidock_signature:`).
+   A transcript is **not** pending once any `Sources/Meetings/**/*.md` references it (wikilink to `Sources/Transcripts/HiDock/...` or frontmatter `hidock_signature:`).
 
 4. **Summarize** — For each pending file:
-   - Read transcript under `Transcripts/HiDock/`.
+   - Read transcript under `Sources/Transcripts/HiDock/`.
    - **Area:** infer from content + `Metadata/area_registry.md` (HiDock transcripts have no `area` field). Ask if unclear.
-   - Create `Meetings/<Area>/YYYY-MM-DD [Title].md` per `.cursor/rules/summarize.mdc`.
+   - Create `Sources/Meetings/<Area>/YYYY-MM-DD [Title].md` per `.cursor/rules/summarize.mdc`.
    - Set meeting note `source: HiDock` and `hidock_signature: <signature>` from transcript frontmatter.
    - **Transcript Link:** wikilink to source file (basename without `.md` is enough).
    - **Speaker labels** — After attributions are clear (from dialogue: names spoken, roles, meeting note participants), **write back to the source transcript** per summarize rule (replace `Speaker N:` with `Full Name:`, add `participants:` to frontmatter). Skip write-back only if still uncertain — then leave a Context note on the meeting note.
    - Skip if a meeting note already references this transcript.
 
 5. **Distill** — For each new meeting note (when user wants full pipeline):
-   - Apply `.cursor/rules/distill.mdc` — evidence only.
-   - Fill `# Distilled` on the meeting note.
+   - Apply `.cursor/rules/distill.mdc` — evidence only, under `Evidence/<area>/`.
+   - Fill `# Distilled` on the meeting note; lint touched files (`lint_vault.py --files`).
 
-6. **Report** — Organizer run result, pending count before/after, notes created, memory updated.
+6. **Report** — Organizer run result, pending count before/after, notes created, evidence appended.
 
 ## Error handling
 

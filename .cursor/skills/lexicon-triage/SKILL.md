@@ -1,13 +1,14 @@
 ---
 name: lexicon-triage
-description: Interactive triage — recap with user, update Memory current truth, clean Ideas queue. Not for meetings. Use when user says "triage <area>", "recap <area>", or wants to discuss how things are going and update memory.
+description: Interactive triage — recap with user, rewrite Synthesis/<area>.md, keep decision files honest, clean Ideas queue. Not for meetings. Use when user says "triage <area>", "recap <area>", or wants to discuss how things are going.
 ---
 
 # Triage an area
 
-Interactive session: **recap → discuss → update Memory → clean Ideas**. Meetings are read-only context.
+Interactive session: **recap → discuss → rewrite synthesis → clean Ideas**.
+Meetings and Evidence are read-only context.
 
-**Rule:** `.cursor/rules/triage.mdc`  
+**Rule:** `.cursor/rules/triage.mdc`
 **Direction file:** `Direction/Lexicon.md`
 
 ## What triage is / is not
@@ -15,61 +16,76 @@ Interactive session: **recap → discuss → update Memory → clean Ideas**. Me
 | Yes | No |
 |-----|-----|
 | Conversation: what happened, how you're doing, open problems | Processing or editing meeting notes |
-| Update `# Current model` (area layout) or durable sections (topic layout), resolve open decisions | Distilling meetings (use **lexicon-distill**); Editing `Direction/` or `Objectives.md` (use **lexicon-review**) |
-| Refresh People `# Current read` | Appending `# Evidence` from meetings |
-| Promote / Retire / Keep **Ideas** and **Clippings** | Setting `triaged` on `Meetings/` |
+| **Rewrite `Synthesis/<area>.md` wholesale**, stamp `synthesized:` | Distilling meetings (use **lexicon-distill**) |
+| Open/update/close `Synthesis/<area>/decisions/<slug>.md` files | Editing `Direction/**` or `Objectives.md` (use **lexicon-review**) |
+| Stage `## Direction candidates` for review | Appending evidence, or compacting/deleting it — evidence is permanent |
+| Promote / Retire / Keep **Ideas** and **Clippings** | Setting `triaged` on meetings |
 
-**Ideas disposition (user rule):** **Keep** only if you will **keep editing** the idea file. Otherwise **Promote** knowledge into Memory (then delete the idea) or **Retire** if stale.
-
-**Distill** writes important statements to `# Evidence`. **Triage** synthesizes into `# Current model` (or `# What we learned` on topic-slug areas) when you agree.
+**Ideas disposition (user rule):** **Keep** only if you will **keep editing** the
+idea file. Otherwise **Promote** (capture in synthesis, then delete the idea) or
+**Retire**. Lens drafts stay in Ideas until a review session promotes them.
 
 ## Inputs
 
-- **area** — required (e.g. `personal`, `acme`)
-- **period** — optional. If missing, suggest since last triage or last ~2 weeks — do not default to all-time.
-
-## Optional: Plan mode (visible steps)
-
-For a **large** triage (memory + many ideas), start in **Plan mode** so phases are explicit before bulk file ops:
-
-| Phase | What happens |
-|-------|----------------|
-| 1. Queue | Run `triage_queue.py`; read recap + pending decisions + **evidence debt** + meetings context |
-| 2. Recap | Conversation — narrative, mental state, corrections (**no writes**) |
-| 3. Memory | Propose updates; drain evidence debt; user approves |
-| 4. Ideas | Cluster queue → Promote / Keep / **Retire (delete)**; user approves |
-| 5. Log | Append `Metadata/recap/<area>/YYYY-MM.md` |
-
-Switch to **Agent mode** to execute approved writes. Small sessions can stay in Agent throughout.
+- **area** — required
+- **period** — optional. Default: since the `synthesized:` stamp or last ~2 weeks — never all-time.
 
 ## Steps
 
-1. **Queue** — Run:
+1. **Queue** — run:
    ```bash
    python3 scripts/triage_queue.py --area <area> [--since YYYY-MM-DD] [--until YYYY-MM-DD]
    ```
-   Read: previous triage, pending decisions, **evidence debt** (area layout), **recent meetings (context)**, **ideas queue**.
+   Read: previous triage, **synthesis staleness**, new evidence since the stamp
+   (incl. `Pending decision:` bullets), **open decisions + overdue decide-by**,
+   recent meetings (context), ideas queue, usage summary.
 
-2. **Recap (conversation)** — Narrative from recent meetings + Memory + Me.md (if present). Discuss open problems. Wait for user input before writes.
+2. **Recap (conversation)** — narrative from recent meetings + evidence since the
+   stamp + previous synthesis. Discuss open problems. **Decision-state conflict
+   check:** flag work that contradicts an open decision's acceptance test with no
+   dated Veto/Direction/Scope update on file. Wait for user input before writes.
 
-3. **Memory updates** — Propose changes, resolve open decisions, People `# Current read`. **Drain evidence debt:** every area listed in the script's Evidence debt section gets its un-drained bullets folded into `# Current model` (stamp `model_updated: YYYY-MM-DD` in frontmatter) or an explicit user-approved deferral. Migrate legacy inline `# Evidence` sections to the sibling `.evidence.md` when flagged. User approves first.
+3. **Rewrite synthesis (propose → approve → write)** — rewrite
+   `Synthesis/<area>.md` wholesale: `# Current synthesis` (capped narrative,
+   cited), `## People` reads, `## Open decisions` index (promote pending bullets,
+   open decision files for consequential ones — each needs a `decide-by` and an
+   acceptance test), `## Open hypotheses`, `## Direction candidates`. Stamp
+   `synthesized: YYYY-MM-DD`. A ⚠ STALE flag or overdue decide-by must not
+   survive the session unaddressed — act or explicitly defer with the user.
 
-4. **Ideas queue** — Propose Promote / Keep / Skip / Retire per idea (cluster when possible). User approves first.
+4. **Entity corrections** — resolve each pending line in
+   `Metadata/entity_registry.md` `## Proposed` with the user: approve → move to
+   `## Canonical` (entity or alias; optionally fix affected notes/filenames), or
+   reject → delete.
 
-5. **Log** — Append to `Metadata/recap/<area>/YYYY-MM.md`.
+5. **Ideas queue** — propose Promote / Keep / Skip / Retire per idea (cluster
+   when possible). User approves first. Skip gets no `triaged`; Retire = delete.
 
-6. **Report** — What changed in Memory, ideas processed, what remains in queue. Also list any evidence written this session that falls under an active objective's `Evidence:` paths in `Objectives.md`, so the next review does not have to rediscover it. Read `Objectives.md`; do not write it.
+6. **Log** — append to `Metadata/recap/<area>/YYYY-MM.md` (recap, synthesis
+   changes, decisions touched, entity corrections, ideas, candidates staged,
+   carry-forward).
+
+7. **Lint gate** — run:
+   ```bash
+   python3 scripts/lint_vault.py --files Synthesis/<area>.md <decision files touched> <recap log>
+   ```
+   Fix errors before finishing.
+
+8. **Report** — synthesis rewritten (what changed), decision files touched,
+   entity corrections resolved, ideas processed / remaining, candidates staged
+   for the next review, suggested next kick.
 
 ## Error handling
 
-- **Unknown area** — List `Meetings/*/` and `Ideas/*/`; ask user to pick.
-- **Empty ideas queue** — OK; triage can still be recap + memory-only.
-- **No recap yet** — First triage; note that in opening.
+- **Unknown area** — list `Sources/Meetings/*/` and `Sources/Ideas/*/`; ask.
+- **Empty ideas queue** — OK; triage can be recap + synthesis only.
+- **No synthesis file yet** — first triage for the area: create
+  `Synthesis/<area>.md` from `.cursor/templates/synthesis_template.md` and say so.
 
 ## Do not
 
-- Edit meeting files or set `triaged` on meetings.
-- Update `# Current model` or durable synthesis sections without user approval.
-- Append meeting evidence during triage (that's distill).
+- Edit meeting files, append evidence, or delete evidence.
+- Rewrite the synthesis without user approval of the proposed content.
+- Edit `Direction/**`, `Objectives.md`, `Objectives.evidence.md` — stage
+  candidates instead.
 - Process hundreds of ideas in one session without clustering.
-- Edit `Direction/**`, `Objectives.md` or `Objectives.evidence.md` — those belong to **lexicon-review**.

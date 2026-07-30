@@ -22,13 +22,13 @@ If either is missing, ask: "Which date and which account?"
    ```bash
    python scripts/fireflies_collection.py process-date YYYY-MM-DD <account>
    ```
-   - This step may be re-run during the day; it just syncs new transcripts into `Transcripts/Fireflies/<account>/`.
+   - This step may be re-run during the day; it just syncs new transcripts into `Sources/Transcripts/Fireflies/<account>/`.
    - Do **not** decide what to summarize based on the `fireflies_YYYY-MM-DD_<account>.log` date or file name prefixes.
 
 3. **Select transcripts to summarize (by frontmatter date, not filename)**  
    For the requested `date`:
    - Because Fireflies stores timestamps in UTC and local time may differ, treat the requested date as a **local date** and search a **three-day window**: `date-1`, `date`, and `date+1` in frontmatter.
-   - For each of these three dates, search `Transcripts/Fireflies/<account>/` for files whose **frontmatter** contains:
+   - For each of these three dates, search `Sources/Transcripts/Fireflies/<account>/` for files whose **frontmatter** contains:
    ```yaml
    date: YYYY/MM/DD
    ```
@@ -38,22 +38,23 @@ If either is missing, ask: "Which date and which account?"
 
    A simple way to find candidate files for this three-day window is to run `rg` for each date:
    ```bash
-   rg "^date:\s*YYYY/MM/DD" "Transcripts/Fireflies/<account>/" --glob "*.md" --files-with-matches
-   rg "^date:\s*YYYY/MM/DD_MINUS_1" "Transcripts/Fireflies/<account>/" --glob "*.md" --files-with-matches
-   rg "^date:\s*YYYY/MM/DD_PLUS_1" "Transcripts/Fireflies/<account>/" --glob "*.md" --files-with-matches
+   rg "^date:\s*YYYY/MM/DD" "Sources/Transcripts/Fireflies/<account>/" --glob "*.md" --files-with-matches
+   rg "^date:\s*YYYY/MM/DD_MINUS_1" "Sources/Transcripts/Fireflies/<account>/" --glob "*.md" --files-with-matches
+   rg "^date:\s*YYYY/MM/DD_PLUS_1" "Sources/Transcripts/Fireflies/<account>/" --glob "*.md" --files-with-matches
    ```
    Then, for each matching file, read the frontmatter and confirm `area: <area>` before summarizing.
 
 4. **Summarize** — For each matching transcript:
    - If a meeting note for `(area, date, title)` does **not** exist:
-     - Create `Meetings/<Area>/YYYY-MM-DD [Title].md` following `.cursor/rules/summarize.mdc`.
+     - Create `Sources/Meetings/<Area>/YYYY-MM-DD [Title].md` following `.cursor/rules/summarize.mdc`.
    - If it already exists, only re-summarize when the user explicitly asks to refresh.
 
 5. **Distill** — For each new meeting note:
-   - Apply `.cursor/rules/distill.mdc` — **evidence only** (`<Area>.evidence.md` on area layout, `# Evidence` on topic pages, People `# Evidence Log`); **never** `# Current model`.
+   - Apply `.cursor/rules/distill.mdc` — **evidence only**, appended under `Evidence/<area>/`; never `Synthesis/`.
    - Fill the note's **# Distilled** section with links to updated files.
+   - Lint what was touched: `python3 scripts/lint_vault.py --files <files>`; fix errors before moving on.
 
-6. **Report** — Tell user: transcripts fetched, notes created, memory updated. Remind that **triage** (interactive recap + Ideas queue) is a separate user-kicked step — not part of this batch run.
+6. **Report** — Tell user: transcripts fetched, notes created, evidence appended (and lint clean). Remind that **triage** (interactive recap + Ideas queue) is a separate user-kicked step — not part of this batch run.
 
 ## Error handling
 

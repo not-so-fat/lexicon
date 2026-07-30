@@ -19,11 +19,11 @@ stopped mattering looks exactly like one that is on track, because nothing ever
 re-reads it. This tier adds a home for horizon-bound intent (`Objectives.md`) and a
 weekly ritual that re-reads it (**review**).
 
-It also removes a conflation. The old `Memory/<area>/Direction.md` was normative
-content sitting beside `Product.md` and `Org.md`, which are descriptive — so "read
-the normative tier" was a convention an agent had to know rather than a path it
-could follow. The normative tier is now `Direction/` and `Objectives.md` at the top
-level; `Memory/` is purely descriptive.
+It also removes a conflation. Normative content once sat beside descriptive files
+inside the memory tree — so "read the normative tier" was a convention an agent
+had to know rather than a path it could follow. The normative tier is now
+`Direction/` and `Objectives.md` at the top level; `Sources/`, `Evidence/` and
+`Synthesis/` are purely descriptive (see [MEMORY_MODEL.md](MEMORY_MODEL.md)).
 
 ---
 
@@ -51,8 +51,8 @@ tasks. Work with a finish line belongs where the work happens.
 
 The frontmatter `area:` field (`personal`, `acme`, …) does not name H1 projects. (It was called `project:` before this rename; the old key still works — see UPDATING.md.)
 Those values are **Areas of Responsibility** — ongoing hats with no finish line. So
-H2 needs no new structure: it is already the directory layout under `Memory/`,
-`People/` and `Meetings/`.
+H2 needs no new structure: it is already the `<area>` directory layout under
+`Sources/`, `Evidence/` and `Synthesis/`.
 
 Throughout these docs, **area** is the value of the `area:` frontmatter key. The key is *not*
 renamed — the churn across every existing note is not worth the terminology gain.
@@ -67,6 +67,7 @@ Verbatim from `Objectives.md`, where the wrong thing actually gets added:
 > No finish line, but has a quality bar → **Standard** (`Direction/<area>.md`)
 > Has a date and can be missed → **Objective** (here)
 > Has a deliverable → it's a **Project** — it does not live in this vault
+> Runnable procedure, no finish line, too big for one line → **Lens** (`Direction/Lenses/`), pointed at by a Standard
 
 The test appears **only** there — it is not copied into each `Direction/<area>.md`.
 `Objectives.md` is the point of decision, so the test sits at that point, once.
@@ -124,9 +125,12 @@ The heading is the outcome, not the activity. Six fields, all required —
 | **Evidence** | The vault paths review reads for this objective — and only these. Keeps the weekly read bounded, and turns "nothing found" into a finding rather than a failed search. |
 | **Opened** | Ages the objective, so one that has been carried for three cycles is visible as such at retirement. |
 
-`Evidence:` paths are files or directories, human-maintained. "Newest evidence"
-means the newest dated bullet in a file, or the newest dated file in a directory —
-nothing else in the vault changes shape to support this.
+`Evidence:` paths are files or directories, human-maintained — typically under
+`Evidence/<area>/…` or `Synthesis/<area>…`. Every path **must exist on disk**:
+a dead path makes the review's evidence step silently empty, so `lint_vault.py`
+errors on it. "Newest evidence" means the newest dated bullet in a file, or the
+newest dated file in a directory — nothing else in the vault changes shape to
+support this.
 
 ---
 
@@ -202,7 +206,7 @@ Skill: `.cursor/skills/lexicon-review/SKILL.md`. Rule: `.cursor/rules/review.mdc
 | 3. Evidence | Per objective: what happened since the last review, from its `Evidence:` paths only | none |
 | 4. Status | Agent proposes `moving` / `stalled` / `drifting`; you accept or edit | none |
 | 5. Retire | Achieved, past-horizon, or reclassified objectives leave `## Active` with an outcome line; frontmatter `reviewed:` (and `objectives_updated:` if `## Active` changed) gets stamped | `Objectives.md`, `Objectives.evidence.md` |
-| 6. Route | What turned out to be a standard or a project leaves for its real home | `Direction/<area>.md`, `Objectives.evidence.md` |
+| 6. Route | What turned out to be a standard, a lens, or a project leaves for its real home; `## Direction candidates` staged by triage are promoted or rejected | `Direction/<area>.md`, `Direction/Lenses/`, `Objectives.evidence.md` |
 | 7. Log | Append the session | `Metadata/review/YYYY-Www.md` |
 | 8. Verify | `python3 scripts/lint_vault.py --json`, scoped to errors/warnings under `Objectives.md`, `Objectives.evidence.md`, or `Direction/**` — pre-existing debt elsewhere does not block the session | none |
 | 9. Report | What changed, what was retired, what remains, the named WIG, and the lint result | none |
@@ -217,8 +221,9 @@ Review is global and weekly; **triage** is per-area and runs when material has
 accumulated. A per-area session structurally cannot enforce a global cap or name
 one WIG across areas. The two loops share evidence and nothing else:
 
-- Triage never writes `Objectives.md`, `Objectives.evidence.md` or `Direction/**`.
-- Review never writes `Memory/`, `People/` or meeting notes.
+- Triage never writes `Objectives.md`, `Objectives.evidence.md` or `Direction/**` —
+  it stages `## Direction candidates` in `Synthesis/<area>.md` for review to read.
+- Review never writes `Sources/`, `Evidence/` or `Synthesis/`.
 
 An area with zero active objectives is **not** a gap. An area governed only by its
 Standards for a cycle is correct, and the queue labels it that way.

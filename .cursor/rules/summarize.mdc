@@ -1,6 +1,6 @@
 ---
-description: Summarize raw transcripts (Fireflies, HiNotes, other) into structured meeting notes. Paths: Meetings/<Area>/.
-globs: Transcripts/**/*.md
+description: Summarize raw transcripts (Fireflies, HiNotes, other) into structured meeting notes. Paths: Sources/Meetings/<area>/.
+globs: Sources/Transcripts/**/*.md, Sources/Meetings/**/*.md
 alwaysApply: false
 ---
 
@@ -25,7 +25,7 @@ Future distillation and AI reasoning may extract patterns from them.
 Especially if speaker is respected professional / external customers, let's try to keep a lot of learning signals.
 
 ## Output file template
-**File path:** `Meetings/<Area>/YYYY-MM-DD [Title].md`
+**File path:** `Sources/Meetings/<Area>/YYYY-MM-DD [Title].md`
 Use the transcript's `area` (or frontmatter) to choose `<Area>` (e.g. personal, company, career).
 **Template:** Use `.cursor/templates/meeting_note_template.md`
 
@@ -50,16 +50,27 @@ Reassign if clearly mismatched; when uncertain, keep the hint. Common overrides:
 - Company account meeting about personal mentoring → `career`
 - Conference / external talk yielding learnings about a specific area → that area (never `personal` just because of the venue)
 
-Even when the note stays under the hinted area, **distill routes evidence by subject** — signals about another area land in that area's Memory (see distill rule).
+Even when the note stays under the hinted area, **distill routes evidence by subject** — signals about another area land in that area's `Evidence/` files (see distill rule).
 
 **HiDock source** (`source: HiDock` in transcript):
 - Set meeting note `source: HiDock` and `hidock_signature: <signature>` from transcript frontmatter.
-- `# Transcript Link` → wikilink to `Transcripts/HiDock/<basename without .md>`.
+- `# Transcript Link` → wikilink to `Sources/Transcripts/HiDock/<basename without .md>`.
 - Body starts as `Speaker N:` from diarization. During summarize, infer names from dialogue (spoken names, roles, third parties). When confident:
   1. Add `participants:` to the **transcript** frontmatter (list of full names).
   2. Replace `Speaker N:` prefixes in `# Raw Transcript` with `Full Name:` (e.g. `Alice Smith:`). Replace higher numbers first (`Speaker 3` before `Speaker 2` before `Speaker 1`).
   3. Drop the "attributions inferred" callout on the meeting note if write-back is complete.
 - If still uncertain, keep `Speaker N:` on the transcript and add a Context callout on the meeting note only.
+
+**Entity names (people, companies, products):**
+Transcripts regularly mis-hear names. Resolve every participant, company, and
+product name against `Metadata/entity_registry.md` (`## Canonical` + aliases):
+- A known alias → write the **canonical** spelling everywhere in the meeting
+  note (incl. HiDock speaker write-back).
+- An unrecognized name that is plausibly a mis-hearing or a new entity → keep
+  the transcript spelling in the note, and append a dated line to the
+  registry's `## Proposed (review at triage)` section:
+  `- YYYY-MM-DD — **Heard Name** (person?) — likely <new entity | alias of **Canonical**>; heard in [[<meeting note>]]`
+- **Never** add to `## Canonical` — triage approves proposals with the user.
 
 **Topics** (3–5 max, snake_case nouns):
 Check `Metadata/topic_registry.md` for existing canonical slugs before inventing

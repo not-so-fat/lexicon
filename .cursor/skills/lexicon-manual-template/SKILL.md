@@ -5,7 +5,7 @@ description: Create a manual transcript template file. Use when user says "creat
 
 # Create manual transcript template
 
-Creates `Transcripts/Manual/YYYY-MM-DD_<slug>_manual.md` with frontmatter. User pastes transcript, then asks to summarize.
+Creates `Sources/Transcripts/Manual/YYYY-MM-DD_<slug>_manual.md` with frontmatter. User pastes transcript, then asks to summarize.
 
 ## Inputs
 

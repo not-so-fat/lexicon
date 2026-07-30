@@ -1,6 +1,6 @@
 ---
-description: Distill meeting notes into People and Memory evidence only — never # Current model. Synthesis happens in triage.
-globs: Meetings/**/*.md, People/**/*.md, Memory/**/*.md, Metadata/**/*.md
+description: Distill meeting notes into Evidence/ only — append-only dated one-line bullets, never synthesis. Lints every file it touched before finishing.
+globs: Sources/Meetings/**/*.md, Evidence/**/*.md, Metadata/**/*.md
 alwaysApply: false
 ---
 
@@ -8,166 +8,92 @@ alwaysApply: false
 
 **Trigger:** When the user asks to distill a meeting note (e.g. "Distill this meeting note").
 
-Goal: Extract **important statements** from the meeting note into durable **evidence** in People and Memory. **Do not synthesize** — triage updates `# Current model` later.
+Goal: Extract **important statements** from the meeting note into dated evidence
+bullets under `Evidence/<area>/`. **Do not synthesize** — triage rewrites
+`Synthesis/<area>.md` later.
 
-Meeting notes = evidence
-Distillation = dated facts appended to evidence sections
-
-Never reinterpret transcript directly unless the user asks.
-Memory evidence sections are **append-only**.
-Do not rewrite past evidence unless clearly wrong.
+Meeting notes = sources. Distillation = dated pointers appended to Evidence.
+Never reinterpret the transcript directly unless the user asks.
+`Evidence/` is **append-only and permanent** — never rewrite, compact, or delete
+past bullets, even clearly wrong ones (append a dated correction instead).
 
 ## Hard boundaries (never in distill)
 
-**Do not edit during distill:**
+- Never write `Synthesis/**` (triage), `Direction/**` or `Objectives.md` (review).
+- Never edit the meeting note body, except the `# Distilled` traceability section.
+- Never set `triaged` on meeting notes.
 
-- `# Current model` on any Memory area file
-- `# Current read` on People pages
-- `Direction/<area>.md` and `Objectives.md`
-- Meeting note body (except `# Distilled` traceability section)
+## Step 0 — Read the meeting note
 
-**Triage** owns synthesis, `# Current model` and `# Current read`; the normative tier (`Direction/<area>.md`, `Objectives.md`) belongs to **review**. See `.cursor/rules/triage.mdc` and `Direction/Lexicon.md`.
+Sections in order: 1. Signals 2. Decisions 3. Action Items 4. Summary 5. Context.
+Signals are the primary input.
 
-Do not set `triaged` on meeting notes.
+## Step 1 — Route each signal (deterministic, by subject)
 
-## Step 0 — Read Meeting Note
+**Route by subject, not by source.** Evidence goes to the area it is *about*,
+regardless of which account or venue captured the meeting. A personal-account
+conference chat containing market intel for area X appends to
+`Evidence/X/Validation.md`. List every cross-area destination in `# Distilled`.
 
-Read sections in order:
+| Signal | Destination |
+|---|---|
+| Person observation (1:1 / small_group, internal) | `Evidence/<area>/People/<Name>.md` |
+| Product / customer / market signal | `Evidence/<area>/Product.md` |
+| Cross-partner market pattern | `Evidence/<area>/Validation.md` |
+| Partner-specific | `Evidence/<area>/Partners/<Company>.md` |
+| Org / process / leadership (internal) | `Evidence/<area>/Org.md` |
+| Your performance (`# AI Evaluation`) | `Evidence/<area>/Me.md` — one compact line per meeting |
+| Genuinely topic-shaped (rare) | `Evidence/<area>/Topics/<slug>.md` — register the slug in `Metadata/topic_registry.md` first |
 
-1. Signals
-2. Decisions
-3. Action Items
-4. Summary
-5. Context
+If uncertain between Product and Org: prefer Product when external voices appear;
+prefer Org when only internal discussion.
 
-Signals are primary input.
+**Entity names:** resolve people/companies against `Metadata/entity_registry.md`
+before routing — `People/<Name>.md` and `Partners/<Company>.md` always use the
+**canonical** spelling (one entity, one file). Unrecognized names: route under
+the transcript spelling and append a dated proposal to the registry's
+`## Proposed` section (never to `## Canonical`).
 
-## Step 1 — Determine routing category (deterministic)
+Create a destination file (with the `# Evidence (append-only)` heading) if it
+does not exist yet.
 
-**Route by subject, not by source.** Evidence goes to the Memory area it is *about*, regardless of which account or venue captured the meeting or where the meeting note lives. A personal-account conference chat containing market intel for area X appends to `Memory/X/` (e.g. `Validation.evidence.md`), not to the personal area. List every cross-area destination in `# Distilled`.
+## Step 2 — Bullet format (hard contract, lint-enforced)
 
-Use meeting_type + context (not signal taxonomy) to route most outputs:
+```markdown
+- YYYY-MM-DD — <one line, ~30 words / 240 chars of claim text — source links and #tags don't count> — Source: [[Sources/Meetings/<area>/<Note>]]
+```
 
-A) People-focused routing
-- If meeting_type in [1:1, small_group] AND context in [internal]
-  → append People `# Evidence Log` only (not `# Current read`)
+- **One line.** The bullet is a greppable pointer; detail stays in the linked
+  meeting note. Do not re-summarize the meeting — that is Summarize's job,
+  already done. If a signal cannot fit one line, split it into separate signals.
+- Optional inline `#topic_slug` (canonical, from the registry).
+- Extract generously — include subtle or ambiguous signals with attribution.
+- People bullets add confidence: `- YYYY-MM-DD — <paraphrase> (confidence: low|med|high) — Source: [[…]]`.
 
-B) Product routing
-- If context in [external] OR meeting_type in [customer, interview]
-  → append Memory evidence (Product or Partners)
-  → **area layout:** `Memory/<Area>/Product.evidence.md` or `Partners/<Co>.evidence.md`
+## Step 3 — Decisions
 
-C) Org routing
-- If meeting_type in [leadership, team] AND context in [internal]
-  → append Memory evidence on Org
-  → **area layout:** `Memory/<Area>/Org.evidence.md`
+- **Decided:** append to the routed domain file with a `Decision:` prefix
+  (`- YYYY-MM-DD — Decision: … (Owner: …) — Source: [[…]]`).
+- **Pending:** append with a `Pending decision:` prefix. Triage promotes these
+  into `Synthesis/<area>.md` `## Open decisions` (or a decision-state file) —
+  distill never writes `Synthesis/`.
 
-D) Decisions routing (always)
-- If Decisions section contains entries (not “(None)”)
-  → topic-slug: `Decisions/decisions.md`
-  → area layout: append to area `## Open decisions` or `## Open hypotheses` when meeting records **pending** (factual capture)
+## Step 4 — Action items
 
-E) Personal routing
-- Meaningful **# AI Evaluation** → append `Memory/<Area>/Me.evidence.md` when `Me.md` exists (area layout); else `Personal/ai_evaluation.md` (classic layout)
-- One compact evidence line per meeting (growth signal); full Did well / Could improve / Experiment stays in the meeting note
-- Promote recurring patterns to `Me.md` `# Current model` in **triage**, not distill
+Only durable strategic items (as evidence bullets); daily todos stay in the
+meeting note.
 
-If uncertain between Product vs Org:
-- Prefer Product when external voices appear (customer/partner)
-- Prefer Org when only internal discussion
+## Step 5 — Traceability
 
-## Step 2 — Output destinations (default)
+Update the meeting note's `# Distilled` section — list every file touched.
+If nothing was updated: `(No durable updates.)`
 
-People pages:
-- People/<Area>/<PersonName>.md — **`# Evidence Log` only**
+## Step 6 — Lint gate (mandatory)
 
-Topic memory pages (classic layout):
-- Memory/<Area>/Product/<topic>.md — **`# Evidence`**
-- Memory/<Area>/Org/<topic>.md — **`# Evidence`** or `# Signals` append section
+```bash
+python3 scripts/lint_vault.py --files <every file you touched>
+```
 
-Decisions:
-- Memory/<Area>/Decisions/decisions.md
-
-Personal (self-improvement):
-- Memory/<Area>/Me.evidence.md (area layout — create in triage when patterns recur)
-- Memory/<Area>/Personal/ai_evaluation.md (classic layout only, when no `Me.md`)
-
-Topic naming — match-before-create:
-1. **List existing files** under `Memory/<Area>/Product/` and `Memory/<Area>/Org/`.
-2. **Check registry:** Look up the proposed topic slug in `Metadata/topic_registry.md`.
-3. **Fuzzy match** existing slugs before creating new topic files.
-4. **New topic:** add to topic registry first, then create the file.
-
-### Area files layout
-
-Detect: area files (`Product.md`, `Me.md`, etc.) exist at `Memory/<Area>/` root → use them. Otherwise use classic topic slugs.
-
-**Do not** create or append to `Product/<topic>.md`, `Org/<topic>.md`, `Personal/ai_evaluation.md`, legacy decision logs, or `_legacy/` files when area files exist.
-
-Evidence lives in the **sibling evidence file**, never in the model file. Create `<Area>.evidence.md` (with a `# Evidence (append-only)` heading) if it does not exist yet. If the model file still has a legacy inline `# Evidence` section, leave it untouched — append new bullets to the sibling file only; triage migrates the old section.
-
-Append only to:
-- Product signals → `Product.evidence.md`
-- Org signals → `Org.evidence.md`
-- Cross-partner validation → `Validation.evidence.md`, or `Validation.md` `## Open hypotheses` (if still testing)
-- Partner-specific → `Partners/<Company>.evidence.md`
-- Personal eval → `Me.evidence.md`
-- Pending decisions (from meeting) → area `## Open decisions` / `## Open hypotheses` on the model file (dated line + source)
-
-The `## Open decisions` / `## Open hypotheses` append is the **only** write distill makes to a model file.
-
-Create a topic page (classic layout) whenever a meaningful signal appears.
-
-## Step 3 — Distill from each section (what to extract)
-
-### 3.1 Signals → evidence
-Extract generously. Include subtle or ambiguous signals with attribution.
-
-Each bullet:
-- **one line, ~30 words max** — a statement, not a paragraph
-- date
-- link to meeting note
-- optional `#topic_slug` inline (canonical from registry)
-
-**Hard cap.** The bullet is a greppable pointer; detail stays in the linked meeting note. Do not re-summarize the meeting into the evidence line — that is Summarize's job, already done. If a signal cannot fit one line, split it into separate signals or tighten the paraphrase.
-
-### 3.2 Decisions → decisions log or `## Open decisions`
-- **Decided:** append to Decisions log (classic) or `# Evidence` with "Decision:" prefix
-- **Pending:** append to `## Open decisions` / `## Open hypotheses` — triage resolves later
-
-### 3.3 Action Items → (optional)
-Only durable strategic items; daily todos stay in the meeting note.
-
-### 3.4 AI Evaluation → Me / Personal log
-Subjective; append-only.
-
-## Step 4 — People pages
-
-Append to `# Evidence Log` only during distill.
-
-Entry format:
-- YYYY-MM-DD — <short paraphrase> (confidence: low|med|high) — Source: [[<Meeting Note>]]
-
-Relationships: append when clearly evidenced (both pages if bilateral).
-
-## Step 5 — Topic memory pages (classic layout only)
-
-Append to `# Evidence` (or `# What we learned` only if file has no Evidence section yet — prefer `# Evidence`).
-
-## Step 6 — Decisions log (classic layout)
-
-- YYYY-MM-DD — Decision: <...> (Owner: <...>) — Source: [[<Meeting Note>]]
-- YYYY-MM-DD — Pending decision: <...> — Source: [[<Meeting Note>]]
-
-## Step 7 — Personal AI evaluation log (classic layout)
-
-- YYYY-MM-DD — Meeting: <title> / Did well / Could improve / Source: [[<Meeting Note>]]
-
-## Step 8 — Traceability back to the meeting note
-
-Update meeting note `# Distilled` — list every file touched.
-
-Do not set `triaged` on meeting notes. Triage does not process meetings.
-
-If nothing was updated:
-- (No durable updates.)
+Fix every error it reports **before** telling the user distill is done. A distill
+that leaves lint errors is not finished — this is how format debt stays out of
+the vault.

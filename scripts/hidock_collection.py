@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Run hinotes_organizer from Lexicon (USB sync + transcribe → Transcripts/HiDock/).
+Run hinotes_organizer from Lexicon (USB sync + transcribe → Sources/Transcripts/HiDock/).
 
-Requires hinotes_organizer configured with output.dir pointing at this vault's Transcripts/HiDock/.
+Requires hinotes_organizer configured with output.dir pointing at this vault's Sources/Transcripts/HiDock/.
 
 Usage:
   python scripts/hidock_collection.py run [--limit N]
@@ -72,7 +72,7 @@ def run_pipeline(limit: int | None = None) -> int:
         print("Copy config.example.yaml to config.yaml in hinotes_organizer.", file=sys.stderr)
         sys.exit(1)
 
-    hidock_out = os.path.join(REPO_ROOT, "Transcripts", "HiDock")
+    hidock_out = os.path.join(REPO_ROOT, "Sources", "Transcripts", "HiDock")
     os.makedirs(hidock_out, exist_ok=True)
 
     cmd = [

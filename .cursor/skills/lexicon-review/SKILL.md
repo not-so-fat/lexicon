@@ -15,12 +15,13 @@ Global across all areas. Memory and meeting notes are read-only here.
 
 | Yes | No |
 |-----|-----|
-| Read `Objectives.md` and `Direction/<area>.md` | Editing `Memory/`, `People/` or meeting notes |
+| Read `Objectives.md` and `Direction/<area>.md` | Editing `Sources/`, `Evidence/` or `Synthesis/` |
 | Propose `moving` / `stalled` / `drifting` per objective | Producing a numeric score of any kind |
 | Retire objectives; append to `Objectives.evidence.md` | Opening an objective without `Done when` and `Obstacle` |
+| Promote or reject `## Direction candidates` staged by triage in `Synthesis/<area>.md`; promote iterated lens drafts | Producing tier-3 items without provenance (`adopted` date + source) |
 | Edit `Direction/<area>.md` when a principle or standard changes | Triaging the Ideas queue (use **lexicon-triage**) |
 
-**Hard boundary:** review never writes `Memory/`. Triage never writes `Objectives.md` or `Direction/`.
+**Hard boundary:** review never writes `Sources/`, `Evidence/` or `Synthesis/`. Triage never writes `Objectives.md` or `Direction/**`.
 
 ## Steps
 
@@ -56,10 +57,13 @@ Global across all areas. Memory and meeting notes are read-only here.
 
    Before ending the session, stamp `Objectives.md`'s frontmatter with today's date: `reviewed:` always (the file was read end-to-end this session regardless of whether anything changed), and `objectives_updated:` only if `## Active` actually changed (a retirement or a new objective).
 
-6. **Route** — anything that turned out not to be an objective goes where it belongs, and gets the matching `reclassified` line in `Objectives.evidence.md` from step 5 — routing something out is a retirement, not a silent deletion:
-   - No finish line, can't be failed → `## Principles` in `Direction/<area>.md`
-   - No finish line, has a quality bar → `## Standards` in `Direction/<area>.md`
-   - Has a deliverable → it's a project; it leaves the vault (Linear, repo, task list)
+6. **Route** — two flows, both requiring your approval per change:
+   - **Out of Objectives:** anything that turned out not to be an objective goes where it belongs, and gets the matching `reclassified` line in `Objectives.evidence.md` from step 5 — routing something out is a retirement, not a silent deletion:
+     - No finish line, can't be failed → `## Principles` in `Direction/<area>.md`
+     - No finish line, has a quality bar → `## Standards` in `Direction/<area>.md`
+     - Runnable procedure, too big for one line → `Direction/Lenses/<name>.md` (promote the iterated draft from `Sources/Ideas/`; a one-line Standard points at it; retire the superseded drafts)
+     - Has a deliverable → it's a project; it leaves the vault (Linear, repo, task list)
+   - **Into tier 3:** read `## Direction candidates` in each `Synthesis/<area>.md`; promote accepted items as one-line ID'd entries `(adopted YYYY-MM-DD — [[source]])`, reject the rest (tell triage via the review log). Direction files stay under their cap — promoting at cap means retiring another item.
 
 7. **Log** — append to `Metadata/review/YYYY-Www.md` (ISO week). Record: status per objective, retirements with outcomes, what was routed out, and the WIG for the coming week.
 
@@ -81,7 +85,7 @@ Global across all areas. Memory and meeting notes are read-only here.
 ## Do not
 
 - Produce a score, a percentage, or a rating.
-- Write to `Memory/`, `People/` or meeting notes.
+- Write to `Sources/`, `Evidence/` or `Synthesis/`.
 - Open an objective missing `Done when` or `Obstacle`.
 - Open a sixth objective. Retire first.
 - End the session with an unresolved error or warning under `Objectives.md`, `Objectives.evidence.md`, or `Direction/**` (step 8) — pre-existing debt elsewhere does not block the session.

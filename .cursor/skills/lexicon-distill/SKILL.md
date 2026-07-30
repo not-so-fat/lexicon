@@ -1,54 +1,63 @@
 ---
 name: lexicon-distill
-description: Extract important statements from a meeting note into Memory and People evidence only — never # Current model. Use when user says "distill this meeting note". Not used in triage.
+description: Extract important statements from a meeting note into Evidence/<area>/ as dated one-line bullets — never synthesis. Use when user says "distill this meeting note". Not used in triage.
 ---
 
-# Distill meeting note into memory
+# Distill meeting note into evidence
 
-Appends **evidence only** from a meeting note. **Triage** later updates `# Current model` from that evidence.
+Appends **evidence only** from a meeting note. **Triage** later rewrites
+`Synthesis/<area>.md` from that evidence.
 
 **Rule:** `.cursor/rules/distill.mdc`
 
 ## Hard boundaries
 
 **Never during distill:**
-- `# Current model` on Memory area files
-- `# Current read` on People pages
-- `Direction.md`
+- `Synthesis/**` (triage's tier)
+- `Direction/**`, `Objectives.md` (review's tier)
 - `triaged` on meeting notes
+- Rewriting or deleting existing evidence bullets — `Evidence/` is append-only and permanent
 
-**Do append:**
-- Memory evidence files — area layout: `<Area>.evidence.md` siblings (Product, Org, Validation, Partners, **Me**); create if missing, never write evidence into the model file
-- People `# Evidence Log`
-- `## Open decisions` / `## Open hypotheses` when meeting records pending items (the only model-file write)
-- Classic topic slugs: `Product/<topic>.md`, `Decisions/decisions.md` — only when the area has no area files
-- AI Evaluation → `Me.evidence.md` when `Me.md` exists; `Personal/ai_evaluation.md` only in classic layout
+**Do append (all under `Evidence/<area>/`, create files with the `# Evidence (append-only)` heading if missing):**
+- Product / market signals → `Product.md`; cross-partner patterns → `Validation.md`
+- Partner-specific → `Partners/<Company>.md`
+- Org / process → `Org.md`
+- Person observations → `People/<Name>.md`
+- AI Evaluation → `Me.md` (one compact line per meeting)
+- Decided decisions → routed domain file with `Decision:` prefix; pending → `Pending decision:` prefix (triage promotes them to Synthesis)
 
-**Bullet cap:** one line, ~30 words max, dated, with meeting-note source link. Detail stays in the meeting note — never re-summarize the meeting into the evidence line.
+**Bullet cap:** one line, ~30 words / 240 chars of claim text (source links and #tags don't count), dated, with source link.
+Detail stays in the meeting note — never re-summarize the meeting into the bullet.
 
-**Route by subject:** evidence about another area goes to that area's Memory files, wherever the meeting note lives. List cross-area destinations in `# Distilled`.
-
-**Not triage.** Distill appends **evidence** only. Synthesis (`# Current model`, `# Current read`) happens in **lexicon-triage** after user approval; the normative tier (`Direction/<area>.md`, `Objectives.md`) belongs to **lexicon-review**. See `Direction/Lexicon.md`.
+**Route by subject:** evidence about another area goes to that area's
+`Evidence/` files, wherever the meeting note lives. List cross-area destinations
+in `# Distilled`.
 
 ## Prerequisites
 
-Meeting note under `Meetings/<Area>/`.
+Meeting note under `Sources/Meetings/<area>/`.
 
 ## Steps
 
 1. **Read the meeting note** — Signals, Decisions, Action Items, Summary, Context.
-2. **Detect memory layout** — Area files if `Memory/<Area>/Product.md` (or `Me.md`) exists at root; else topic slugs. See distill rule.
-3. **Read registries** — Read `Metadata/topic_registry.md` (for topic matching); classic layout: list existing files under `Memory/<Area>/Product/` and `Org/` (match-before-create). If registries or folders are missing, proceed with best-effort matching.
-4. **Apply distill rule** — Follow `.cursor/rules/distill.mdc` in full. Key additions:
-   - **Topic matching**: before creating a new Memory topic file, check the topic registry for canonical slugs and aliases. Use existing topics when possible. Add genuinely new topics to the registry.
-   - **Inline `#topic`**: when writing a bullet to a Memory or People page, append `#topic_slug` if the fact also relates to another registered topic.
-   - **Relationships**: when signals reveal interpersonal dynamics, update the `# Relationships` section on **both** people's pages.
-5. **Fill `# Distilled`** — In the meeting note, list every file you updated.
-6. **Reply** — Confirm done and list updated files.
+2. **Read registries** — `Metadata/topic_registry.md` for canonical `#topic_slug`
+   tags and any `Topics/<slug>.md` routing; `Metadata/entity_registry.md` for
+   canonical people/company spellings (People/Partners files always use the
+   canonical name; unknowns → dated `## Proposed` line, never `## Canonical`);
+   missing registries → best-effort.
+3. **Apply the distill rule** — Follow `.cursor/rules/distill.mdc` in full.
+   Inline `#topic_slug` when a bullet also relates to a registered topic.
+4. **Fill `# Distilled`** — list every file you updated in the meeting note.
+5. **Lint gate (mandatory)** — run:
+   ```bash
+   python3 scripts/lint_vault.py --files <every file you touched>
+   ```
+   Fix every error before finishing. A distill that leaves lint errors is not done.
+6. **Reply** — confirm done, list updated files and the lint result.
 
 ## Error handling
 
-- **No meeting note** — Ask user which note to distill.
-- **Note has no area** — Ask user which area (check `Metadata/area_registry.md` when available).
-- **Append-only** — Never overwrite past entries in People or Memory; always append.
-- **No synthesis** — Do not edit `# Current model`, `# Current read`, or `Direction.md`. Do not set `triaged` on meeting notes.
+- **No meeting note** — ask which note to distill.
+- **Note has no area** — ask which area (check `Metadata/area_registry.md`).
+- **Append-only** — never overwrite past entries; a clearly wrong past bullet gets
+  a dated correction appended, not an edit.

@@ -40,7 +40,7 @@ def test_area_matches_falls_back_to_folder_when_no_frontmatter_key():
 def test_build_queue_parameter_is_named_area(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
     monkeypatch.setattr(tq, "REPO_ROOT", tmp_path)
-    ideas = tmp_path / "Ideas" / "acme"
+    ideas = tmp_path / "Sources" / "Ideas" / "acme"
     ideas.mkdir(parents=True)
     (ideas / "2026-07-01 Idea.md").write_text(
         "---\narea: acme\ncreated: 2026-07-01\n---\n\n# Idea\n", encoding="utf-8"
@@ -53,7 +53,7 @@ def test_build_queue_parameter_is_named_area(tmp_path, monkeypatch):
 def test_build_queue_finds_legacy_project_key(tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
     monkeypatch.setattr(tq, "REPO_ROOT", tmp_path)
-    ideas = tmp_path / "Ideas" / "acme"
+    ideas = tmp_path / "Sources" / "Ideas" / "acme"
     ideas.mkdir(parents=True)
     (ideas / "2026-07-01 Idea.md").write_text(
         "---\nproject: acme\ncreated: 2026-07-01\n---\n\n# Idea\n", encoding="utf-8"
