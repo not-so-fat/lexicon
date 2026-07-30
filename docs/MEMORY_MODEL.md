@@ -39,8 +39,8 @@ Evidence/                     # Tier 2 — append-only, dated one-liners
 Synthesis/                    # Tier 2.5 — rewritten each triage
   <area>.md
   <area>/decisions/<slug>.md  #   per-decision state files
-  <area>/people/<Name>.md     #   per-person current reads (refreshed at triage)
-  <area>/partners/<Co>.md     #   per-partner current reads (refreshed at triage)
+  <area>/people/<Name>.md     #   per-person reads — recurring relationships only
+  <area>/partners/<Co>.md     #   per-partner reads — active partners only
 Direction/                    # Tier 3 — constant input, review-owned
   <area>.md
   Lenses/<name>.md            #   runnable protocols, trigger-loaded

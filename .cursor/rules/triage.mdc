@@ -74,7 +74,9 @@ since the stamp + the conversation):
    lines) forces selectivity — cut what no longer earns constant attention.
 2. `## People` (optional) — ~3-bullet reads for who matters most now; refresh
    the per-person/per-partner read files (`Synthesis/<area>/people/`,
-   `…/partners/`) for anyone the period's evidence touched.
+   `…/partners/`) for anyone the period's evidence touched. Reads follow the
+   entity-registry inclusion criteria — recurring relationships only; never
+   create one for an interview candidate or one-off contact (evidence suffices).
 3. `## Open decisions` — index of `Synthesis/<area>/decisions/<slug>.md` files
    with their `decide-by` dates. Promote new `Pending decision:` evidence
    bullets here; open a **decision-state file** for consequential ones (frame,
