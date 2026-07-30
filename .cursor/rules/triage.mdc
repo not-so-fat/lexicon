@@ -64,6 +64,16 @@ momentum, how the user is doing, open problems. Sources: recent meetings +
 evidence bullets since the stamp + previous synthesis. Pause for corrections
 before proposing writes.
 
+**The recap serves the human, not the queue.** Lead with (a) what happened and
+(b) **the decisions the user actually faces** — file dispositions come last.
+
+**Me-patterns read (required):** the user rarely re-reads their own AI
+evaluations — triage is where patterns surface. Cluster the period's
+`Evidence/<area>/Me.md` gap/Experiment bullets and report: gaps that repeated
+≥3× (current weakness/risk), any experiment prescribed ≥3× (it's validated —
+propose graduating it to a Direction candidate, stop re-prescribing it), and
+one suggested focus for the next period.
+
 ## Step 2 — Rewrite Synthesis (propose → approve → write)
 
 Rewrite `Synthesis/<area>.md` **wholesale** from (previous synthesis + evidence
@@ -109,7 +119,7 @@ For each item in the **Ideas / Clippings queue** only:
 |---|---|
 | **Promote** | Durable fact → note it in the synthesis rewrite; idea: `triaged`, `status: promoted`, `promotes-to`. **Retire (delete)** the idea file once captured, unless the user still wants a scratch copy. Lens drafts stay until review promotes them. |
 | **Keep** | User expects to **edit this file again**. Set `triaged`. If they won't edit again → Promote or Retire, not Keep. |
-| **Skip** | Not now — **no `triaged`** |
+| **Skip** | Not now — **no `triaged`**. A Skip must name **what it is waiting for** (a decision, a session, a date), recorded in the recap log. A Skip whose condition has resolved is not re-skipped — it becomes Promote or Retire. Inheriting last session's Skip reason without re-checking it is the failure mode. |
 | **Retire** | Delete the file |
 | **Move** | Relocate; set `triaged` when done |
 
