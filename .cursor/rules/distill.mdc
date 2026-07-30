@@ -79,6 +79,20 @@ does not exist yet.
   into `Synthesis/<area>.md` `## Open decisions` (or a decision-state file) —
   distill never writes `Synthesis/`.
 
+## Off-record decisions (user-stated)
+
+Decisions made outside recorded meetings (chat, email, unrecorded calls) never
+reach the pipeline. When the user states one ("record: I declined X", or a
+correction during triage), append it as a normal dated bullet with the user as
+source — and when it supersedes earlier bullets, say so in the claim:
+
+```markdown
+- YYYY-MM-DD — Decision: <what> (supersedes the MM-DD "<old state>" bullets) — Source: user (YYYY-MM-DD <triage|session>)
+```
+
+This is the only case where evidence has no note to link. Never invent this
+channel yourself — only on an explicit user statement.
+
 ## Step 4 — Action items
 
 Only durable strategic items (as evidence bullets); daily todos stay in the
