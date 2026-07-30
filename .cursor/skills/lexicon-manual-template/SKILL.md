@@ -1,6 +1,6 @@
 ---
 name: lexicon-manual-template
-description: Use when the user says "create a manual transcript", "new transcript template", or needs a stub file to paste a meeting transcript into. Creates the stub only — summarize is a separate step.
+description: Use when the user says "create a manual transcript", "new transcript template", or needs a stub file to paste a meeting transcript into. Not for summarizing — that is a separate step.
 ---
 
 # Create manual transcript template

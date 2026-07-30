@@ -1,6 +1,6 @@
 ---
 name: lexicon-summarize
-description: Use when the user says "summarize this transcript", "create a meeting note", or points at a raw transcript under Sources/Transcripts/ (Fireflies, HiDock, or manual). Output contract: one structured meeting note under Sources/Meetings/<area>/ with entity names normalized against the registry.
+description: Use when the user says "summarize this transcript", "create a meeting note", or points at a raw transcript under Sources/Transcripts/ (Fireflies, HiDock, or manual).
 ---
 
 # Summarize transcript into meeting note

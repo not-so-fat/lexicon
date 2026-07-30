@@ -1,6 +1,6 @@
 ---
 name: lexicon-process-hidock
-description: Use when the user says "process my HiDock meetings", plugs in a HiDock device, or asks about pending HiDock transcripts. Selection is pending-based (transcripts without meeting notes), never date-based.
+description: Use when the user says "process my HiDock meetings", plugs in a HiDock device, or asks about pending HiDock transcripts.
 ---
 
 # Process HiDock meetings
