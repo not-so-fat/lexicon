@@ -22,8 +22,6 @@ Every file is the same shape:
 - **Pointers, not summaries** — detail stays in the linked source note.
 - Decided decisions are bullets with a `Decision:` prefix. *Pending* decisions are
   working state → `Synthesis/`.
-- Comp / performance / candidate / health / legal / M&A bullets → `Confidential.md`
-  in the area, **fail closed** — never an open file (distill rule Step 1.5).
 - Distill lints what it touched before finishing: `python3 scripts/lint_vault.py --files <paths>`.
 
 **What does NOT belong here:** what the evidence *means* (→ `Synthesis/<area>.md`,

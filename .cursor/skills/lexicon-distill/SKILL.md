@@ -25,7 +25,6 @@ Appends **evidence only** from a meeting note. **Triage** later rewrites
 - Person observations → `People/<Name>.md`
 - AI Evaluation → `Me.md` (one compact line per meeting)
 - Decided decisions → routed domain file with `Decision:` prefix; pending → `Pending decision:` prefix (triage promotes them to Synthesis)
-- **Confidential (fail closed, per bullet):** comp/equity, performance assessments, candidate evaluations, health/personal-sensitive, legal/exit/M&A → `Evidence/<area>/Confidential.md` — never an open Product/Org/People/Partners file; unsure → confidential (rule Step 1.5)
 
 **Bullet cap:** one line, ~30 words / 240 chars of claim text (source links and #tags don't count), dated, with source link.
 Detail stays in the meeting note — never re-summarize the meeting into the bullet.

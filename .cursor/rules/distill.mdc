@@ -43,30 +43,11 @@ conference chat containing market intel for area X appends to
 | Partner-specific | `Evidence/<area>/Partners/<Company>.md` |
 | Org / process / leadership (internal) | `Evidence/<area>/Org.md` |
 | Your performance (`# AI Evaluation`) | `Evidence/<area>/Me.md` — one compact line per meeting |
-| Comp / performance / candidate / health / legal / M&A | `Evidence/<area>/Confidential.md` — see Step 1.5, fail closed |
 | Genuinely topic-shaped (rare) | `Evidence/<area>/Topics/<slug>.md` — register the slug in `Metadata/topic_registry.md` first |
 
 If uncertain between Product and Org: prefer Product when external voices appear;
 prefer Org when only internal discussion.
 
-## Step 1.5 — Confidential routing (fail closed, per bullet)
-
-Some signals must never enter open evidence files. **Before** routing by
-subject, classify each bullet.
-
-**Always confidential:** compensation / equity / offer numbers; performance
-assessments of a named employee; candidate or interview evaluations; health,
-family, or personal-sensitive facts; legal, exit, or M&A matters.
-
-- Destination: `Evidence/<area>/Confidential.md` — never Product, Org,
-  Partners, or any person's open `People/<Name>.md` file.
-- **Fail closed, per bullet:** unsure whether a bullet is confidential → it is.
-- A `sensitive`-tagged meeting does not make everything confidential:
-  non-sensitive bullets from the same meeting still go to the open files.
-- Open interpersonal / working-style observations stay in People files — the
-  test is the category list above, not "is it about a person".
-- A vault may remap the destination path in its `local-*.mdc` rule; the
-  categories and the fail-closed default are not overridable.
 
 **Entity names:** resolve people/companies against `Metadata/entity_registry.md`
 before routing — `People/<Name>.md` and `Partners/<Company>.md` always use the

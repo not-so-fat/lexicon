@@ -82,10 +82,8 @@ Append-only logs of dated one-line bullets. One format everywhere:
   bullets; triage promotes them into Synthesis (its working state) — so each
   tier still has exactly one writer.
 - Entity tree inside a tier: `Evidence/<area>/Product.md`, `Org.md`, `Me.md`,
-  `Validation.md`, `Partners/<Co>.md`, `People/<Name>.md`, optionally
-  `Topics/<slug>.md` (slug registered in `Metadata/topic_registry.md` first),
-  and `Confidential.md` — comp, performance, candidate, health, legal, M&A
-  bullets route there **fail-closed** (distill rule Step 1.5), never to open files.
+  `Validation.md`, `Partners/<Co>.md`, `People/<Name>.md`, and optionally
+  `Topics/<slug>.md` (slug registered in `Metadata/topic_registry.md` first).
 - Written only by **distill**, which must lint what it touched before finishing
   (`lint_vault.py --files …`).
 
