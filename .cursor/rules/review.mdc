@@ -1,5 +1,5 @@
 ---
-description: Weekly cross-area objectives review — re-anchor, evidence, status, retire, route candidates. Global, not per-area. User-kicked.
+description: Apply when the user asks to review objectives, run the weekly review, or asks about goal alignment — and whenever routing intent-vs-truth questions.
 globs: Objectives.md, Objectives.evidence.md, Direction/**/*.md, Metadata/review/**/*.md, Synthesis/**/*.md, Evidence/**/*.md
 alwaysApply: true
 ---

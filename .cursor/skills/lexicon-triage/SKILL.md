@@ -1,6 +1,6 @@
 ---
 name: lexicon-triage
-description: Interactive triage — recap with user, rewrite Synthesis/<area>.md, keep decision files honest, clean Ideas queue. Not for meetings. Use when user says "triage <area>", "recap <area>", or wants to discuss how things are going.
+description: Use when the user says "triage <area>", "recap <area>", or wants to review how an area is going and update its memory. Output contract: Synthesis/<area> rewritten with user approval; evidence and meetings stay read-only. Not for processing meetings or transcripts.
 ---
 
 # Triage an area

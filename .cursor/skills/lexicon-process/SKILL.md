@@ -1,6 +1,6 @@
 ---
 name: lexicon-process
-description: Full Fireflies pipeline fetch-summarize-distill for one date and account. Use when user says "process my Fireflies meetings", "fetch and summarize", or mentions a date and Fireflies account.
+description: Use when the user says "process my Fireflies meetings", or names a date and Fireflies account to fetch and process. Covers the full day pipeline; selection is by transcript frontmatter date, not filename.
 ---
 
 # Process Fireflies meetings

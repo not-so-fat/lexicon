@@ -1,5 +1,5 @@
 ---
-description: Area triage — interactive recap, rewrite Synthesis, keep decision files honest, clean Ideas queue. Not for meetings. User-kicked; optional period filter.
+description: Apply when the user kicks a triage/recap session for an area ('triage <area>', 'recap <area>'). Not for meetings or transcripts.
 globs: Sources/Ideas/**/*.md, Sources/Clippings/**/*.md, Sources/Meetings/**/*.md, Evidence/**/*.md, Synthesis/**/*.md, Metadata/recap/**/*.md
 alwaysApply: false
 ---

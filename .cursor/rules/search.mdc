@@ -1,5 +1,5 @@
 ---
-description: How to search and retrieve knowledge from the Lexicon vault. Apply when the user asks a question that requires finding information across meetings, people, topics, or decisions.
+description: Apply when answering questions from vault knowledge — what happened, who said what, what we believe, meeting prep, open decisions.
 globs: Sources/**/*.md, Evidence/**/*.md, Synthesis/**/*.md, Direction/**/*.md, Metadata/**/*.md
 alwaysApply: false
 ---

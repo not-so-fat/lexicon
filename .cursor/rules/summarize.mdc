@@ -1,5 +1,5 @@
 ---
-description: Summarize raw transcripts (Fireflies, HiNotes, other) into structured meeting notes. Paths: Sources/Meetings/<area>/.
+description: Apply when turning a raw transcript (Fireflies, HiDock, manual) into a meeting note — 'summarize this transcript', 'create a meeting note'.
 globs: Sources/Transcripts/**/*.md, Sources/Meetings/**/*.md
 alwaysApply: false
 ---

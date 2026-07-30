@@ -1,6 +1,6 @@
 ---
 name: lexicon-process-hidock
-description: HiDock pipeline sync-transcribe-summarize-distill via pending list (not date-based). Use when user says "process my HiDock meetings", "process hidock", or plug-in device workflow.
+description: Use when the user says "process my HiDock meetings", plugs in a HiDock device, or asks about pending HiDock transcripts. Selection is pending-based (transcripts without meeting notes), never date-based.
 ---
 
 # Process HiDock meetings
