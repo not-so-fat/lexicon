@@ -16,6 +16,11 @@ an `## Open decisions` index, `## Open hypotheses`, and `## Direction candidates
 — the **only** channel through which anything reaches `Direction/` or
 `Objectives.md` (review reads it and promotes or rejects).
 
+Person/partner read files follow the **entity-registry inclusion criteria**:
+recurring relationships only — never interview candidates or one-off contacts.
+Their facts stay in `Evidence/` (append-only, no maintenance cost); the read
+file is the standing cost triage pays, so it must be earned.
+
 Decision-state files persist consequential choices between sessions: frame,
 hypotheses with falsifiers, typed evidence updates (Veto / Direction / Scope /
 Execution / Watch), a **frozen acceptance test**, and a required `decide-by`
