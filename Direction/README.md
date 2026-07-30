@@ -51,7 +51,7 @@ superseded drafts.
 > Has a deliverable → it's a **Project** — it does not live in this vault
 > Runnable procedure, no finish line, too big for one line → **Lens** (`Direction/Lenses/`), pointed at by a Standard
 
-Horizon-bound intentions (H3) live in the root `Objectives.md`, not here, so the
+Dated goals live in the root `Objectives.md`, not here, so the
 cap across all areas stays visible in one place. Projects (H1) and next actions
 do not live in this vault at all.
 
