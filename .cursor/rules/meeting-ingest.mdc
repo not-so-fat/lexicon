@@ -34,6 +34,7 @@ Capture these in **Analysis** and/or **Key Learnings & Decisions**.
 
 **File path:** `Sources/Meetings/<Area>/YYYY-MM-DD [Title].md`  
 Use the transcript's `area` (or frontmatter) to choose `<Area>` (e.g. work, personal, career).
+**Filename safety:** sanitize the title when building the file path — replace `/` (and `\`, `:`) with `-`; a slash in a filename silently creates a subdirectory and splits the note. Keep the verbatim title (slash included) in the `title:` frontmatter.
 
 ```markdown
 ---
