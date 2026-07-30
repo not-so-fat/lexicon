@@ -6,6 +6,11 @@ review**, always with provenance.
 
 ## `Direction/<area>.md`
 
+*"Horizon" = altitude of intent, from GTD's Horizons of Focus (see
+docs/OBJECTIVES.md): H5 = purpose & principles (why this exists — most
+stable), H3 = dated goals (`Objectives.md`), H2 = ongoing responsibilities
+held to a quality bar, H1 = projects (deliberately not in this vault).*
+
 | Section | Horizon | Test |
 |---|---|---|
 | `## Purpose` | H5 | Why this area exists. One paragraph, ≤5 lines. Rarely changes. |
