@@ -58,6 +58,21 @@ the transcript spelling and append a dated proposal to the registry's
 Create a destination file (with the `# Evidence (append-only)` heading) if it
 does not exist yet.
 
+### When the meeting is external (customer, interview, partner)
+
+For notes with `context: external`, `meeting_type: customer`/`interview`, or any
+clear partner-discovery / customer call / candidate interview, the routing above
+still holds — external signals just skew toward Validation/Partners/Product. Two
+differences:
+
+- **Set frontmatter first** if missing: partner/customer → `meeting_type: customer`
+  (or `small_group`), `context: external`; candidate → `meeting_type: interview`,
+  `context: external`. This is what makes the note distill as external.
+- **Topics run richer.** External meetings need more, more specific slugs — tech
+  (architecture, api, integration, onboarding) and external (customer_feedback,
+  competitor, hiring, interview, partnership, roadmap). Register new slugs in
+  `Metadata/topic_registry.md` before use.
+
 ## Step 2 — Bullet format (hard contract, lint-enforced)
 
 ```markdown

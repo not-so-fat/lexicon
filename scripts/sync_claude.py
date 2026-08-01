@@ -26,6 +26,7 @@ Stdlib only. Deterministic — same source always yields the same output.
 from __future__ import annotations
 
 import pathlib
+import shutil
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
@@ -60,10 +61,18 @@ def skill_names() -> set[str]:
     return {p.name for p in CURSOR_SKILLS.iterdir() if (p / "SKILL.md").is_file()}
 
 
+def safe_description(description: str) -> str:
+    """A Claude-skill-safe description: single line, no angle brackets (spec forbids them)."""
+    desc = " ".join(description.split())
+    return desc.replace("<", "").replace(">", "")
+
+
 def render_skill(name: str, description: str, body: str) -> str:
-    desc = description.replace("\n", " ").strip()
+    # Single-quote the scalar so colons/quotes in the description can't break the YAML
+    # frontmatter (single-quoted YAML only needs ' doubled).
+    desc = safe_description(description).replace("'", "''")
     return (
-        f"---\nname: {name}\ndescription: {desc}\n---\n\n"
+        f"---\nname: {name}\ndescription: '{desc}'\n---\n\n"
         f"<!-- {GEN_BANNER} -->\n\n{body.rstrip()}\n"
     )
 
@@ -113,18 +122,43 @@ def build() -> dict[pathlib.Path, str]:
     return out
 
 
-def existing_generated_skill_files() -> set[pathlib.Path]:
+def existing_skill_dirs() -> set[pathlib.Path]:
     if not CLAUDE_SKILLS.exists():
         return set()
-    return set(CLAUDE_SKILLS.rglob("SKILL.md"))
+    return {d for d in CLAUDE_SKILLS.iterdir() if d.is_dir()}
+
+
+def validate(planned: dict[pathlib.Path, str]) -> list[str]:
+    """Self-check generated frontmatter — no external deps. Returns a list of problems."""
+    problems = []
+    for path, content in planned.items():
+        if path.name != "SKILL.md":
+            continue
+        fm, _ = parse_frontmatter(content)
+        if not fm.get("name"):
+            problems.append(f"{path.relative_to(ROOT)}: missing name")
+        desc = fm.get("description", "")
+        if not desc:
+            problems.append(f"{path.relative_to(ROOT)}: missing description")
+        if "<" in desc or ">" in desc:
+            problems.append(f"{path.relative_to(ROOT)}: angle brackets in description")
+    return problems
 
 
 def main(argv: list[str]) -> int:
     check = "--check" in argv
     planned = build()
 
-    # Detect stale files that would be orphaned (source removed but projection lingering).
-    stale = existing_generated_skill_files() - set(planned)
+    invalid = validate(planned)
+    if invalid:
+        print("INVALID generated skills:", file=sys.stderr)
+        for p in invalid:
+            print(f"  {p}", file=sys.stderr)
+        return 2
+
+    # Reconcile whole skill directories, so a removed source leaves no empty dir behind.
+    planned_dirs = {p.parent for p in planned if p.name == "SKILL.md"}
+    stale = existing_skill_dirs() - planned_dirs
 
     if check:
         drift = [p for p, c in planned.items() if not p.exists() or p.read_text(encoding="utf-8") != c]
@@ -137,8 +171,8 @@ def main(argv: list[str]) -> int:
         print("Claude projection up to date.")
         return 0
 
-    for p in sorted(stale):
-        p.unlink()
+    for d in sorted(stale):
+        shutil.rmtree(d)
     for p, content in planned.items():
         p.parent.mkdir(parents=True, exist_ok=True)
         p.write_text(content, encoding="utf-8")
